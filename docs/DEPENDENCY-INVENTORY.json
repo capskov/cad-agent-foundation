@@ -1,0 +1,419 @@
+{
+  "status": "Resolved package metadata for source-preview server, native plugin and journal builds; no dependency binaries distributed",
+  "target_framework": "net8.0 / net8.0-windows",
+  "entries": [
+    {
+      "component": "Microsoft.CSharp/4.7.0",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://github.com/dotnet/corefx",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.CodeAnalysis.Analyzers/3.3.4",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://github.com/dotnet/roslyn-analyzers",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.CodeAnalysis.CSharp.Scripting/4.8.0",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://github.com/dotnet/roslyn",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.CodeAnalysis.CSharp/4.8.0",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://github.com/dotnet/roslyn",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.CodeAnalysis.Common/4.8.0",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://github.com/dotnet/roslyn",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.CodeAnalysis.Scripting.Common/4.8.0",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://github.com/dotnet/roslyn",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Data.Sqlite.Core/8.0.31",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://docs.microsoft.com/dotnet/standard/data/sqlite/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Data.Sqlite.Core/8.0.6",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://docs.microsoft.com/dotnet/standard/data/sqlite/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Data.Sqlite/8.0.31",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://docs.microsoft.com/dotnet/standard/data/sqlite/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Data.Sqlite/8.0.6",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://docs.microsoft.com/dotnet/standard/data/sqlite/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.AI.Abstractions/10.3.0",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.Caching.Abstractions/10.0.3",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.Configuration.Abstractions/10.0.3",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.Configuration.Binder/8.0.2",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.Configuration.CommandLine/8.0.0",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.Configuration.EnvironmentVariables/8.0.0",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.Configuration.FileExtensions/8.0.1",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.Configuration.Json/8.0.1",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.Configuration.UserSecrets/8.0.1",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.Configuration/8.0.0",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.DependencyInjection.Abstractions/10.0.3",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.DependencyInjection/8.0.1",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.Diagnostics.Abstractions/10.0.3",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.Diagnostics/8.0.1",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.FileProviders.Abstractions/10.0.3",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.FileProviders.Physical/8.0.0",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.FileSystemGlobbing/8.0.0",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.Hosting.Abstractions/10.0.3",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.Hosting/8.0.1",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.Logging.Abstractions/10.0.3",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.Logging.Configuration/8.0.1",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.Logging.Console/8.0.1",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.Logging.Debug/8.0.1",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.Logging.EventLog/8.0.1",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.Logging.EventSource/8.0.1",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.Logging/8.0.1",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.Options.ConfigurationExtensions/8.0.0",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.Options/10.0.3",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "Microsoft.Extensions.Primitives/10.0.3",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "ModelContextProtocol.Core/1.1.0",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://licenses.nuget.org/Apache-2.0",
+      "projectUrl": "https://modelcontextprotocol.github.io/csharp-sdk",
+      "copyright": "© Model Context Protocol a Series of LF Projects, LLC."
+    },
+    {
+      "component": "ModelContextProtocol/1.1.0",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://licenses.nuget.org/Apache-2.0",
+      "projectUrl": "https://modelcontextprotocol.github.io/csharp-sdk",
+      "copyright": "© Model Context Protocol a Series of LF Projects, LLC."
+    },
+    {
+      "component": "Newtonsoft.Json/13.0.3",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://www.newtonsoft.com/json",
+      "copyright": "Copyright © James Newton-King 2008"
+    },
+    {
+      "component": "SQLitePCLRaw.bundle_e_sqlite3/2.1.12",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://licenses.nuget.org/Apache-2.0",
+      "copyright": "Copyright 2014-2024 SourceGear, LLC"
+    },
+    {
+      "component": "SQLitePCLRaw.bundle_e_sqlite3/2.1.6",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://licenses.nuget.org/Apache-2.0",
+      "copyright": "Copyright 2014-2023 SourceGear, LLC"
+    },
+    {
+      "component": "SQLitePCLRaw.core/2.1.12",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://licenses.nuget.org/Apache-2.0",
+      "copyright": "Copyright 2014-2024 SourceGear, LLC"
+    },
+    {
+      "component": "SQLitePCLRaw.core/2.1.6",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://licenses.nuget.org/Apache-2.0",
+      "copyright": "Copyright 2014-2023 SourceGear, LLC"
+    },
+    {
+      "component": "SQLitePCLRaw.lib.e_sqlite3/2.1.12",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://licenses.nuget.org/Apache-2.0",
+      "copyright": "Copyright 2014-2024 SourceGear, LLC"
+    },
+    {
+      "component": "SQLitePCLRaw.lib.e_sqlite3/2.1.6",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://licenses.nuget.org/Apache-2.0",
+      "copyright": "Copyright 2014-2023 SourceGear, LLC"
+    },
+    {
+      "component": "SQLitePCLRaw.provider.e_sqlite3/2.1.12",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://licenses.nuget.org/Apache-2.0",
+      "copyright": "Copyright 2014-2024 SourceGear, LLC"
+    },
+    {
+      "component": "SQLitePCLRaw.provider.e_sqlite3/2.1.6",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://licenses.nuget.org/Apache-2.0",
+      "copyright": "Copyright 2014-2023 SourceGear, LLC"
+    },
+    {
+      "component": "System.Collections.Immutable/7.0.0",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "System.Diagnostics.DiagnosticSource/10.0.3",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "System.Diagnostics.EventLog/8.0.1",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "System.IO.Pipelines/10.0.3",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "System.Memory/4.5.3",
+      "license": "MIT",
+      "licenseUrl": "https://github.com/dotnet/corefx/blob/master/LICENSE.TXT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved.",
+      "license_evidence": "deprecated nuspec licenseUrl points to official corefx MIT LICENSE.TXT"
+    },
+    {
+      "component": "System.Net.ServerSentEvents/10.0.3",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "System.Reflection.Metadata/7.0.0",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "System.Runtime.CompilerServices.Unsafe/6.0.0",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "System.Text.Encodings.Web/10.0.3",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    },
+    {
+      "component": "System.Text.Json/10.0.3",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "projectUrl": "https://dot.net/",
+      "copyright": "© Microsoft Corporation. All rights reserved."
+    }
+  ]
+}

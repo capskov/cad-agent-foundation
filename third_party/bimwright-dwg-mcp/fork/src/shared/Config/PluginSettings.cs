@@ -1,0 +1,146 @@
+// Modified for CAD Agent Foundation by capskov (2026); derived from Bimwright DWG MCP pinned at 4d0f75646631186612af926944d7e33affc4757d. See NOTICE.md.
+using System;
+using System.IO;
+using Newtonsoft.Json.Linq;
+using Bimwright.Dwg.Shared;
+
+namespace Bimwright.Dwg.Plugin
+{
+    /// <summary>
+    /// Plugin-side settings default to %LOCALAPPDATA%\Bimwright\Dwg\settings.json;
+    /// BIMWRIGHT_DWG_ROOT moves them to <root>\Dwg\settings.json.
+    /// Env var overlays the file value at load time, same posture as rvt-mcp:
+    /// the MCPTOAST command writes the file; BIMWRIGHT_ENABLE_TOAST re-wins
+    /// at next launch while it is set.
+    /// </summary>
+    public static class PluginSettings
+    {
+        public const string EnvEnableToast = "BIMWRIGHT_ENABLE_TOAST";
+        public const bool DefaultEnableToast = true;
+        public const int DefaultToastIdleSeconds = 20;
+        public static readonly int[] ToastIdleChoices = { 10, 20, 30, 60 };
+
+        /// <summary>Test hook: redirect the settings file to a fixture path.</summary>
+        internal static string FilePathOverride { get; set; }
+
+        public static string DefaultFilePath => BimwrightAppRoot.Current.UnderDwg("settings.json");
+
+        private static string FilePath =>
+            string.IsNullOrWhiteSpace(FilePathOverride) ? DefaultFilePath : FilePathOverride;
+
+        public static bool LoadToastEnabled()
+        {
+            var env = ParseBool(Environment.GetEnvironmentVariable(EnvEnableToast));
+            if (env.HasValue)
+                return env.Value;
+
+            var file = ReadEnableToast(FilePath);
+            return file ?? DefaultEnableToast;
+        }
+
+        public static int NormalizeToastIdleSeconds(int seconds)
+        {
+            for (var i = 0; i < ToastIdleChoices.Length; i++)
+            {
+                if (ToastIdleChoices[i] == seconds)
+                    return seconds;
+            }
+            return DefaultToastIdleSeconds;
+        }
+
+        public static int LoadToastIdleSeconds()
+        {
+            var file = ReadToastIdleSeconds(FilePath);
+            return file.HasValue ? NormalizeToastIdleSeconds(file.Value) : DefaultToastIdleSeconds;
+        }
+
+        /// <summary>Persist only enableToast into the JSON file, preserving other keys.</summary>
+        public static bool SaveEnableToast(bool enabled)
+        {
+            return TryUpdate(root => root["enableToast"] = enabled, "SaveEnableToast");
+        }
+
+        /// <summary>Persist toastIdleSeconds. Values outside 10/20/30/60 are stored as 20.</summary>
+        public static bool SaveToastIdleSeconds(int seconds)
+        {
+            var normalized = NormalizeToastIdleSeconds(seconds);
+            return TryUpdate(root => root["toastIdleSeconds"] = normalized, "SaveToastIdleSeconds");
+        }
+
+        private static bool TryUpdate(Action<JObject> mutate, string operation)
+        {
+            var path = FilePath;
+            try
+            {
+                JObject root = null;
+                if (File.Exists(path))
+                {
+                    try { root = JObject.Parse(File.ReadAllText(path)); }
+                    catch { root = null; }
+                }
+                root = root ?? new JObject();
+                mutate(root);
+
+                var dir = Path.GetDirectoryName(path);
+                if (!string.IsNullOrEmpty(dir))
+                    Directory.CreateDirectory(dir);
+                File.WriteAllText(path, root.ToString(Newtonsoft.Json.Formatting.Indented));
+                return true;
+            }
+            catch (Exception ex)
+            {
+                PluginLog.Debug("PluginSettings." + operation + " failed: " + ex.Message);
+                return false;
+            }
+        }
+
+        internal static int? ReadToastIdleSeconds(string path)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+                    return null;
+                return JObject.Parse(File.ReadAllText(path))["toastIdleSeconds"]?.Value<int?>();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        internal static bool? ReadEnableToast(string path)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+                    return null;
+                return JObject.Parse(File.ReadAllText(path))["enableToast"]?.Value<bool?>();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        internal static bool? ParseBool(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+                return null;
+            switch (raw.Trim().ToLowerInvariant())
+            {
+                case "1":
+                case "true":
+                case "yes":
+                case "on":
+                    return true;
+                case "0":
+                case "false":
+                case "no":
+                case "off":
+                    return false;
+                default:
+                    return null;
+            }
+        }
+    }
+}

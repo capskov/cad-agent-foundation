@@ -1,0 +1,70 @@
+<!-- Modified for CAD Agent Foundation by capskov (2026); derived from Bimwright DWG MCP pinned at 4d0f75646631186612af926944d7e33affc4757d. See NOTICE.md. -->
+<!-- Public preparation: capskov, 2026-10-14; remove only unlicensed SHX packaging items. Native execution code unchanged. -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <RootNamespace>Bimwright.Dwg.Plugin</RootNamespace>
+    <AssemblyName>Bimwright.Dwg.Plugin.Acad26</AssemblyName>
+    <LangVersion>latest</LangVersion>
+    <AutoCadVersionYear>2026</AutoCadVersionYear>
+    <DefineConstants>$(DefineConstants);ACAD2026;ACAD2025_OR_GREATER;ACAD2026_OR_GREATER</DefineConstants>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <AutoCad2026Dir Condition="'$(AutoCad2026Dir)' == ''">C:\Program Files\Autodesk\AutoCAD 2026</AutoCad2026Dir>
+  </PropertyGroup>
+
+  <Target Name="ValidateAutoCadReferences" BeforeTargets="ResolveReferences">
+    <Error Condition="!Exists('$(AutoCad2026Dir)\accoremgd.dll') or !Exists('$(AutoCad2026Dir)\acdbmgd.dll') or !Exists('$(AutoCad2026Dir)\acmgd.dll')"
+           Text="AutoCAD 2026 managed assemblies were not found under '$(AutoCad2026Dir)'. Install AutoCAD 2026 or build with /p:AutoCad2026Dir=&quot;C:\Path\To\AutoCAD 2026&quot;." />
+  </Target>
+
+  <Target Name="CopyX64SqliteNativeToPluginOutputRoot" AfterTargets="Build"
+          Condition="'$(PlatformTarget)' == 'x64'">
+    <PropertyGroup>
+      <_SqliteX64Native>$(TargetDir)runtimes\win-x64\native\e_sqlite3.dll</_SqliteX64Native>
+    </PropertyGroup>
+    <Copy SourceFiles="$(_SqliteX64Native)"
+          DestinationFiles="$(TargetDir)e_sqlite3.dll"
+          SkipUnchangedFiles="true"
+          Condition="Exists('$(_SqliteX64Native)')" />
+  </Target>
+
+  <ItemGroup>
+    <Compile Include="..\plugin-acad24\App.cs" Link="App.cs" />
+    <Compile Include="..\shared\**\*.cs"
+             Exclude="..\shared\Execution\PluginJobModels.cs;..\shared\Execution\DrawingRiskKey.cs"
+             LinkBase="Shared" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\plugin-journal-net8\Bimwright.Dwg.Plugin.Journal.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="accoremgd">
+      <HintPath>$(AutoCad2026Dir)\accoremgd.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="acdbmgd">
+      <HintPath>$(AutoCad2026Dir)\acdbmgd.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="acmgd">
+      <HintPath>$(AutoCad2026Dir)\acmgd.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.8.0" />
+    <FrameworkReference Include="Microsoft.WindowsDesktop.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\shared\assets\fonts\OpenSans-CondensedLight.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>Fonts\OpenSans-CondensedLight.ttf</TargetPath>
+    </Content>
+  </ItemGroup>
+</Project>

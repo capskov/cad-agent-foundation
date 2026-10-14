@@ -1,0 +1,60 @@
+<!-- Modified for CAD Agent Foundation by capskov (2026); derived from Bimwright DWG MCP pinned at 4d0f75646631186612af926944d7e33affc4757d. See NOTICE.md. -->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Bimwright.Dwg.Server</RootNamespace>
+    <AssemblyName>Bimwright.Dwg.Server</AssemblyName>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <!-- NuGet .NET tool packaging -->
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>bimwright-dwg</ToolCommandName>
+    <PackageId>Capskov.CadAgentFoundation.Host</PackageId>
+    <Version>1.0.0-rc.1</Version>
+    <Authors>Khoa Le; capskov</Authors>
+    <Description>MCP gateway for AutoCAD 2022-2027 DWG workflows: text reading, translation rewriting, target routing, optional ToolBaker, and opt-in code execution.</Description>
+    <PackageProjectUrl>https://github.com/capskov/cad-agent-foundation</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/capskov/cad-agent-foundation</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageTags>mcp;autocad;dwg;ai;translation</PackageTags>
+    <Copyright>Copyright 2026 Khoa Le</Copyright>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ModelContextProtocol" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.6" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\shared\Infrastructure\BimwrightAppRoot.cs" Link="Shared\Infrastructure\BimwrightAppRoot.cs" />
+    <Compile Include="..\shared\Cad\CadWire.cs" Link="Shared\Cad\CadWire.cs" />
+    <Compile Include="..\shared\Cad\HandleBatchRequest.cs" Link="Shared\Cad\HandleBatchRequest.cs" />
+    <Compile Include="..\shared\Execution\DrawingRiskKey.cs" Link="Shared\Execution\DrawingRiskKey.cs" />
+    <Compile Include="..\shared\Execution\Road08R01D1WriteContract.cs" Link="Shared\Execution\Road08R01D1WriteContract.cs" />
+    <Compile Include="..\shared\Execution\H1FixedHatchPreflightContract.cs" Link="Shared\Execution\H1FixedHatchPreflightContract.cs" />
+    <Compile Include="..\shared\Execution\H1FixedHatchRepairReadbackContract.cs" Link="Shared\Execution\H1FixedHatchRepairReadbackContract.cs" />
+    <Compile Include="..\shared\Execution\H1FixedHatchWriteContract.cs" Link="Shared\Execution\H1FixedHatchWriteContract.cs" />
+    <Compile Include="..\shared\Execution\FoundationDrawingPlan.cs" Link="Shared\Execution\FoundationDrawingPlan.cs" />
+    <Compile Include="..\shared\Execution\J10FixedHatchWriteContract.cs" Link="Shared\Execution\J10FixedHatchWriteContract.cs" />
+    <Compile Include="..\shared\Transport\DiscoveryFileMutex.cs" Link="Shared\Transport\DiscoveryFileMutex.cs" />
+    <Compile Include="..\shared\ToolBaker\*.cs" LinkBase="Shared\ToolBaker" />
+    <Compile Include="..\shared\Security\SecretMasker.cs" LinkBase="Shared\Security" />
+    <Compile Include="..\shared\Security\ErrorSanitizer.cs" LinkBase="Shared\Security" />
+    <Compile Include="..\shared\Security\BakeRedactor.cs" LinkBase="Shared\Security" />
+    <Compile Include="..\shared\Security\LispExecutionPolicy.cs" LinkBase="Shared\Security" />
+  </ItemGroup>
+
+</Project>
