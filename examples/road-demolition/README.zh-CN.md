@@ -8,13 +8,13 @@
 
 | 任务 | 所需组件 | 版本与限制 |
 | --- | --- | --- |
-| 已支持的基础 CAD 操作 | 仅 `cad-agent-foundation` | 本地基线 `v1.0.0-local`；公开源码预览 `v1.0.0-rc.1`，不附可运行二进制资产。有界二维操作，当前写入限米制，仅有记录的 Windows／AutoCAD 2026 宿主实测。无需两个 Skill。 |
-| 本项目的引线标注样式与排布 | 底座 + `cad-callout-pair-layout` | 标注规则 v0.3，公开导出待完成。默认与验证来自米制道路图；完整样式、排布尚未通过底座首版单独执行验收，写入前须核对后端覆盖。 |
-| 本项目的病害／拆除标注工作流 | 底座 + `cad-distress-annotation` + `cad-callout-pair-layout` | 病害拆除规则快照尚无独立公开版本。需要工程依据、分类规则及标注规则；完整流程仍需首版配置之外的能力，尚未验证仅靠这三个组件即可全部复现。 |
+| 已支持的基础 CAD 操作 | 仅 `cad-agent-foundation` | 本地基线 `v1.0.0-local`；公开源码预览`v1.0.0-rc.2`（运行源码不变），不附可运行二进制资产。有界二维操作，当前写入限米制，仅有记录的 Windows／AutoCAD 2026 宿主实测。无需两个 Skill。 |
+| 本项目的引线标注样式与排布 | 底座 + `cad-callout-pair-layout` | 引线公开预览v0.3.0-rc.1（沿用v0.3规则）。默认与验证来自米制道路图；完整样式、排布尚未通过底座首版单独执行验收，写入前须核对后端覆盖。 |
+| 本项目的病害／拆除标注工作流 | 底座 + `cad-distress-annotation` + `cad-callout-pair-layout` | 病害规则公开预览v0.1.0-rc.1。需要工程依据、分类规则及标注规则；完整流程仍需首版配置之外的能力，尚未验证仅靠这三个组件即可全部复现。 |
 
-按当前模块化规则复现工作流，应准备**底座、病害拆除 Skill、标注 Skill 三个组件**。见[组件选择与安装](../../docs/COMPONENTS-AND-INSTALLATION.zh-CN.md)。这说明必要的规则与执行组件，不代表现在下载三项就能完整自动复现案例。
+按当前模块化规则，准备病害与引线Skill及适用原生后端；受支持的治理操作选择底座。见[组件选择与安装](../../docs/COMPONENTS-AND-INSTALLATION.zh-CN.md)。三个仓库的组合不代表现在下载即可完整自动复现历史案例。
 
-底座源码公开，**两个 Skill 尚未发布**：[底座](https://github.com/capskov/cad-agent-foundation)、[标注 Skill](https://github.com/capskov/cad-callout-pair-layout)、[病害拆除 Skill](https://github.com/capskov/cad-distress-annotation)。经审核的源码／安装包入口待补。页首 PDF／PNG 为源码预览中的展示资产，尚无公开 CAD 复现数据集或自动安装器。
+底座源码与**两个独立Skill预览均已公开**：[底座](https://github.com/capskov/cad-agent-foundation)、[标注 Skill](https://github.com/capskov/cad-callout-pair-layout)、[病害拆除 Skill](https://github.com/capskov/cad-distress-annotation)。Skill安装／Release入口见组件选择页；底座二进制仍待独立发布。页首 PDF／PNG 为源码预览中的展示资产，尚无公开 CAD 复现数据集或自动安装器。
 
 ### 历史成果与当前复现边界
 

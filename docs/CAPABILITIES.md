@@ -15,7 +15,7 @@ Baseline: v1.0.0-local. “Implemented” is scoped to the configured bounded pr
 | Move/archive supported logical groups | Implemented, locally checked | Supported entity types and complete associations; no general polyline reshape |
 | Whole-document save and selected-object disk readback | Implemented, locally checked | Includes all unsaved document edits; checks selected facts, model handles and layers |
 | Owned-copy install/start/doctor/stop, CLI/MCP | Implemented, locally checked | Windows local environment; safe stop does not override unresolved fences |
-| Filtered model-space query and cursor | Implemented in existing governed reads | Extents-overlap candidates, not exact geometry intersection; stale after changes |
+| Filtered model-space query and cursor | Implemented; no complete current-v1 individual end-to-end certification | Extents-overlap candidates, not exact geometry intersection; stale after changes |
 | Local static Lisp inspection | Read-only catalog capability | Not Lisp execution; omitted from the write-profile catalog |
 | H1/J10 fixed repair pilots | Historical restricted experiments, closed milestones | Not the public general drawing API; no new sample expansion |
 | View/preview work from prior stages | Historical constrained work | Not exposed as a supported v1 public profile |
@@ -30,3 +30,5 @@ The layer primitive creates a layer or reuses an existing layer with matching co
 Object identity and old-value digests are exact guards. For the tested road-work geometry checks, area difference below 0.001 m² and position checks at 0.001 m were used independently. Those engineering checks are not manufacturing tolerances or a coordinate/unit-conversion service.
 
 Reads may report missing, unsupported or truncated information. Do not infer a complete geometric or engineering proof from an area, bounding box, association flag or tool name alone.
+
+See the [versioned interface catalog](COMMAND-CATALOG-v1.0.0-rc.1.md) for exact CLI/MCP/plan names and verified versus implemented-only branches. Existing-code presence is not public-profile support.

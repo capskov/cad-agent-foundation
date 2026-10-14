@@ -29,4 +29,4 @@ The annotation method can be adapted to other fields, including landscape plant 
 
 ## Task dependencies and installation
 
-Foundation alone covers supported basic CAD tasks. Add the callout Skill for this project's style/layout; distress/demolition requires both Skills and Foundation, with missing backend steps checked separately. Neither Skill is a global Foundation dependency. See the bilingual [component selection and installation table](COMPONENTS-AND-INSTALLATION.md). Planned repositories and downloads remain unpublished; no automatic Skill installer exists.
+Foundation alone covers supported basic CAD tasks. Add the callout Skill for this project's style/layout; this project's distress callout presentation uses both Skills and a verified native backend; Foundation is the governed route for supported operations, with missing backend steps checked separately. Neither Skill is a global Foundation dependency. See the bilingual [component selection and installation table](COMPONENTS-AND-INSTALLATION.md). Both Skill previews and their manual-install ZIPs are public; no automatic Skill installer exists.

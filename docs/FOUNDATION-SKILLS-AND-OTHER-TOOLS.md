@@ -34,3 +34,9 @@ The intended core is useful beyond roads. For example, a future planting Skill c
 其他 MCP/COM 可以并用，但外部直接写入不自动进入底座的事务、请求记录和写后核验。事后读到一个对象，只能检查当时的事实，不能补成对先前写入全过程的治理。不能换工具绕过未知写入，也应避免在同一工作图上产生相互冲突的写入。
 
 图纸按自身单位表达坐标和尺寸；WCS 不代表米制，高斯投影也不负责设定标注尺寸。当前首版实际限制米制，其他单位尚待适配。园林植物等分类标注可作为以后扩展方向，现有道路 Skill 的默认尺寸和道路侧规则不能直接当作园林验收结果。
+
+## Independent component development / 独立开发与接口边界
+
+Foundation and Skills can have independent repositories, development cycles and releases. Foundation owns reusable native operations, execution safety/status and object-management contracts. Skills own domain rules, style parameters, placement algorithms and business workflows. Skills invoke the actual stable, versioned Foundation interfaces; they must check schema/version/operation coverage, not assume every AutoCAD operation is wrapped. Current interfaces and evidence are listed in the [v1.0.0-rc.1 catalog](COMMAND-CATALOG-v1.0.0-rc.1.md). Complete migration of existing Skills is not certified.
+
+底座与Skill可独立开发、建仓、发布。底座维护可复用原生操作、执行安全／状态和对象管理契约；Skill维护行业规则、样式参数、排布算法与业务流程，通过实际开放的稳定版本接口调用，并核对schema／版本／覆盖范围。缺接口不等于Skill已经实现该原生能力；现有Skill全流程底座化仍未认证。见[版本清单](COMMAND-CATALOG-v1.0.0-rc.1.zh-CN.md)。

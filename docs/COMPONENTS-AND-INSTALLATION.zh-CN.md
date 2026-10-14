@@ -6,9 +6,9 @@
 
 | 任务 | 所需组件 | 版本与限制 |
 | --- | --- | --- |
-| 已支持的基础 CAD 操作 | 仅 `cad-agent-foundation` | 本地基线 `v1.0.0-local`；公开源码预览 `v1.0.0-rc.1`，不附可运行二进制资产。有界二维操作，当前写入限米制，仅有记录的 Windows／AutoCAD 2026 宿主实测。无需两个 Skill。 |
-| 本项目的引线标注样式与排布 | 底座 + `cad-callout-pair-layout` | 标注规则 v0.3，公开导出待完成。默认与验证来自米制道路图；完整样式、排布尚未通过底座首版单独执行验收，写入前须核对后端覆盖。 |
-| 本项目的病害／拆除标注工作流 | 底座 + `cad-distress-annotation` + `cad-callout-pair-layout` | 病害拆除规则快照尚无独立公开版本。需要工程依据、分类规则及标注规则；完整流程仍需首版配置之外的能力，尚未验证仅靠这三个组件即可全部复现。 |
+| 已支持的基础 CAD 操作 | 仅 `cad-agent-foundation` | 本地基线 `v1.0.0-local`；公开源码预览`v1.0.0-rc.2`（运行源码不变），不附可运行二进制资产。有界二维操作，当前写入限米制，仅有记录的 Windows／AutoCAD 2026 宿主实测。无需两个 Skill。 |
+| 本项目的引线标注样式与排布 | 底座 + `cad-callout-pair-layout` | 引线公开预览v0.3.0-rc.1（沿用v0.3规则）。默认与验证来自米制道路图；完整样式、排布尚未通过底座首版单独执行验收，写入前须核对后端覆盖。 |
+| 本项目的病害／拆除标注工作流 | 底座 + `cad-distress-annotation` + `cad-callout-pair-layout` | 病害规则公开预览v0.1.0-rc.1。需要工程依据、分类规则及标注规则；完整流程仍需首版配置之外的能力，尚未验证仅靠这三个组件即可全部复现。 |
 
 ## 职责与实际操作范围
 
@@ -22,15 +22,15 @@
 
 ## 仓库与安装入口
 
-下方底座链接为公开源码入口；**两个 Skill 链接仍为拟建占位**。可运行底座二进制及经审核的 Skill 下载尚不可用，源码不是已安装发行包。
+下方为实际公开入口；两个Skill已有手动安装ZIP，底座仍仅公开源码，尚无可运行二进制发行包。
 
-| 组件 | 拟建仓库 | 安装入口 |
+| 组件 | 公开仓库／预览 | 安装入口 |
 | --- | --- | --- |
 | 底座 | [cad-agent-foundation（源码预览）](https://github.com/capskov/cad-agent-foundation) | [底座安装与调用](QUICKSTART.zh-CN.md)；经审核的公开包链接待补。 |
-| 标注 Skill | [cad-callout-pair-layout（拟建）](https://github.com/capskov/cad-callout-pair-layout) | 拟建仓库的 `docs/INSTALL.zh-CN.md`；经审核的 Skill 包／源码链接待补。 |
-| 病害拆除 Skill | [cad-distress-annotation（拟建）](https://github.com/capskov/cad-distress-annotation) | 拟建仓库的 `docs/INSTALL.zh-CN.md`；经审核的 Skill 包／源码链接待补，须与标注 Skill 一起准备。 |
+| 标注 Skill | [cad-callout-pair-layout v0.3.0-rc.1](https://github.com/capskov/cad-callout-pair-layout) | [引线安装](https://github.com/capskov/cad-callout-pair-layout/blob/main/docs/INSTALL.zh-CN.md) · [Release ZIP](https://github.com/capskov/cad-callout-pair-layout/releases/tag/v0.3.0-rc.1)。 |
+| 病害拆除 Skill | [cad-distress-annotation v0.1.0-rc.1](https://github.com/capskov/cad-distress-annotation) | [病害安装](https://github.com/capskov/cad-distress-annotation/blob/main/docs/INSTALL.zh-CN.md) · [Release ZIP](https://github.com/capskov/cad-distress-annotation/releases/tag/v0.1.0-rc.1)，需本项目引线表现时同级安装引线Skill。 |
 
-审核后的 Skill 导出可用时，按照使用者 Agent 客户端支持的手动安装流程放置文件。两个 Skill 文件夹应同级，名称保持不变，各含 `SKILL.md` 和所需资源，以便病害拆除规则引用标注规则。`foundation.cmd install` 只安装底座，不负责 Skill 的安装或客户端发现；不要虚构 `--skills` 参数。
+按Agent客户端支持的手动安装流程放置已公开的Skill ZIP。两个 Skill 文件夹应同级，名称保持不变，各含 `SKILL.md` 和所需资源，以便病害拆除规则引用标注规则。`foundation.cmd install` 只安装底座，不负责 Skill 的安装或客户端发现；不要虚构 `--skills` 参数。
 
 ## Agent 执行前检查
 
@@ -40,3 +40,5 @@
 4. 绑定正确工作副本并遵守写入／读回约束。外部工具仅能走经核实且有授权的路线，不共享底座事务、请求编号或未知写入栅栏；不能在工具拒绝或写入未知后自动转 COM、通用代码或换后端。应查询原请求。
 
 后续开发边界：可复用原生操作和执行约束归底座，专业判断、分类、样式和排布规则归 Skill。本轮只完善说明，不新增自动安装或 CAD 操作。
+
+The Foundation-based rows describe one selected execution route, not a mandatory backend for independent scope review, offline geometry or BZYD. / 上表的底座组合描述选用底座的执行路线；范围分析、离线几何与BZYD不强制依赖底座。

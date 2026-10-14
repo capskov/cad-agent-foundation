@@ -6,9 +6,9 @@ Choose components by task. The two Skills are independent, optional companions, 
 
 | Task | Required components | Versions and limits |
 | --- | --- | --- |
-| Supported basic CAD operations | `cad-agent-foundation` only | Local baseline `v1.0.0-local`; public source preview `v1.0.0-rc.1`, without a runnable binary asset. Bounded 2D operations; current writes require metres; recorded Windows/AutoCAD 2026 host only. Neither Skill is required. |
-| This project's callout style and placement | Foundation + `cad-callout-pair-layout` | Callout rules v0.3, public export pending. Metre-based road defaults; complete styles and layout have not been certified on Foundation v1 alone. Check backend coverage before writing. |
-| This project's distress/demolition workflow | Foundation + `cad-distress-annotation` + `cad-callout-pair-layout` | Distress rules snapshot has no independent public release version. Requires engineering evidence, classifications and the callout rules; full workflow needs capabilities outside the current Foundation profile and is not certified on these three components alone. |
+| Supported basic CAD operations | `cad-agent-foundation` only | Local baseline `v1.0.0-local`; public source preview `v1.0.0-rc.2` (same runtime source), without a runnable binary asset. Bounded 2D operations; current writes require metres; recorded Windows/AutoCAD 2026 host only. Neither Skill is required. |
+| This project's callout style and placement | Foundation + `cad-callout-pair-layout` | Public callout Skill v0.3.0-rc.1 (existing rules v0.3). Metre-based road defaults; complete styles and layout have not been certified on Foundation v1 alone. Check backend coverage before writing. |
+| This project's distress/demolition workflow | Foundation + `cad-distress-annotation` + `cad-callout-pair-layout` | Public distress rules preview v0.1.0-rc.1. Requires engineering evidence, classifications and the callout rules; full workflow needs capabilities outside the current Foundation profile and is not certified on these three components alone. |
 
 ## Responsibilities and actual operation coverage
 
@@ -22,15 +22,15 @@ Native DIMENSION, MLeader, general old-hatch repair, arbitrary existing-polyline
 
 ## Repository and installation entries
 
-Foundation source is published at the link below; **both Skill links remain planned placeholders**. No runnable Foundation binary or reviewed Skill download is available; source is not an installed package.
+Foundation source and both reviewed Skill previews are published below. Skill releases have manual-install ZIPs; Foundation still has no public runnable binary package.
 
-| Component | Repository / planned Skill | Installation entry |
+| Component | Repository / public preview | Installation entry |
 | --- | --- | --- |
 | Foundation | [cad-agent-foundation (source preview)](https://github.com/capskov/cad-agent-foundation) | [Foundation installation and CLI](QUICKSTART.md); approved public package link pending. |
-| Callout Skill | [cad-callout-pair-layout (planned)](https://github.com/capskov/cad-callout-pair-layout) | Planned repository `docs/INSTALL.md`; reviewed Skill archive/source link pending. |
-| Distress Skill | [cad-distress-annotation (planned)](https://github.com/capskov/cad-distress-annotation) | Planned repository `docs/INSTALL.md`; reviewed Skill archive/source link pending. Install alongside the callout Skill. |
+| Callout Skill | [cad-callout-pair-layout v0.3.0-rc.1](https://github.com/capskov/cad-callout-pair-layout) | [Install](https://github.com/capskov/cad-callout-pair-layout/blob/main/docs/INSTALL.md) · [Release ZIP](https://github.com/capskov/cad-callout-pair-layout/releases/tag/v0.3.0-rc.1). |
+| Distress Skill | [cad-distress-annotation v0.1.0-rc.1](https://github.com/capskov/cad-distress-annotation) | [Install](https://github.com/capskov/cad-distress-annotation/blob/main/docs/INSTALL.md) · [Release ZIP](https://github.com/capskov/cad-distress-annotation/releases/tag/v0.1.0-rc.1). Add callout rules for presentation. |
 
-Once reviewed Skill exports are available, use your Agent client's supported manual Skill installation procedure. Keep the two folders as siblings with their exact names, each containing `SKILL.md` and its required resources, because the distress rules reference the callout rules. Client-specific discovery is not supplied by `foundation.cmd install`; that command installs Foundation only. Do not invent a `--skills` option.
+Use your Agent client's supported manual Skill installation procedure for the published Skill ZIPs. Keep the two folders as siblings with their exact names, each containing `SKILL.md` and its required resources, because the distress rules reference the callout rules. Client-specific discovery is not supplied by `foundation.cmd install`; that command installs Foundation only. Do not invent a `--skills` option.
 
 ## Before an Agent executes a task
 
@@ -40,3 +40,5 @@ Once reviewed Skill exports are available, use your Agent client's supported man
 4. Bind the intended working copy and follow its write/readback contract. External tools may be used only through a verified, authorized route; they do not share Foundation transactions, request IDs or fences. Do not automatically switch to COM, arbitrary code or another provider after refusal or an uncertain write. Query the original request.
 
 Reusable native primitives and execution constraints belong in Foundation. Professional decisions, classifications, style and placement rules belong in Skills. Future capability work must preserve that boundary; this documentation update adds no installer or CAD operation.
+
+The Foundation-based rows describe one selected execution route, not a mandatory backend for independent scope review, offline geometry or BZYD. / 上表的底座组合描述选用底座的执行路线；范围分析、离线几何与BZYD不强制依赖底座。
