@@ -11,3 +11,8 @@ Focused offline checks: 19 Foundation plan/catalog/readback-tampering cases and 
 A historical save returned successfully but its following hash read was blocked by an inappropriate file-sharing mode. The new save path corrected the sharing mode and passed on a fresh copy. The original request remains committed with unknown verification and a retained fence; it was not replayed or retrospectively reclassified as passed. This illustrates the separation between effects and verification rather than universal recovery.
 
 This evidence does not establish total geometric preservation of every original object, all drawings/fonts/proxies, fault-matrix completeness, arbitrary client/platform support, or comparative speed/cost savings. Public packaging changes need new artifact/hash checks; behavioural/runtime/font changes need only the checks directly affected by those changes, not another unlimited verification campaign.
+
+
+## v1.1.0-rc.1 scoped native evidence
+
+See [the new acceptance summary](VALIDATION-v1.1.0-rc.1.md). The prior evidence above remains historical. Native DIMENSION, named style creation/reuse, layer states, closed-surface/callout continuation and same-drawing transforms are new scoped operations, not proof of every parameter/entity combination.

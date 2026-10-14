@@ -17,6 +17,7 @@ namespace Bimwright.Dwg.Plugin
    Add("current_space",()=>doc.Database.TileMode?"ModelSpace":System.Convert.ToInt32(AcApp.GetSystemVariable("CVPORT"))>1?"ModelViewport":"PaperSpace");
    Add("main_window_handle",()=>AcApp.MainWindow.Handle.ToInt64());
    Add("secureload",()=>AcApp.GetSystemVariable("SECURELOAD"));Add("proxyshow",()=>AcApp.GetSystemVariable("PROXYSHOW"));Add("proxynotice",()=>AcApp.GetSystemVariable("PROXYNOTICE"));
+   Add("foundation_catalog",()=>FoundationPlanWriteHandler.ReadCatalog(doc));
    info["unknown_fields"]=errors;return info;
   }
  }

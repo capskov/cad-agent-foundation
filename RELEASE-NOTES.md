@@ -1,4 +1,10 @@
-# v1.0.0-rc.1 — source and documentation preview
+# Release notes
+
+## v1.1.0-rc.1 — native operations and Windows runtime preview
+
+Adds four native DIMENSION types, text/dimension styles, layer management, closed boundary/hatch and callout continuation, guarded rotation/scaling/copying, and a manifest-bearing Windows runtime package. See [release details](docs/RELEASE-v1.1.0-rc.1.md), [commands](docs/COMMAND-CATALOG-v1.1.0-rc.1.md) and [native validation](docs/VALIDATION-v1.1.0-rc.1.md). Previous releases remain intact.
+
+## v1.0.0-rc.1 — source and documentation preview
 
 First public source preview of CAD Agent Foundation, based on accepted local runtime v1.0.0-local. This is a prerelease, not a turnkey binary distribution.
 

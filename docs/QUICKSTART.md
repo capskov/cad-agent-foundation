@@ -1,18 +1,18 @@
 # Local installation and first operation
 
-This release provides source only, not a runnable binary download. Build prerequisites and current packaging gap: [BUILD](BUILD.md). The commands below describe the accepted local packaged interface and require a complete manifest-bearing package.
+The current release provides source and a manifest-bearing Windows runtime ZIP. Build prerequisites and runtime packaging: [BUILD](BUILD.md). The commands below describe the accepted local packaged interface and require a complete manifest-bearing package.
 
 ## Choose components first
 
 | Task | Required components | Versions and limits |
 | --- | --- | --- |
-| Supported basic CAD operations | `cad-agent-foundation` only | Local baseline `v1.0.0-local`; public source preview `v1.0.0-rc.2` (same runtime source), without a runnable binary asset. Bounded 2D operations; current writes require metres; recorded Windows/AutoCAD 2026 host only. Neither Skill is required. |
-| This project's callout style and placement | Foundation + `cad-callout-pair-layout` | Public callout Skill v0.3.0-rc.1 (existing rules v0.3). Metre-based road defaults; complete styles and layout have not been certified on Foundation v1 alone. Check backend coverage before writing. |
+| Supported basic CAD operations | `cad-agent-foundation` only | Local baseline `v1.0.0-local`; public source preview `v1.1.0-rc.1`, with a manifest-bearing runtime ZIP. Bounded 2D operations; current writes require metres; recorded Windows/AutoCAD 2026 host only. Neither Skill is required. |
+| This project's callout style and placement | Foundation + `cad-callout-pair-layout` | Public callout Skill v0.3.0-rc.1 (existing rules v0.3). Metre-based road defaults; Native style/pose interfaces and a bounded synthetic unchanged-Skill integration are verified in v1.1; full real-project/background coverage remains per task. Check backend coverage before writing. |
 | This project's distress/demolition workflow | Foundation + `cad-distress-annotation` + `cad-callout-pair-layout` | Public distress rules preview v0.1.0-rc.1. Requires engineering evidence, classifications and the callout rules; full workflow needs capabilities outside the current Foundation profile and is not certified on these three components alone. |
 
-This page installs Foundation only. Skill previews have their own ZIPs; the Foundation binary asset remains pending. No automatic Skill installation is implemented. [Component and tool preflight](COMPONENTS-AND-INSTALLATION.md).
+This page installs Foundation only. Skill previews have their own ZIPs; the Foundation runtime ZIP is independently versioned. No automatic Skill installation is implemented. [Component and tool preflight](COMPONENTS-AND-INSTALLATION.md).
 
-This documents the accepted local CLI; the public binary asset and its checksum will be added only after release review. A source checkout alone is not a ready-to-run installed package.
+Use the versioned Release ZIP and SHA256SUMS.txt; these commands require the complete extracted package. A source checkout alone is not a ready-to-run installed package.
 
 Requirements: Windows x64, a separately licensed AutoCAD installation matching the tested host profile, .NET 8 Desktop Runtime for the current baseline, and Python 3.11+. Updated .NET 10-based AutoCAD hosts are not validated by this baseline. See [compatibility](COMPATIBILITY.md).
 

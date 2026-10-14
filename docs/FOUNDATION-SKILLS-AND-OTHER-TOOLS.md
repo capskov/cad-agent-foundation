@@ -40,3 +40,8 @@ The intended core is useful beyond roads. For example, a future planting Skill c
 Foundation and Skills can have independent repositories, development cycles and releases. Foundation owns reusable native operations, execution safety/status and object-management contracts. Skills own domain rules, style parameters, placement algorithms and business workflows. Skills invoke the actual stable, versioned Foundation interfaces; they must check schema/version/operation coverage, not assume every AutoCAD operation is wrapped. Current interfaces and evidence are listed in the [v1.0.0-rc.1 catalog](COMMAND-CATALOG-v1.0.0-rc.1.md). Complete migration of existing Skills is not certified.
 
 底座与Skill可独立开发、建仓、发布。底座维护可复用原生操作、执行安全／状态和对象管理契约；Skill维护行业规则、样式参数、排布算法与业务流程，通过实际开放的稳定版本接口调用，并核对schema／版本／覆盖范围。缺接口不等于Skill已经实现该原生能力；现有Skill全流程底座化仍未认证。见[版本清单](COMMAND-CATALOG-v1.0.0-rc.1.zh-CN.md)。
+
+
+## v1.1.0-rc.1 scoped native evidence
+
+See [the new acceptance summary](VALIDATION-v1.1.0-rc.1.md). The prior evidence above remains historical. Native DIMENSION, named style creation/reuse, layer states, closed-surface/callout continuation and same-drawing transforms are new scoped operations, not proof of every parameter/entity combination.

@@ -1,6 +1,6 @@
 # CAD Agent Foundation — AutoCAD MCP & CLI for AI Agents
 
-**Public source preview v1.0.0-rc.2 (documentation update; runtime source unchanged from rc.1).** Source and documentation only; no runnable binary asset is included. [Build prerequisites and limits](docs/BUILD.md). The accepted local runtime v1.0.0-local is a separate baseline. Companion Skill previews are published independently: callout v0.3.0-rc.1 and distress v0.1.0-rc.1.
+**Public source preview v1.1.0-rc.1 (bounded native operations and Windows runtime preview).** Source, documentation and a manifest-bearing Windows runtime ZIP are provided in this preview. [Build prerequisites and limits](docs/BUILD.md). The accepted local runtime v1.0.0-local is a separate baseline. Companion Skill previews are published independently: callout v0.3.0-rc.1 and distress v0.1.0-rc.1.
 
 [简体中文](README.zh-CN.md) · [Quick start](docs/QUICKSTART.md) · [Capabilities](docs/CAPABILITIES.md) · [Compatibility](docs/COMPATIBILITY.md)
 
@@ -10,7 +10,7 @@ AI agents can inspect and operate a live AutoCAD drawing through structured nati
 
 CAD Agent Foundation gives CAD agents a bounded execution contract: explicitly bind a drawing, persist request ownership and execution state, inspect the original request after an uncertain reply, and verify tracked object facts after writes and saves. The current implementation integrates these mechanisms into a modified, pinned [Bimwright DWG MCP](https://github.com/bimwright/dwg-mcp) host.
 
-This is a local Windows/AutoCAD bridge maintained by **capskov**. The current engineering baseline is **v1.0.0-local**. This source preview is not a runnable binary release or an assertion of compatibility with every AutoCAD 2026 update.
+This Windows/AutoCAD bridge is maintained by **capskov**. The current preview is **v1.1.0-rc.1**, with an independently built runtime ZIP and scoped native evidence. The accepted **v1.0.0-local** baseline is retained; compatibility with every AutoCAD update is not claimed.
 
 ## Why this project exists
 
@@ -18,9 +18,15 @@ The project grew out of road and civil-engineering CAD work: creating boundaries
 
 The design focuses on those decisions. Durable records, drawing identity and native readback add overhead; no comparative speed, token-cost or productivity advantage has been established. Engineering judgment and domain-specific layout rules remain in separate Skills.
 
+## Native operations and installation
+
+Download [v1.1.0-rc.1 runtime](https://github.com/capskov/cad-agent-foundation/releases/tag/v1.1.0-rc.1), verify SHA256SUMS.txt and extract the complete folder. Requires licensed compatible Windows x64 AutoCAD 2026, .NET 8 Desktop Runtime and Python 3.11+. No Autodesk assemblies or SHX fonts are redistributed. [Installation](docs/QUICKSTART.md) · [25-operation catalog](docs/COMMAND-CATALOG-v1.1.0-rc.1.md) · [New validation](docs/VALIDATION-v1.1.0-rc.1.md).
+
+New in this preview: installed-font text styles, dimension styles, native linear/aligned/radius/diameter DIMENSION, layer state management, guarded closed-boundary/hatch continuation, linked callout geometry/format, and same-drawing rotate/scale/copy of supported complete groups. It preserves original-request reconciliation and drawing/object protection.
+
 ## Current capability overview
 
-Maturity: the bounded local runtime has native acceptance evidence; GitHub currently distributes a source preview without a turnkey binary. Support follows the actually exposed profile.
+Maturity: the bounded local runtime has native acceptance evidence; The release provides a runtime ZIP with dependency licenses, file hashes and plugin MVID; prerequisites remain separately installed. Support follows the actually exposed profile.
 
 | Category | Current capabilities | Status / limits |
 | --- | --- | --- |
@@ -29,27 +35,28 @@ Maturity: the bounded local runtime has native acceptance evidence; GitHub curre
 | Edits / object management | Digest-guarded linked-text update and complete callout-group move/archive | Specified group workflow verified; not every entity branch individually tested. |
 | Execution / delivery | Drawing binding, original-request queries, duplication guards and whole-document save/disk readback | Local workflows verified; no automatic unknown-write replay/unlock. |
 | Reads / helpers | Entity properties/digests, layer list, filtered paging and static Lisp inspection | Entity readback verified; some other implemented routes lack current-version individual end-to-end proof. |
-| Not exposed | Native DIMENSION, MLEADER, complete style management, layout/plot/xref edits | AutoCAD/upstream support alone does not establish Foundation support. |
+| Additional bounded operations | Four native DIMENSION types, named matching styles, layer states, closed-boundary/callout updates, rotate/scale/copy | See the 25-operation catalog for exact guards and scoped native evidence. |
+| Not exposed | MLEADER, shared-style overwrite, arbitrary object editing, complex Boolean/holes, layout/plot/xref edits | No blanket coverage of every native object or upstream command. |
 
-[Full interfaces, invocation and per-item verification status](docs/COMMAND-CATALOG-v1.0.0-rc.1.md). Foundation supplies reusable native operations, execution constraints, status and object management. Independently maintained Skills supply domain rules, style parameters, placement algorithms and workflows through actual supported Foundation interfaces. Missing native/backend compatibility is not supplied merely by installing a Skill.
+[Full interfaces, invocation and per-item verification status](docs/COMMAND-CATALOG-v1.1.0-rc.1.md). Foundation supplies reusable native operations, execution constraints, status and object management. Independently maintained Skills supply domain rules, style parameters, placement algorithms and workflows through actual supported Foundation interfaces. Missing native/backend compatibility is not supplied merely by installing a Skill.
 
 ## Execution contract
 
-Bind the intended drawing and verify process/session/plugin identity. Persist a stable request before submission; after an uncertain reply, query that original request. Existing edits need fresh native digests and complete associations. Confirm effects, independent readback and fence release separately; save covers the whole working drawing. See [architecture](docs/ARCHITECTURE.md) and [versioned interface catalog](docs/COMMAND-CATALOG-v1.0.0-rc.1.md).
+Bind the intended drawing and verify process/session/plugin identity. Persist a stable request before submission; after an uncertain reply, query that original request. Existing edits need fresh native digests and complete associations. Confirm effects, independent readback and fence release separately; save covers the whole working drawing. See [architecture](docs/ARCHITECTURE.md) and [versioned interface catalog](docs/COMMAND-CATALOG-v1.1.0-rc.1.md).
 
 ## Choose components by task
 
 | Task | Required components | Versions and limits |
 | --- | --- | --- |
-| Supported basic CAD operations | `cad-agent-foundation` only | Local baseline `v1.0.0-local`; public source preview `v1.0.0-rc.2` (same runtime source), without a runnable binary asset. Bounded 2D operations; current writes require metres; recorded Windows/AutoCAD 2026 host only. Neither Skill is required. |
-| This project's callout style and placement | Foundation + `cad-callout-pair-layout` | Public callout Skill v0.3.0-rc.1 (existing rules v0.3). Metre-based road defaults; complete styles and layout have not been certified on Foundation v1 alone. Check backend coverage before writing. |
+| Supported basic CAD operations | `cad-agent-foundation` only | Local baseline `v1.0.0-local`; public source preview `v1.1.0-rc.1`, with a reviewed runtime ZIP; prerequisites are separate. Bounded 2D operations; current writes require metres; recorded Windows/AutoCAD 2026 host only. Neither Skill is required. |
+| This project's callout style and placement | Foundation + `cad-callout-pair-layout` | Public callout Skill v0.3.0-rc.1 (existing rules v0.3). Metre-based road defaults; Native style/pose interfaces and a bounded synthetic unchanged-Skill integration are verified in v1.1; full real-project/background coverage remains per task. Check backend coverage before writing. |
 | This project's distress/demolition workflow | Foundation + `cad-distress-annotation` + `cad-callout-pair-layout` | Public distress rules preview v0.1.0-rc.1. Requires engineering evidence, classifications and the callout rules; full workflow needs capabilities outside the current Foundation profile and is not certified on these three components alone. |
 
 The two Skills are optional for basic operations. Their rules are not built into Foundation; installing them does not add missing native operations. Foundation source and both independent Skill previews are public. [Installation entries, versions and Agent checks](docs/COMPONENTS-AND-INSTALLATION.md).
 
 ## Quick start
 
-The commands below describe the existing local interface. A public download is intentionally not linked until asset, privacy and licensing review is complete.
+The commands below use the extracted runtime ZIP. Source checkout alone requires build/packaging first.
 
 ```bat
 foundation.cmd install --workspace "C:\CAD-work\demo01"
@@ -74,7 +81,7 @@ Plans write bounded 2D model-space geometry. Coordinates, lengths and annotation
 
 **The current write interface is restricted to metres:** plans require `units: metres`, and the drawing must use metres or explicitly metre-based unitless coordinates. Millimetres and other units are not enabled or validated. This implementation boundary does not limit the intended foundation to road work.
 
-This release does not provide native DIMENSION objects, MLeader, general old-hatch repair, arbitrary polyline editing, cross-drawing copy, proxy-object semantics, layout/plotting, engineering decisions, or automatic recovery/unlocking of uncertain writes. A committed operation cannot be assumed rolled back because a later verification failed.
+This release provides four native dimension primitives and bounded closed-boundary/single-hatch updates. It does not provide MLeader, general old-hatch repair/Boolean/holes, arbitrary polyline properties, cross-drawing copy, proxy-object semantics, layout/plotting, engineering decisions or automatic recovery/unlocking of uncertain writes. A committed operation cannot be assumed rolled back because a later verification failed.
 
 The `.NET 8` local baseline was inspected on AutoCAD **R25.1.74.0.0**. AutoCAD 2026.1.2 introduced a `.NET 10` transition; compatibility with that updated host is **not yet validated here**. See [compatibility](docs/COMPATIBILITY.md). [Autodesk runtime update](https://blog.autodesk.io/autodesk-desktop-products-2025-2026-net-10-updates/)
 
@@ -91,7 +98,7 @@ Foundation supplies supported CAD primitives and their execution contract. Skill
 
 Callout techniques may also serve landscape planting and other classified drawing annotations. The existing Skill's tested rules and defaults come from metre-based road drawings; other disciplines or millimetre drawings need style, size and placement adaptation and are not certified here.
 
-Both repositories provide versioned public Skill ZIPs and manual installation guides. A complete Foundation-only Skill workflow has not been certified. Callout v0.3.0-rc.1 and distress v0.1.0-rc.1 remain independently versioned. See [compatibility](docs/COMPATIBILITY.md).
+Both repositories provide versioned public Skill ZIPs and manual installation guides. Foundation v1.1 adds the native style/pose/measurement interfaces; a synthetic unchanged-Skill solver integration is recorded in the new validation, not a blanket real-project certification. A complete Foundation-only Skill workflow has not been certified. Callout v0.3.0-rc.1 and distress v0.1.0-rc.1 remain independently versioned. See [compatibility](docs/COMPATIBILITY.md).
 
 ## Working alongside other tools
 
@@ -105,7 +112,7 @@ The integrated host derives from Bimwright DWG MCP, pinned at [`4d0f756`](https:
 
 The development path was practical: examine existing CAD MCP backends against real tasks, integrate a bounded execution contract into the selected native host, then check writes, native readback and saved drawings. Historical evaluations are documented with their scope rather than presented as a ranking of today's projects.
 
-This public source preview uses Apache-2.0, preserving applicable upstream and MIT-origin notices. Version `v1.0.0-rc.1` includes source and documentation; binary assets remain pending their own review and checks. Dependencies keep their own licenses. AutoCAD and its SDK are not redistributed. HZTXT assets without established redistribution permission are excluded; the bundled Open Sans font retains its own OFL notice. See [license decision](LICENSING.md) and [draft notices](THIRD_PARTY_NOTICES.md).
+This preview uses Apache-2.0, preserving upstream and MIT-origin notices. Earlier `v1.0.0-rc.1`/`rc.2` source/documentation releases are retained; `v1.1.0-rc.1` adds a reviewed runtime ZIP with dependency license texts. AutoCAD/SDK and unlicensed SHX assets are not redistributed; Open Sans retains OFL. See [license decision](LICENSING.md) and [notices](THIRD_PARTY_NOTICES.md).
 
 Human and AI-assisted contributions are welcome when changes and verification evidence are reviewable. The maintainer reviews merges and releases. See [contributing](CONTRIBUTING.md).
 

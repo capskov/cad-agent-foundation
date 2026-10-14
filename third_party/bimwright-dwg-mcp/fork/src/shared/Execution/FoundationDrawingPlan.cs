@@ -9,7 +9,7 @@ using Newtonsoft.Json.Linq;
 namespace Bimwright.Dwg.Shared.Execution
 {
     // First-release drawing vocabulary, not an arbitrary AutoCAD command channel.
-    public static class FoundationDrawingPlan
+    public static partial class FoundationDrawingPlan
     {
         public const string McpToolName="dwg_apply_plan", PluginToolName="foundation_apply_plan";
         public const string Schema="foundation-drawing-plan-v1", Validator="foundation-plan-readback-v1";
@@ -46,10 +46,14 @@ namespace Bimwright.Dwg.Shared.Execution
                         if(step["vertices"] is not JArray points||points.Count<(step.Value<bool>("closed")?3:2)||points.Count>128)throw new ArgumentException("2..128 polyline vertices required; closed needs 3");
                         foreach(JToken v in points){Point(v,true);if(((JArray)v).Count==3&&Math.Abs(Number(v[2]))>1)throw new ArgumentException("major bulge unsupported in first release");}vertices+=points.Count;estimatedHandles++;break;
                     case "text":case "mtext":
-                        if(op=="text")Keys(step,"id","op","text","position","height","rotation","layer","color");else{Keys(step,"id","op","text","position","height","rotation","width","layer","color");Positive(step,"width");}
+                        if(op=="text")KeysWithOptional(step,new[]{"id","op","text","position","height","rotation","layer","color"},"text_style");else{KeysWithOptional(step,new[]{"id","op","text","position","height","rotation","width","layer","color"},"text_style");Positive(step,"width");}
+                        if(step["text_style"]!=null)Text(step,"text_style",255);
                         Text(step,"text",2048);Point(step["position"]);Positive(step,"height");Number(step["rotation"]);Options(step);estimatedHandles++;break;
                     case "callout":
-                        Keys(step,"id","op","text","position","height","width","vertices","dot_radius","layer","color");Text(step,"text",2048);Point(step["position"]);Positive(step,"height");Positive(step,"width");Positive(step,"dot_radius");Options(step);
+                        KeysWithOptional(step,new[]{"id","op","text","position","height","width","vertices","dot_radius","layer","color"},"text_style","dimension_style","text_color","gap","attachment");Text(step,"text",2048);Point(step["position"]);Positive(step,"height");Positive(step,"width");Positive(step,"dot_radius");Options(step);
+                        if(step["text_style"]!=null)Text(step,"text_style",255);if(step["dimension_style"]!=null)Text(step,"dimension_style",255);if(step["text_color"]!=null)Color(step,"text_color");
+                        if(step["gap"]!=null)Number(step["gap"]);
+                        ValidateAttachment(step);
                         if(step["vertices"] is not JArray lv||lv.Count<2||lv.Count>16)throw new ArgumentException("2..16 ordinary LEADER vertices required");foreach(JToken v in lv)Point(v);vertices+=lv.Count;estimatedHandles+=4;break;
                     case "hatch":
                         Keys(step,"id","op","boundary","pattern","scale","angle","layer","color");Options(step);Text(step,"pattern",128);Positive(step,"scale");Number(step["angle"]);
@@ -57,6 +61,15 @@ namespace Bimwright.Dwg.Shared.Execution
                     case "set_text":
                         Keys(step,"id","op","handle","expected_sha256","text","companions");Expected(step);Text(step,"text",2048);
                         if(step["companions"] is not JArray companions||companions.Count>32)throw new ArgumentException("0..32 companions required");foreach(JObject t in companions){Keys(t,"handle","expected_sha256");Expected(t);}estimatedHandles+=companions.Count+1;break;
+                    case "set_polyline":
+                        Keys(step,"id","op","handle","expected_sha256","vertices","companions");Expected(step);
+                        if(step["vertices"] is not JArray pv||pv.Count<3||pv.Count>128)throw new ArgumentException("3..128 closed boundary vertices required");
+                        foreach(JToken v in pv){Point(v,true);if(((JArray)v).Count==3&&Math.Abs(Number(v[2]))>1)throw new ArgumentException("major bulge unsupported");}
+                        if(step["companions"] is not JArray pc||pc.Count>1)throw new ArgumentException("0..1 associated hatch required");foreach(JObject t in pc){Keys(t,"handle","expected_sha256");Expected(t);}vertices+=pv.Count;estimatedHandles+=pc.Count+1;break;
+                    case "set_callout":
+                        KeysWithOptional(step,new[]{"id","op","handle","expected_sha256","text_handle","text_expected_sha256","vertices","position"},"dot_companions");Expected(step);Expected(new JObject{["handle"]=step["text_handle"],["expected_sha256"]=step["text_expected_sha256"]});
+                        if(step["vertices"] is not JArray cv||cv.Count!=3)throw new ArgumentException("three ordinary LEADER vertices required");foreach(JToken v in cv)Point(v);Point(step["position"]);vertices+=3;estimatedHandles+=2;
+                        if(step["dot_companions"]!=null){if(step["dot_companions"] is not JArray dots||dots.Count!=2)throw new ArgumentException("dot circle and its hatch required");foreach(JObject d in dots){Keys(d,"handle","expected_sha256");Expected(d);}estimatedHandles+=2;}break;
                     case "save":
                         Keys(step,"id","op","expected");if(steps.Count!=1||step["expected"] is not JArray expected||expected.Count<1||expected.Count>64)throw new ArgumentException("save is a separate whole-document operation with 1..64 expected entities");foreach(JObject t in expected){Keys(t,"handle","expected_sha256");Expected(t);}estimatedHandles+=expected.Count;break;
                     case "move":case "archive":
@@ -64,7 +77,7 @@ namespace Bimwright.Dwg.Shared.Execution
                         if(step["targets"] is not JArray targets||targets.Count<1||targets.Count>32)throw new ArgumentException("1..32 explicit targets required");
                         var handles=new System.Collections.Generic.HashSet<string>();foreach(JObject t in targets){Keys(t,"handle","expected_sha256");Expected(t);if(!handles.Add(t.Value<string>("handle")))throw new ArgumentException("duplicate target");}
                         if(op=="move")Point(step["delta"]);else Text(step,"layer",255);estimatedHandles+=targets.Count;break;
-                    default:throw new ArgumentException("unsupported first-release operation: "+op);
+                    default:if(!ValidateExtension(step,ref estimatedHandles))throw new ArgumentException("unsupported drawing-plan operation: "+op);break;
                 }
             }
             if(vertices>1024||estimatedHandles>MaxHandles||Encoding.UTF8.GetByteCount(Canonical(p))>131072)throw new ArgumentException("plan exceeds 1024 vertices, 64 entity outcomes or semantic 128 KiB");
@@ -104,12 +117,13 @@ namespace Bimwright.Dwg.Shared.Execution
                 string[] oldIds=oldModel.Values<string>().ToArray(),newIds=newModel.Values<string>().ToArray(),newCreated=created.Values<string>().ToArray();
                 if(oldIds.Length>100000||newCreated.Length>MaxHandles||oldIds.Distinct().Count()!=oldIds.Length||newIds.Distinct().Count()!=newIds.Length||newCreated.Distinct().Count()!=newCreated.Length||newCreated.Intersect(oldIds).Any()||!newIds.ToHashSet().SetEquals(oldIds.Concat(newCreated))||!after.Properties().Select(p=>p.Name).ToHashSet().SetEquals(before.Properties().Select(p=>p.Name).Concat(newCreated)))return false;
                 foreach(var row in after.Properties())if(row.Value?.Value<string>("handle")!=row.Name)return false;
-                foreach(var layer in oldLayers.Properties())if(!JToken.DeepEquals(layer.Value,newLayers[layer.Name]))return false;
+                if(!VerifyLayerChanges(oldLayers,newLayers,(JArray)plan["steps"])||!VerifySymbols(receipt,(JArray)plan["steps"]))return false;
                 foreach(JObject step in (JArray)plan["steps"])
                 {
                     string id=step.Value<string>("id"),op=step.Value<string>("op");
                     JObject map=objects[id] as JObject;if(map==null)return false;
                     JObject E(string role)=>after[map.Value<string>(role)??""] as JObject;
+                    bool extensionOk=VerifyExtension(step,receipt,out bool handled);if(handled){if(!extensionOk)return false;continue;}
                     if(op=="layer"){if(map.Value<string>("layer")!=step.Value<string>("name")||receipt["layers"]?[step.Value<string>("name")]?.Value<int?>("color_index")!=step.Value<int>("color"))return false;continue;}
                     if(op=="save")
                     {
@@ -119,8 +133,26 @@ namespace Bimwright.Dwg.Shared.Execution
                     if(op=="set_text")
                     {
                         string h=step.Value<string>("handle");if(Hash(before[h])!=step.Value<string>("expected_sha256")||after[h]?.Value<string>("text")!=step.Value<string>("text"))return false;
-                        var old=(JObject)before[h].DeepClone();var next=(JObject)after[h].DeepClone();foreach(string field in new[]{"text","extents"}){old.Remove(field);next.Remove(field);}if(!JToken.DeepEquals(old,next))return false;
+                        var old=(JObject)before[h].DeepClone();var next=(JObject)after[h].DeepClone();foreach(string field in new[]{"text","extents","actual_width","actual_height"}){old.Remove(field);next.Remove(field);}if(!JToken.DeepEquals(old,next))return false;
                         foreach(JObject c in (JArray)step["companions"]){string ch=c.Value<string>("handle");if(Hash(before[ch])!=c.Value<string>("expected_sha256")||!JToken.DeepEquals(before[ch],after[ch]))return false;}continue;
+                    }
+                    if(op=="set_polyline")
+                    {
+                        if(receipt.Value<string>("verification_scope")!="boundary_vertices_and_native_area_plus_associated_hatch_path;cached_hatch_area_requires_independent_read")return false;
+                        string h=step.Value<string>("handle");var old=(JObject)before[h];var actual=(JObject)after[h];
+                        if(Hash(old)!=step.Value<string>("expected_sha256")||old.Value<string>("type")!="Polyline"||old.Value<bool?>("is_closed")!=true||actual.Value<bool?>("is_closed")!=true)return false;
+                        var a=(JObject)old.DeepClone();var b=(JObject)actual.DeepClone();foreach(string f in new[]{"vertices","vertex_count","area","length","extents"}){a.Remove(f);b.Remove(f);}if(!JToken.DeepEquals(a,b))return false;
+                        var expected=(JArray)step["vertices"];var av=(JArray)actual["vertices"];if(av.Count!=expected.Count)return false;
+                        for(int i=0;i<expected.Count;i++){var v=(JArray)expected[i];if(!PointMatches(av[i],v)||!Near(av[i]["bulge"],v.Count==3?Number(v[2]):0,1e-10))return false;}
+                        foreach(JObject c in (JArray)step["companions"]){string ch=c.Value<string>("handle");if(Hash(before[ch])!=c.Value<string>("expected_sha256")||!HatchMatches((JObject)after[ch],actual,false))return false;foreach(string f in new[]{"type","layer","color_index","pattern_name","pattern_scale","pattern_angle"})if(!JToken.DeepEquals(before[ch][f],after[ch][f]))return false;}continue;
+                    }
+                    if(op=="set_callout")
+                    {
+                        string lh=step.Value<string>("handle"),th=step.Value<string>("text_handle");var oldLeader=(JObject)before[lh];var nextLeader=(JObject)after[lh];var oldText=(JObject)before[th];var nextText=(JObject)after[th];
+                        if(Hash(oldLeader)!=step.Value<string>("expected_sha256")||Hash(oldText)!=step.Value<string>("text_expected_sha256")||oldLeader.Value<string>("type")!="Leader"||oldText.Value<string>("type")!="MText"||oldLeader.Value<string>("annotation_handle")!=th||nextLeader.Value<string>("annotation_handle")!=th)return false;
+                        var lv=(JArray)step["vertices"];if(nextLeader["vertices_wcs"] is not JArray nv||nv.Count!=3)return false;for(int i=0;i<3;i++)if(!PointMatches(nv[i],(JArray)lv[i]))return false;
+                        foreach(var pair in new[]{(oldLeader,nextLeader,new[]{"vertices_wcs","extents"}),(oldText,nextText,new[]{"location","extents"})}){var a=(JObject)pair.Item1.DeepClone();var b=(JObject)pair.Item2.DeepClone();foreach(string f in pair.Item3){a.Remove(f);b.Remove(f);}if(!JToken.DeepEquals(a,b))return false;}
+                        if(!PointMatches(nextText["location"],(JArray)step["position"])||!VerifyCalloutDot(step,before,after,oldLeader,nextLeader))return false;continue;
                     }
                     if(op=="move"||op=="archive")
                     {
@@ -145,12 +177,14 @@ namespace Bimwright.Dwg.Shared.Execution
                         case "polyline":
                             var vertices=(JArray)step["vertices"];if(entity.Value<string>("type")!="Polyline"||entity.Value<bool?>("is_closed")!=step.Value<bool>("closed")||entity["vertices"] is not JArray actualVertices||actualVertices.Count!=vertices.Count)return false;
                             for(int i=0;i<vertices.Count;i++){var v=(JArray)vertices[i];if(!PointMatches(actualVertices[i],v)||!Near(actualVertices[i]["bulge"],v.Count==3?Number(v[2]):0,1e-10))return false;}break;
-                        case "text":case "mtext":if(!TextMatches(entity,step,op=="mtext"))return false;break;
+                        case "text":case "mtext":if(!TextMatches(entity,step,op=="mtext")||(step["text_style"]!=null&&entity.Value<string>("text_style")!=step.Value<string>("text_style")))return false;break;
                         case "hatch":
                             var bm=objects[step.Value<string>("boundary")] as JObject;var boundary=after[bm?.Value<string>("entity")??""] as JObject;if(!HatchMatches(entity,boundary)||entity.Value<string>("pattern_name")!=step.Value<string>("pattern")||!Near(entity["pattern_scale"],Number(step["scale"]),1e-10)||!Near(entity["pattern_angle"],Number(step["angle"]),1e-10))return false;break;
                         case "callout":
                             var text=E("text");var leader=E("leader");var dot=E("dot_boundary");var fill=E("dot_fill");
-                            if(text==null||leader==null||dot==null||fill==null||!EntityOptions(text,step)||!TextMatches(text,step,true)||leader.Value<string>("type")!="Leader"||leader.Value<string>("annotation_handle")!=map.Value<string>("text")||!HatchMatches(fill,dot)||dot.Value<int?>("color_index")!=2||fill.Value<int?>("color_index")!=2||!PointMatches(dot["center"],(JArray)step["vertices"][0])||!Near(dot["radius"],Number(step["dot_radius"])))return false;
+                            if(text==null||leader==null||dot==null||fill==null||text.Value<string>("layer")!=step.Value<string>("layer")||text.Value<int?>("color_index")!=(step.Value<int?>("text_color")??step.Value<int>("color"))||!EntityOptions(leader,step)||!TextMatches(text,step,true)||leader.Value<string>("type")!="Leader"||leader.Value<string>("annotation_handle")!=map.Value<string>("text")||!HatchMatches(fill,dot)||dot.Value<int?>("color_index")!=2||fill.Value<int?>("color_index")!=2||!PointMatches(dot["center"],(JArray)step["vertices"][0])||!Near(dot["radius"],Number(step["dot_radius"])))return false;
+                            if(step["text_style"]!=null&&text.Value<string>("text_style")!=step.Value<string>("text_style")||step["dimension_style"]!=null&&leader.Value<string>("style_name")!=step.Value<string>("dimension_style"))return false;
+                            if(step["attachment"]!=null&&text.Value<string>("attachment")!=step.Value<string>("attachment"))return false;
                             var lv=(JArray)step["vertices"];if(leader["vertices_wcs"] is not JArray nativeVertices||nativeVertices.Count!=lv.Count)return false;for(int i=0;i<lv.Count;i++)if(!PointMatches(nativeVertices[i],(JArray)lv[i]))return false;break;
                     }
                 }
@@ -158,9 +192,9 @@ namespace Bimwright.Dwg.Shared.Execution
             }
             catch{return false;}
         }
-        public static bool HatchMatches(JObject hatch,JObject boundary)
+        public static bool HatchMatches(JObject hatch,JObject boundary,bool checkCachedArea=true)
         {
-            if(hatch==null||boundary==null||hatch.Value<string>("type")!="Hatch"||hatch.Value<bool?>("is_associative")!=true||hatch.Value<int?>("loop_count")!=1||hatch.Value<string>("loop_read_status")!="complete"||hatch.Value<bool?>("loops_truncated")!=false||Math.Abs(Number(hatch["area"])-Number(boundary["area"]))>=0.001)return false;
+            if(hatch==null||boundary==null||hatch.Value<string>("type")!="Hatch"||hatch.Value<bool?>("is_associative")!=true||hatch.Value<int?>("loop_count")!=1||hatch.Value<string>("loop_read_status")!="complete"||hatch.Value<bool?>("loops_truncated")!=false||(checkCachedArea&&Math.Abs(Number(hatch["area"])-Number(boundary["area"]))>=0.001))return false;
             var loop=hatch["loops"]?[0] as JObject;
             if(loop==null||loop.Value<string>("association_status")!="available"||loop.Value<bool?>("associated_handles_truncated")!=false||!JToken.DeepEquals(loop["associated_handles"],new JArray(boundary.Value<string>("handle")))||loop.Value<string>("geometry_status")!="available"||hatch.Value<string>("loop_geometry_space")!="wcs")return false;
             try
@@ -217,7 +251,7 @@ namespace Bimwright.Dwg.Shared.Execution
             if(a.Type is JTokenType.Float or JTokenType.Integer && b.Type is JTokenType.Float or JTokenType.Integer)
             {
                 double difference=Math.Abs(Number(a)-Number(b));if(field=="area")return difference<0.001;
-                return new[]{"x","y","z","radius","length","elevation","width"}.Contains(field)?difference<=0.001:difference==0;
+                return new[]{"x","y","z","radius","diameter","circumference","length","elevation","width","height","text_height","actual_width","actual_height","measurement","arrow_size","gap"}.Contains(field)?difference<=0.001:difference==0;
             }
             return JToken.DeepEquals(a,b);
         }

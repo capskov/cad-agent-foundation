@@ -18,10 +18,10 @@ The full AutoCAD patch/runtime baseline for the exact local release should be re
 
 ## Skill compatibility is not a blanket version requirement
 
-| Planned repository | Existing node | Foundation overlap | Remaining public conditions |
+| Independent repository | Public version | Foundation v1.1 overlap | Remaining boundary |
 |---|---|---|---|
-| cad-callout-pair-layout | v0.3, MCP-first rules and finite layout algorithm | Reads, ordinary callouts and guarded group edits | Exact style/color/font/placement compatibility is not fully certified; remove private links/real-case fixtures and finalize component ownership under the selected Apache-2.0 plan |
-| cad-distress-annotation | Rules from an existing demolition workflow; no independent version declared | Simple new boundaries/fill/text and object readback | Boolean geometry, holes, dimensions and full continuation are not supplied by the limited profile; anonymize examples and finalize component ownership under the selected Apache-2.0 plan |
+| cad-callout-pair-layout | v0.3.0-rc.1 | Installed fonts/styles, text/leader colors, actual text sizes, pose and complete groups; bounded synthetic solver/native integration | Real-project road/background/layout correctness remains per task; no blanket migration certification. |
+| cad-distress-annotation | v0.1.0-rc.1 | New and bounded existing closed-boundary/single-hatch operations, quantities/readback, native dimensions | Boolean/holes/general old-hatch repair and full engineering workflow remain outside the profile. |
 
 Skill repositories should publish tested backend/operation combinations. Do not advertise `Foundation >=1.0` as proof that all Skill steps work. Preserve their current routing safeguards: inspect real tool schemas and identity, do not silently switch to legacy COM or replay unknown writes.
 

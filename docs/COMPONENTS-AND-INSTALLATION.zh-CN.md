@@ -6,8 +6,8 @@
 
 | 任务 | 所需组件 | 版本与限制 |
 | --- | --- | --- |
-| 已支持的基础 CAD 操作 | 仅 `cad-agent-foundation` | 本地基线 `v1.0.0-local`；公开源码预览`v1.0.0-rc.2`（运行源码不变），不附可运行二进制资产。有界二维操作，当前写入限米制，仅有记录的 Windows／AutoCAD 2026 宿主实测。无需两个 Skill。 |
-| 本项目的引线标注样式与排布 | 底座 + `cad-callout-pair-layout` | 引线公开预览v0.3.0-rc.1（沿用v0.3规则）。默认与验证来自米制道路图；完整样式、排布尚未通过底座首版单独执行验收，写入前须核对后端覆盖。 |
+| 已支持的基础 CAD 操作 | 仅 `cad-agent-foundation` | 本地基线 `v1.0.0-local`；公开源码预览`v1.1.0-rc.1`，提供带清单运行ZIP。有界二维操作，当前写入限米制，仅有记录的 Windows／AutoCAD 2026 宿主实测。无需两个 Skill。 |
+| 本项目的引线标注样式与排布 | 底座 + `cad-callout-pair-layout` | 引线公开预览v0.3.0-rc.1（沿用v0.3规则）。默认与验证来自米制道路图；v1.1已验证样式／位置接口及有限合成Skill联动，完整实战与背景覆盖仍按任务验收，写入前须核对后端覆盖。 |
 | 本项目的病害／拆除标注工作流 | 底座 + `cad-distress-annotation` + `cad-callout-pair-layout` | 病害规则公开预览v0.1.0-rc.1。需要工程依据、分类规则及标注规则；完整流程仍需首版配置之外的能力，尚未验证仅靠这三个组件即可全部复现。 |
 
 ## 职责与实际操作范围
@@ -18,15 +18,15 @@
 
 底座用途不限道路土建：其他专业可在相同执行限制下使用基础能力。实际验证来自米制土建图；WCS 是坐标参照，不规定单位或地图投影。当前计划解析仍要求 `units: metres`，毫米等其他单位尚未开放、未验证。园林植物／品种等标注只是可拓展用途，现有 Skill 的尺寸、样式与规则适配也尚未验证。
 
-当前配置未提供原生 DIMENSION、MLEADER、复杂旧填充修复、任意已有多段线形状编辑、布尔／复杂孔洞工程流程、布局出图或外参编辑。增加 Skill 或另装 MCP 不会自动扩大底座治理范围。
+本版提供四种原生尺寸及有界闭合边界／单填充续改；MLEADER、通用旧填充修复、任意多段线属性、布尔／复杂孔洞、布局出图和外参仍不提供。增加 Skill 或另装 MCP 不会自动扩大底座治理范围。
 
 ## 仓库与安装入口
 
-下方为实际公开入口；两个Skill已有手动安装ZIP，底座仍仅公开源码，尚无可运行二进制发行包。
+下方为实际公开入口；两个Skill已有手动安装ZIP，底座提供独立带清单运行ZIP。
 
 | 组件 | 公开仓库／预览 | 安装入口 |
 | --- | --- | --- |
-| 底座 | [cad-agent-foundation（源码预览）](https://github.com/capskov/cad-agent-foundation) | [底座安装与调用](QUICKSTART.zh-CN.md)；经审核的公开包链接待补。 |
+| 底座 | [cad-agent-foundation（源码预览）](https://github.com/capskov/cad-agent-foundation) | [底座安装与调用](QUICKSTART.zh-CN.md)；[运行ZIP](https://github.com/capskov/cad-agent-foundation/releases/tag/v1.1.0-rc.1)。 |
 | 标注 Skill | [cad-callout-pair-layout v0.3.0-rc.1](https://github.com/capskov/cad-callout-pair-layout) | [引线安装](https://github.com/capskov/cad-callout-pair-layout/blob/main/docs/INSTALL.zh-CN.md) · [Release ZIP](https://github.com/capskov/cad-callout-pair-layout/releases/tag/v0.3.0-rc.1)。 |
 | 病害拆除 Skill | [cad-distress-annotation v0.1.0-rc.1](https://github.com/capskov/cad-distress-annotation) | [病害安装](https://github.com/capskov/cad-distress-annotation/blob/main/docs/INSTALL.zh-CN.md) · [Release ZIP](https://github.com/capskov/cad-distress-annotation/releases/tag/v0.1.0-rc.1)，需本项目引线表现时同级安装引线Skill。 |
 

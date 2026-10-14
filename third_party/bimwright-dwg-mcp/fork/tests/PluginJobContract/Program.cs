@@ -789,7 +789,7 @@ try
         string controlDispatch = dispatcherSource.Substring(controlStart, controlEnd - controlStart);
 
         True(frameSource.Contains("MaxRequestFrameBytes = 4096", StringComparison.Ordinal));
-        True(frameSource.Contains("MaxResponseFrameBytes = 1024 * 1024", StringComparison.Ordinal));
+        True(frameSource.Contains("MaxResponseFrameBytes = 8 * 1024 * 1024", StringComparison.Ordinal));
         True(frameSource.Contains("FrameDeadlineMilliseconds = 3000", StringComparison.Ordinal));
         True(frameSource.Contains("deadline.CancelAfter(deadlineMilliseconds)", StringComparison.Ordinal));
         True(frameSource.Contains("pipe.ReadAsync(oneByte, 0, 1, deadline.Token)", StringComparison.Ordinal));

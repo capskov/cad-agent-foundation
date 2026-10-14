@@ -29,6 +29,9 @@ namespace Bimwright.Dwg.Plugin.Cad
             }
 
             AddExtents(result, entity);
+            var owner=tx.GetObject(entity.OwnerId,OpenMode.ForRead) as BlockTableRecord;
+            result["owner_handle"]=entity.OwnerId.Handle.ToString();
+            if(owner!=null&&owner.IsLayout){var layout=(Layout)tx.GetObject(owner.LayoutId,OpenMode.ForRead);result["layout_name"]=layout.LayoutName;}
 
             switch (entity)
             {
@@ -45,10 +48,10 @@ namespace Bimwright.Dwg.Plugin.Cad
                     DescribePolyline(result, polyline);
                     break;
                 case DBText text:
-                    DescribeDbText(result, text);
+                    DescribeDbText(result, text,tx);
                     break;
                 case MText mText:
-                    DescribeMText(result, mText);
+                    DescribeMText(result, mText,tx);
                     break;
                 case MLeader mLeader:
                     DescribeMLeader(result, mLeader);
@@ -68,6 +71,11 @@ namespace Bimwright.Dwg.Plugin.Cad
                 case Ellipse ellipse:
                     DescribeEllipse(result, ellipse);
                     break;
+#if ACAD2026
+                case Dimension dimension:
+                    Bimwright.Dwg.Plugin.FoundationPlanWriteHandler.DimensionFacts(result,dimension,tx);
+                    break;
+#endif
             }
 
             return result;
@@ -134,24 +142,28 @@ namespace Bimwright.Dwg.Plugin.Cad
             result["vertices"] = vertices.ToArray();
         }
 
-        private static void DescribeDbText(IDictionary<string, object> result, DBText text)
+        private static void DescribeDbText(IDictionary<string, object> result, DBText text,Transaction tx)
         {
             result["text"] = text.TextString;
             result["position"] = Point(text.Position);
             result["height"] = text.Height;
             result["rotation"] = text.Rotation;
+            result["text_style"] = ((TextStyleTableRecord)tx.GetObject(text.TextStyleId,OpenMode.ForRead)).Name;
             result["horizontal_mode"] = text.HorizontalMode.ToString();
             result["vertical_mode"] = text.VerticalMode.ToString();
         }
 
-        private static void DescribeMText(IDictionary<string, object> result, MText mText)
+        private static void DescribeMText(IDictionary<string, object> result, MText mText,Transaction tx)
         {
             result["text"] = mText.Contents;
             result["location"] = Point(mText.Location);
             result["text_height"] = mText.TextHeight;
             result["width"] = mText.Width;
             result["rotation"] = mText.Rotation;
+            result["text_style"] = ((TextStyleTableRecord)tx.GetObject(mText.TextStyleId,OpenMode.ForRead)).Name;
             result["attachment"] = mText.Attachment.ToString();
+            result["actual_width"] = mText.ActualWidth;
+            result["actual_height"] = mText.ActualHeight;
         }
 
         private static void DescribeMLeader(IDictionary<string, object> result, MLeader mLeader)
@@ -208,6 +220,8 @@ namespace Bimwright.Dwg.Plugin.Cad
             result["has_arrow_head"] = leader.HasArrowHead;
             result["has_hook_line"] = leader.HasHookLine;
             result["style_name"] = leader.DimensionStyleName;
+            result["text_height"] = leader.Dimtxt;
+            result["gap"] = leader.Dimgap;
             var annotationId = leader.Annotation;
             result["annotation_handle"] = annotationId.IsNull
                 ? null

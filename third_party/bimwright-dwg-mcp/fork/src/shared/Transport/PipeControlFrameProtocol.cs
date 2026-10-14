@@ -13,7 +13,7 @@ namespace Bimwright.Dwg.Plugin
     public static class PipeControlFrameProtocol
     {
         public const int MaxRequestFrameBytes = 4096;
-        public const int MaxResponseFrameBytes = 1024 * 1024;
+        public const int MaxResponseFrameBytes = 8 * 1024 * 1024;
         public const int FrameDeadlineMilliseconds = 3000;
 
         public static bool IsAllowedControlCommand(string? command) =>

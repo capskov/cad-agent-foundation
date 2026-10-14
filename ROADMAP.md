@@ -1,15 +1,11 @@
 # Roadmap
 
-## Available source preview
+## Current bounded release
 
-v1.0.0-rc.1 exports the implemented limited Foundation baseline, bilingual documentation, selected offline contracts and an anonymous visual case. The accepted local v1.0.0-local runtime evidence remains separately described in docs/VALIDATION.md. A build is not renewed CAD certification.
+v1.1.0-rc.1 provides a Windows runtime preview and 25 native plan operations, including four DIMENSION types, styles, layer state, boundary/hatch continuation, linked callouts and guarded same-drawing edits. See [catalog](docs/COMMAND-CATALOG-v1.1.0-rc.1.md) and [native validation](docs/VALIDATION-v1.1.0-rc.1.md). Two independently published optional Skills provide domain rules and finite placement proposals.
 
-## Next delivery steps
+## Next practical improvements
 
-Produce a clean public runnable package with scoped dependency notices, version/hash/MVID manifest, no stale nested outputs or private debug paths, and targeted isolated install/load/Chinese-display/readback checks. Do not repeat unchanged full acceptance. Review and release the independent callout Skill, then distress Skill, only after maintainer agreement; record per-operation backend coverage rather than asserting blanket compatibility.
+Prioritize concrete field feedback, clearer diagnostics and installed-font examples. Additional entity coverage needs native association, rollback and saved-DWG evidence. Layout/plotting, xrefs, cross-drawing transfer, complex-hole/Boolean repair and other units require separate contracts. AutoCAD 2022 and updated .NET 10 hosts remain unverified.
 
-## After practical feedback
-
-Evaluate the updated AutoCAD runtime profile, clearer minimal diagnostics, and concrete missing native primitives. Reusable native operations and execution constraints belong in Foundation; domain scope/classification, styles and placement belong in Skills. Other drawing units are a core-contract extension; non-road/plant/species rules are Skill adaptations. Neither is validated or scheduled by this source release.
-
-Layout/plotting, cross-drawing transfer, proxy semantics, larger batches and complex geometry remain candidates driven by actual needs. Historical H1/J10/arc-hatch milestones remain closed; no open-ended trigger, undo-API or fault-matrix research is planned. No automatic Skill installer is implemented.
+Historical H1/J10/arc-hatch milestones remain closed. No open-ended fault-matrix work, arbitrary-code route or automatic Skill installer is included. No comparative speed/token-cost advantage is claimed without comparative measurements.

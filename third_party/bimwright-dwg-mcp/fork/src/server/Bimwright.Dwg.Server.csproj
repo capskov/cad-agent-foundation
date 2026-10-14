@@ -15,9 +15,9 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>bimwright-dwg</ToolCommandName>
     <PackageId>Capskov.CadAgentFoundation.Host</PackageId>
-    <Version>1.0.0-rc.1</Version>
+    <Version>1.1.0-rc.1</Version>
     <Authors>Khoa Le; capskov</Authors>
-    <Description>MCP gateway for AutoCAD 2022-2027 DWG workflows: text reading, translation rewriting, target routing, optional ToolBaker, and opt-in code execution.</Description>
+    <Description>Bounded AutoCAD 2026 MCP/CLI automation with drawing identity, native dimensions, styles, guarded editing and write/save verification.</Description>
     <PackageProjectUrl>https://github.com/capskov/cad-agent-foundation</PackageProjectUrl>
     <RepositoryUrl>https://github.com/capskov/cad-agent-foundation</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -48,6 +48,7 @@
     <Compile Include="..\shared\Execution\H1FixedHatchRepairReadbackContract.cs" Link="Shared\Execution\H1FixedHatchRepairReadbackContract.cs" />
     <Compile Include="..\shared\Execution\H1FixedHatchWriteContract.cs" Link="Shared\Execution\H1FixedHatchWriteContract.cs" />
     <Compile Include="..\shared\Execution\FoundationDrawingPlan.cs" Link="Shared\Execution\FoundationDrawingPlan.cs" />
+    <Compile Include="..\shared\Execution\FoundationPlanExtensions.cs" Link="Shared\Execution\FoundationPlanExtensions.cs" />
     <Compile Include="..\shared\Execution\J10FixedHatchWriteContract.cs" Link="Shared\Execution\J10FixedHatchWriteContract.cs" />
     <Compile Include="..\shared\Transport\DiscoveryFileMutex.cs" Link="Shared\Transport\DiscoveryFileMutex.cs" />
     <Compile Include="..\shared\ToolBaker\*.cs" LinkBase="Shared\ToolBaker" />

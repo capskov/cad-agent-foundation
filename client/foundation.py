@@ -5,6 +5,10 @@ import argparse, contextlib, ctypes, datetime as dt, hashlib, importlib.util, js
 from pathlib import Path
 import shutil, sqlite3, subprocess, sys, time, uuid
 
+# Machine-readable CLI/MCP output must not depend on a Windows GBK console.
+for stream in (sys.stdout,sys.stderr):
+    if hasattr(stream,'reconfigure'):stream.reconfigure(encoding='utf-8')
+
 HOME=Path(__file__).resolve().parent.parent
 support=HOME/'support/readonly-entry.py'
 if not support.exists(): support=HOME/'scripts/readonly-entry.py'
@@ -150,6 +154,7 @@ class Gateway:
             with sqlite3.connect((native/'Dwg/execution/plugin-execution.sqlite').as_uri()+'?mode=ro',uri=True) as db:
                 scope,digest=db.execute('select scope_id,path_digest from plugin_journal_identity where singleton=1').fetchone()
             env.update(BIMWRIGHT_DWG_ENABLE_FOUNDATION_WRITE='true',BIMWRIGHT_DWG_FOUNDATION_EXPECTED_DRAWING_PATH=s['drawing'],BIMWRIGHT_DWG_FOUNDATION_EXPECTED_JOURNAL_SCOPE_ID=scope,BIMWRIGHT_DWG_FOUNDATION_EXPECTED_JOURNAL_PATH_DIGEST=digest)
+            env['BIMWRIGHT_DWG_FOUNDATION_JOURNAL_EVIDENCE_PATH']=str(native/'Dwg/execution/plugin-execution.sqlite')
             command=[x for x in command if x!='--read-only']+['--enable-foundation-write','--disable-h1-write-pilot','--disable-h1-preflight-pilot']
         self.command,self.env=command,env;self.client=None;self.log=None
     def __enter__(self):

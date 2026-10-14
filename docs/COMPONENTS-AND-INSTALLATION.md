@@ -6,8 +6,8 @@ Choose components by task. The two Skills are independent, optional companions, 
 
 | Task | Required components | Versions and limits |
 | --- | --- | --- |
-| Supported basic CAD operations | `cad-agent-foundation` only | Local baseline `v1.0.0-local`; public source preview `v1.0.0-rc.2` (same runtime source), without a runnable binary asset. Bounded 2D operations; current writes require metres; recorded Windows/AutoCAD 2026 host only. Neither Skill is required. |
-| This project's callout style and placement | Foundation + `cad-callout-pair-layout` | Public callout Skill v0.3.0-rc.1 (existing rules v0.3). Metre-based road defaults; complete styles and layout have not been certified on Foundation v1 alone. Check backend coverage before writing. |
+| Supported basic CAD operations | `cad-agent-foundation` only | Local baseline `v1.0.0-local`; public source preview `v1.1.0-rc.1`, with a manifest-bearing runtime ZIP. Bounded 2D operations; current writes require metres; recorded Windows/AutoCAD 2026 host only. Neither Skill is required. |
+| This project's callout style and placement | Foundation + `cad-callout-pair-layout` | Public callout Skill v0.3.0-rc.1 (existing rules v0.3). Metre-based road defaults; Native style/pose interfaces and a bounded synthetic unchanged-Skill integration are verified in v1.1; full real-project/background coverage remains per task. Check backend coverage before writing. |
 | This project's distress/demolition workflow | Foundation + `cad-distress-annotation` + `cad-callout-pair-layout` | Public distress rules preview v0.1.0-rc.1. Requires engineering evidence, classifications and the callout rules; full workflow needs capabilities outside the current Foundation profile and is not certified on these three components alone. |
 
 ## Responsibilities and actual operation coverage
@@ -18,15 +18,15 @@ The callout Skill supplies text content conventions, dot/leader style, confirmed
 
 Foundation is not restricted to roads or civil engineering: other professions may use these basic primitives within the same execution limits. Actual validation uses metre-based civil drawings. WCS is a coordinate reference, not a unit or projection. The present plan parser requires `units: metres`; millimetres and other units are not enabled or validated. The Skills' other-domain uses, including planting/species labels, also require unvalidated size/style/rule adaptations.
 
-Native DIMENSION, MLeader, general old-hatch repair, arbitrary existing-polyline reshaping, Boolean/complex-hole engineering workflows, layout/plotting and external-reference editing are not supplied by the current profile. Neither adding Skills nor installing another MCP server automatically extends Foundation's governed coverage.
+Four native dimension primitives and bounded closed-boundary/single-hatch updates are supplied. MLeader, general old-hatch repair, arbitrary polyline properties, Boolean/complex-hole engineering workflows, layout/plotting and external-reference editing remain outside the profile. Neither adding Skills nor installing another MCP server automatically extends Foundation's governed coverage.
 
 ## Repository and installation entries
 
-Foundation source and both reviewed Skill previews are published below. Skill releases have manual-install ZIPs; Foundation still has no public runnable binary package.
+Foundation source and both reviewed Skill previews are published below. Skill releases have manual-install ZIPs; Foundation now provides its own manifest-bearing runtime ZIP.
 
 | Component | Repository / public preview | Installation entry |
 | --- | --- | --- |
-| Foundation | [cad-agent-foundation (source preview)](https://github.com/capskov/cad-agent-foundation) | [Foundation installation and CLI](QUICKSTART.md); approved public package link pending. |
+| Foundation | [cad-agent-foundation (source preview)](https://github.com/capskov/cad-agent-foundation) | [Foundation installation and CLI](QUICKSTART.md); [Runtime ZIP](https://github.com/capskov/cad-agent-foundation/releases/tag/v1.1.0-rc.1). |
 | Callout Skill | [cad-callout-pair-layout v0.3.0-rc.1](https://github.com/capskov/cad-callout-pair-layout) | [Install](https://github.com/capskov/cad-callout-pair-layout/blob/main/docs/INSTALL.md) · [Release ZIP](https://github.com/capskov/cad-callout-pair-layout/releases/tag/v0.3.0-rc.1). |
 | Distress Skill | [cad-distress-annotation v0.1.0-rc.1](https://github.com/capskov/cad-distress-annotation) | [Install](https://github.com/capskov/cad-distress-annotation/blob/main/docs/INSTALL.md) · [Release ZIP](https://github.com/capskov/cad-distress-annotation/releases/tag/v0.1.0-rc.1). Add callout rules for presentation. |
 

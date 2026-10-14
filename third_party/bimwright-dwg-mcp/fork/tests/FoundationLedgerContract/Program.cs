@@ -165,6 +165,20 @@ try
             verification: VerificationState.Passed)));
     });
 
+    Run("committed observation can advance to exact readback stage without releasing fence", () =>
+    {
+        using var ledger = new TestLedger(Path.Combine(tempRoot,"readback-progress.sqlite"));
+        ledger.Value.Reserve(Write("readback-progress"));
+        var committed=Snapshot("readback-progress",3,JobPhase.Completed,EffectState.Committed,result:"{\"saved\":true}",observation:ObservationState.AuthoritativePluginSnapshot);
+        Equal(AdvanceDisposition.Applied,ledger.Value.Advance(committed).Disposition);
+        Equal(AdvanceDisposition.RejectedTransition,ledger.Value.Advance(committed with {PluginSequence=5}).Disposition);
+        var stage=ledger.Value.Advance(committed with {PluginSequence=4});
+        Equal(AdvanceDisposition.Applied,stage.Disposition);
+        Equal(false,stage.Job!.WriteFenceReleased);
+        Equal(VerificationState.NotChecked,stage.Job.Verification);
+        Equal(AdvanceDisposition.RejectedTransition,ledger.Value.Advance(committed with {PluginSequence=5,ResultJson="{\"saved\":false}"}).Disposition);
+    });
+
     Run("higher plugin sequence cannot rewrite a terminal completed write", () =>
     {
         using var ledger = new TestLedger(Path.Combine(tempRoot, "terminal-immutable.sqlite"));

@@ -1,4 +1,10 @@
-# v1.0.0-rc.1 source preview scope
+# Publication scope
+
+## v1.1.0-rc.1 runtime preview
+
+The new version adds reviewed native operations and an independently packaged Windows runtime with dependency notices, file hashes and plugin MVID. Its scoped acceptance is recorded in [versioned validation](VALIDATION-v1.1.0-rc.1.md). Private engineering DWGs, journals, credentials, PDBs and Autodesk/SHX redistributions remain excluded. The following section describes the historical source preview only.
+
+## v1.0.0-rc.1 source preview scope
 
 This public release contains source, bilingual usage/compatibility documentation, selected host-free contracts and anonymized display-only case assets. It starts a new clean Git history; private commits, runtime journals, CAD drawings, original engineering receipts and unlicensed SHX assets are excluded.
 

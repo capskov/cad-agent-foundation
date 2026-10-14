@@ -1028,7 +1028,22 @@ CREATE INDEX IF NOT EXISTS ix_request_jobs_context_created ON request_jobs(conte
     private static bool CanTransition(LedgerJob current, AdvanceRequest next, out string? reason)
     {
         reason = null;
-        if (IsTerminal(current.Phase)) { reason = "terminal_phase_is_immutable"; return false; }
+        if (IsTerminal(current.Phase))
+        {
+            // A committed snapshot may be observed before the plugin persists its
+            // readback stage. Mirror only that next sequence; this does not change
+            // phase/effects/result or release the fence. Independent verification
+            // and the exact two-sided finalization still follow separately.
+            bool readbackProgress=current.IsWrite&&!current.WriteFenceReleased
+                &&current.Phase==JobPhase.Completed&&next.Phase==JobPhase.Completed
+                &&current.Effects==EffectState.Committed&&next.Effects==EffectState.Committed
+                &&current.Verification==VerificationState.NotChecked&&next.Verification==VerificationState.NotChecked
+                &&next.Observation==ObservationState.AuthoritativePluginSnapshot
+                &&current.PluginSequence.HasValue&&next.PluginSequence==current.PluginSequence.Value+1
+                &&current.ResultJson==next.ResultJson&&current.ErrorCode==next.ErrorCode&&current.ErrorMessage==next.ErrorMessage;
+            if(readbackProgress)return true;
+            reason = "terminal_phase_is_immutable"; return false;
+        }
         if (current.Phase == next.Phase) return true;
         if (current.Phase == JobPhase.Unknown)
         {
