@@ -4,6 +4,8 @@
 
 [简体中文](README.zh-CN.md) · [Quick start](docs/QUICKSTART.md) · [Capabilities](docs/CAPABILITIES.md) · [Compatibility](docs/COMPATIBILITY.md)
 
+Registered MCP server: `io.github.capskov/cad-agent-foundation`. [MCPB installation and discovery](docs/MCP-DISCOVERY-AND-INSTALLATION.md) · [Registry metadata](server.json). Local Windows/AutoCAD prerequisites still apply; registration does not grant drawing access.
+
 **AutoCAD automation bridge for AI agents via MCP and CLI, using a native .NET API.**
 
 AI agents can inspect and operate a live AutoCAD drawing through structured native tools for bounded 2D geometry, text, hatches and callouts. The bridge uses MCP (Model Context Protocol) and CLI; drawing identity checks and write/save verification govern the supported operations.

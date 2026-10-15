@@ -4,12 +4,19 @@ import argparse,importlib.util,json,os,subprocess,sys,tempfile,time,uuid
 ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('next_mcp_support',ROOT/'scripts/readonly-entry.py');E=importlib.util.module_from_spec(spec);sys.modules[spec.name]=E;spec.loader.exec_module(E)
 def main():
- p=argparse.ArgumentParser();p.add_argument('--flow',type=Path,required=True);p.add_argument('--package',type=Path);a=p.parse_args()
+ p=argparse.ArgumentParser();p.add_argument('--flow',type=Path,required=True);p.add_argument('--package',type=Path);p.add_argument('--mcpb-manifest',type=Path);a=p.parse_args()
  flow=json.loads((a.flow/'summary.json').read_text(encoding='utf-8'));assert flow['passed'];package=a.package or Path(flow['package']);entry=package/'client/foundation.py';work=Path(tempfile.mkdtemp(prefix='caf-mcp-next-'));evidence=a.flow/'mcp';evidence.mkdir(exist_ok=False);env=dict(os.environ,PYTHONIOENCODING='utf-8',PYTHONDONTWRITEBYTECODE='1')
  def cli(action,*extra):
   c=subprocess.run([sys.executable,str(entry),action,'--workspace',str(work),*map(str,extra)],env=env,capture_output=True,text=True,encoding='utf-8',timeout=115);assert c.returncode==0,c.stderr[:500];return json.loads(c.stdout)
  cli('install');session=cli('start','--source',flow['saved_file'],'--write','--headless');report={'passed':False,'workspace':str(work),'pid':session['pid'],'calls':[]}
- log=(evidence/'wrapper.log').open('wb');process=subprocess.Popen([sys.executable,str(entry),'mcp','--workspace',str(work)],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=log,text=True,encoding='utf-8',env=env,bufsize=1);client=E.McpStdioClient(process)
+ command=[sys.executable,str(entry),'mcp','--workspace',str(work)]
+ if a.mcpb_manifest:
+  metadata=json.loads(a.mcpb_manifest.read_text(encoding='utf-8'));config=metadata['server']['mcp_config'];variables={'${__dirname}':str(a.mcpb_manifest.resolve().parent),'${user_config.python_command}':sys.executable,'${user_config.workspace}':str(work)}
+  def expand(value):
+   for key,text in variables.items():value=value.replace(key,text)
+   assert '${' not in value,'Unresolved MCPB variable';return value
+  command=[expand(config['command']),*[expand(v) for v in config['args']]];env.update({k:expand(v) for k,v in config.get('env',{}).items()});report['mcpb_manifest_resolved']=True
+ log=(evidence/'wrapper.log').open('wb');process=subprocess.Popen(command,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=log,text=True,encoding='utf-8',env=env,bufsize=1);client=E.McpStdioClient(process)
  def call(name,args):report['calls'].append(name);return E.unwrap_application_result(E.parse_mcp_tool_result(client.rpc('tools/call',{'name':name,'arguments':args},30)))
  def poll(context,request,write=False):
   deadline=time.monotonic()+35

@@ -4,6 +4,8 @@
 
 [English](README.md) · [安装与快速入门](docs/QUICKSTART.zh-CN.md) · [能力与限制](docs/CAPABILITIES.md)
 
+底座已注册官方MCP Registry：`io.github.capskov/cad-agent-foundation`。[MCPB安装与检索入口](docs/MCP-DISCOVERY-AND-INSTALLATION.md) · [标准注册信息](server.json)。仍需本机Windows／AutoCAD环境；注册不会自动获得图纸操作权限。
+
 **通过MCP／CLI与原生.NET API，让AI Agent以结构化接口读取和操作AutoCAD图纸。**
 
 支持有界二维绘图、文字、填充、普通引线等AutoCAD自动化操作；图纸身份、请求记录、写后读回及保存核验由底座管理。MCP即Model Context Protocol，底座是CAD操作桥接接口。

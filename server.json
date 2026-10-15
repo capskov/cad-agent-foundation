@@ -1,0 +1,22 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.capskov/cad-agent-foundation",
+  "title": "CAD Agent Foundation",
+  "description": "Native AutoCAD MCP server for AI agents with bounded operations and write/save verification.",
+  "version": "1.1.0-rc.1",
+  "websiteUrl": "https://github.com/capskov/cad-agent-foundation",
+  "repository": {
+    "url": "https://github.com/capskov/cad-agent-foundation",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "mcpb",
+      "identifier": "https://github.com/capskov/cad-agent-foundation/releases/download/v1.1.0-rc.1/cad-agent-foundation-v1.1.0-rc.1-win-x64.mcpb",
+      "fileSha256": "8bfc037e21fdc83b8620584f2d4faffb1ac85d4c549f9b44b4b1e5d6c8b5c7f5",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
