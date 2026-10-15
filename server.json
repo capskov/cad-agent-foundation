@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.capskov/cad-agent-foundation",
   "title": "CAD Agent Foundation",
-  "description": "Native AutoCAD MCP server for AI agents with bounded operations and write/save verification.",
+  "description": "Agent-first AutoCAD MCP server and CLI with drawing binding, execution feedback, verified DWG writes/saves, and reusable CAD operations for third-party Skills.",
   "version": "1.1.0-rc.1",
   "websiteUrl": "https://github.com/capskov/cad-agent-foundation",
   "repository": {
