@@ -1,6 +1,8 @@
 # MCP discovery, registration and installation / 检索、注册与安装
 
-The Foundation is the native AutoCAD MCP server. The two optional professional Skills are separate repositories and do not replace server registration.
+CAD Agent Foundation is an **agent-first AutoCAD MCP and CLI execution foundation**, not just a command bridge. It combines drawing/request binding, execution feedback, write/save verification and safe continuation for supported CAD operations. Independent or third-party professional Skills can reuse those operations; the two companion Skills are separate repositories and do not replace server registration.
+
+**中文速览：面向 AI Agent 的 CAD 执行底座，提供图纸绑定、执行反馈、结果核验与安全续作；支持与第三方专业 Skill 协同。**
 
 ## Official MCP Registry
 
@@ -23,6 +25,8 @@ To reproduce: use [package-mcpb.py](../scripts/package-mcpb.py) with the accepte
 MCPServers confirmed submission of CAD Agent Foundation to its free review queue. This is pending review, not a live listing or an endorsement. The site states review can take up to two weeks.
 
 SkillsLLM confirmed submission of the two independently maintained callout and distress Skills for review. It states a 100-star requirement on its form; submission acceptance does not guarantee final inclusion. Foundation is submitted independently as an MCP server as well, rather than being represented by the Skills.
+
+The `server.json` description and MCPB packaging metadata are maintained together. Updating these source files does not automatically change the already-published Registry listing or an existing versioned MCPB asset; publication metadata requires a separate publishing step.
 
 Official registration, directory review and GitHub/web search ranking are distinct. Accurate topics include `autocad`, `autocad-mcp`, `mcp-server`, `cad-automation`, `model-context-protocol`, `ai-agents` and `dwg`. The native .NET backend is not advertised as COM automation. No ranking guarantee, remote CAD service, or broad AutoCAD-version support is implied.
 
