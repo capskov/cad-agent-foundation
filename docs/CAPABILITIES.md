@@ -1,6 +1,6 @@
 # Capability status
 
-Current runtime preview: v1.1.0-rc.1. Earlier local-v1 evidence is retained; each new native branch is scoped by the new acceptance record and versioned catalog.
+Public runtime preview: v1.1.0-rc.1. The local unit-closeout profile is 1.2.0-local.4. It makes the raw-mode INSUNITS consistency check optional and retains local.3 font primitives and prior bounded operations. See [phase-two implementation and limits](PHASE2-DEVELOPMENT-20261015.zh-CN.md) and the versioned local acceptance records. This is not a public release or blanket A–P completion. The historical table below describes the public v1.1 baseline unless explicitly superseded by those local records. Each new native branch is scoped by its acceptance evidence and versioned catalog.
 
 | Capability | Current state | Boundary |
 |---|---|---|
@@ -11,7 +11,7 @@ Current runtime preview: v1.1.0-rc.1. Earlier local-v1 evidence is retained; eac
 | Ordinary LEADER/MText/yellow filled dot | Implemented, local workflow checked | Distinct from MLeader; not full project-style adaptation or collision-free layout |
 | Native DIMENSION | Four new native primitives, scoped native proof | Linear/aligned/radius/diameter; explicit geometry, not driven source-entity association |
 | MLeader | Not supplied by this profile | Ordinary LEADER and DIMENSION do not establish MLeader support |
-| Other drawing units / map projection conversion | Not supplied by this profile | Current write gate requires metres; no CRS conversion |
+| Explicit raw drawing units for write plans | Implemented in local.2; local.4 makes metadata checking opt-in | Plan declares `raw_drawing_units`; `expected_insunits` (0–24) is optional and checked only when supplied; coordinates are used as-is, with no unit conversion or INSUNITS change. PDF output still accepts only INSUNITS 0 or 6; no CRS conversion |
 | Existing text update | Implemented, locally checked | Fresh digest and complete associated companions |
 | Named text/dimension styles | Create/reuse-matching, scoped native proof | Installed font basenames; no shared old-style overwrite |
 | Closed boundary/single associated hatch update | Implemented, scoped native proof | Zero-width WCS closed Polyline; actual path and independent native area |
@@ -26,10 +26,11 @@ Current runtime preview: v1.1.0-rc.1. Earlier local-v1 evidence is retained; eac
 | H1/J10 fixed repair pilots | Historical restricted experiments, closed milestones | Not the public general drawing API; no new sample expansion |
 | View/preview work from prior stages | Historical constrained work | Not exposed as a supported v1 public profile |
 | Full Skill workflows, all other upstream tools | Not certified by this release | Tool discovery and per-operation validation required |
-| Layout/plot/export, cross-DWG copy, proxy editing | Future candidate work | Not implemented in this profile; no release dates promised |
+| Page setup and PDF output | Implemented as scoped local operations | Page setup supports `layout` or `extents`; PDF output still requires INSUNITS 0 or 6 and an explicitly configured PDF layout. Window plotting and general export are not implied |
+| Cross-DWG copy, proxy editing | Future candidate work | Not implemented in this profile; no release dates promised |
 | Automatic unknown-write unlock/replay/recovery | Not provided | Preserve evidence and fence; absence of a reply does not authorize replay |
 
-Plan bounds: 1–16 steps, up to 64 entity outcomes, semantic JSON up to 128 KiB; new polylines up to 128 vertices each and total plan vertices up to 1024. Existing move/archive target lists are bounded to 32 per step. Save is a separate single-step plan. Points are 2D WCS coordinates expressed in drawing units. WCS does not define a physical unit or a map projection. The current parser requires `units: metres`; native writes accept `INSUNITS=6`, or `INSUNITS=0` with the explicit metre declaration. Other units are not currently enabled or validated. Text rotation uses degrees and hatch angle radians.
+Plan bounds: 1–16 steps, up to 64 entity outcomes, semantic JSON up to 128 KiB; new polylines up to 128 vertices each and total plan vertices up to 1024. Existing move/archive target lists are bounded to 32 per step. Save is a separate single-step plan. Points are 2D WCS coordinates expressed in drawing units. WCS does not define a physical unit or a map projection. Write plans support either the legacy `metres` mode (INSUNITS 0 or 6) or `raw_drawing_units` with an optional `expected_insunits` consistency check (0–24); raw coordinates are never converted. PDF output retains its separate 0/6 unit gate. Text rotation uses degrees and hatch angle radians.
 
 The layer primitive creates a layer or reuses an existing layer with matching color; it is not a full layer-management API. New polyline creation is distinct from arbitrary editing of existing polylines. Supported callout height, width, vertices and dot radius are explicit plan parameters, not a complete project-style engine. See [Foundation, Skills and other tools](FOUNDATION-SKILLS-AND-OTHER-TOOLS.md) for domain and external-backend boundaries.
 

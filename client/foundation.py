@@ -178,7 +178,16 @@ class Gateway:
     def query(self,request,wait=60):
         deadline=time.monotonic()+wait
         while True:
-            reply=self.call('dwg_job_get',{'context_id':request['context_id'],'request_id':request['request_id'],'wait_ms':0})
+            try:
+                reply=self.call('dwg_job_get',{'context_id':request['context_id'],'request_id':request['request_id'],'wait_ms':0})
+            except Exception as ex:
+                # A transient/inconsistent read is not evidence that the write failed.
+                # Reconcile only this original identity; never re-enter apply/submit.
+                request['last_query_error']=str(ex);request['query_failures']=request.get('query_failures',0)+1
+                write(self.work/'requests'/(request['request_id']+'.json'),request)
+                if time.monotonic()>=deadline:
+                    return {'request_id':request['request_id'],'context_id':request['context_id'],'status':'unknown','pending':True,'effects':'unknown','verification':'unknown','write_fence_released':False,'query_error':str(ex),'next_action':'query_original_request; do_not_replay_or_force_unlock'}
+                time.sleep(min(2,.25*request['query_failures']));continue
             request['last_reply']=reply;write(self.work/'requests'/(''+request['request_id']+'.json'),request)
             if reply.get('pending') is False or (reply.get('found') is True and reply.get('job',{}).get('phase') in ('completed','failed','cancelled','rejected','unknown')) or time.monotonic()>=deadline:return reply
             time.sleep(.2)
@@ -233,7 +242,7 @@ def main():
                 elif args.action=='save':
                     rows=g.submit_read('dwg_get_entity_properties',{'handles':json.dumps(E.parse_handles(args.handles)),'include_geometry':True}).get('data',{}).get('entities',[])
                     handles=E.parse_handles(args.handles);require(len(rows)==len(handles) and {r.get('handle') for r in rows}==set(handles) and all(r.get('ok') is True and isinstance(r.get('entity_digest'),str) for r in rows),'Fresh expected objects not all readable')
-                    plan={'schema':'foundation-drawing-plan-v1','source_role':'annotation','units':'metres','steps':[{'id':'save','op':'save','expected':[{'handle':r['handle'],'expected_sha256':r['entity_digest']} for r in rows]}]}
+                    plan={'schema':'foundation-drawing-plan-v1','source_role':'annotation','units':'raw_drawing_units','steps':[{'id':'save','op':'save','expected_layouts':g.bound['document_info']['foundation_catalog']['layout_digests'],'expected':[{'handle':r['handle'],'expected_sha256':r['entity_digest']} for r in rows]}]}
                     result=g.apply(plan,args.request_id)
                 elif args.action=='stop':result=stop(g)
                 else:result=g.query(read(args.workspace/'requests'/(args.request_id+'.json')))

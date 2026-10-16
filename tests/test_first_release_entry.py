@@ -31,4 +31,25 @@ class EntrySafetyTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 with F.lease(self.work):pass
         with F.lease(self.work):pass
+    def test_transient_snapshot_failure_only_requeries_same_request(self):
+        g=self.gateway();calls=[]
+        def call(name,args):
+            calls.append((name,args))
+            if name=='dwg_apply_plan':return {'queued':True}
+            if len(calls)==2:raise RuntimeError('inconsistent snapshot')
+            return {'pending':False,'found':True,'job':{'phase':'completed','verification':'passed','write_fence_released':True}}
+        g.call=call
+        result=g.apply({'test':'snapshot'},'snapshot-original')
+        self.assertEqual(result['job']['phase'],'completed')
+        self.assertEqual([name for name,_ in calls],['dwg_apply_plan','dwg_job_get','dwg_job_get'])
+        self.assertTrue(all(args['request_id']=='snapshot-original' for _,args in calls))
+        self.assertEqual(F.read(self.work/'requests/snapshot-original.json')['query_failures'],1)
+    def test_query_failure_deadline_keeps_unknown_and_original_identity(self):
+        g=self.gateway();calls=[]
+        def call(name,args):calls.append((name,args));raise RuntimeError('query unavailable')
+        g.call=call
+        result=g.query({'request_id':'original','context_id':'original-context'},wait=0)
+        self.assertEqual(result['status'],'unknown');self.assertFalse(result['write_fence_released'])
+        self.assertEqual(calls[0][0],'dwg_job_get');self.assertEqual(calls[0][1]['context_id'],'original-context')
+        self.assertEqual(len(calls),1)
 if __name__=='__main__':unittest.main()

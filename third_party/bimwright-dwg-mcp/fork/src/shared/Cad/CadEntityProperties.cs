@@ -28,6 +28,9 @@ namespace Bimwright.Dwg.Plugin.Cad
                 return result;
             }
 
+            result["linetype"]=entity.Linetype;
+            result["lineweight"]=(int)entity.LineWeight;
+
             AddExtents(result, entity);
             var owner=tx.GetObject(entity.OwnerId,OpenMode.ForRead) as BlockTableRecord;
             result["owner_handle"]=entity.OwnerId.Handle.ToString();
@@ -35,6 +38,8 @@ namespace Bimwright.Dwg.Plugin.Cad
 
             switch (entity)
             {
+                case DBPoint point:
+                    result["position"]=Point(point.Position);break;
                 case Line line:
                     DescribeLine(result, line);
                     break;
@@ -60,7 +65,7 @@ namespace Bimwright.Dwg.Plugin.Cad
                     DescribeLeader(result, leader, tx);
                     break;
                 case Table table:
-                    DescribeTable(result, table);
+                    DescribeTable(result, table,tx);
                     break;
                 case BlockReference blockReference:
                     DescribeBlockReference(result, blockReference, tx);
@@ -147,8 +152,11 @@ namespace Bimwright.Dwg.Plugin.Cad
             result["text"] = text.TextString;
             result["position"] = Point(text.Position);
             result["height"] = text.Height;
+            result["width_factor"] = text.WidthFactor;
+            if(text.HorizontalMode!=TextHorizontalMode.TextLeft||text.VerticalMode!=TextVerticalMode.TextBase)result["alignment_point"]=Point(text.AlignmentPoint);
             result["rotation"] = text.Rotation;
             result["text_style"] = ((TextStyleTableRecord)tx.GetObject(text.TextStyleId,OpenMode.ForRead)).Name;
+            if(text is AttributeDefinition definition){result["attribute_tag"]=definition.Tag;result["constant"]=definition.Constant;}
             result["horizontal_mode"] = text.HorizontalMode.ToString();
             result["vertical_mode"] = text.VerticalMode.ToString();
         }
@@ -228,11 +236,14 @@ namespace Bimwright.Dwg.Plugin.Cad
                 : tx.GetObject(annotationId, OpenMode.ForRead).Handle.ToString();
         }
 
-        private static void DescribeTable(IDictionary<string, object> result, Table table)
+        private static void DescribeTable(IDictionary<string, object> result, Table table,Transaction tx)
         {
             result["position"] = Point(table.Position);
             result["rows"] = table.Rows.Count;
             result["columns"] = table.Columns.Count;
+            bool complete=table.Rows.Count<=16&&table.Columns.Count<=16&&table.Rows.Count*table.Columns.Count<=128;
+            result["cells_complete"]=complete;
+            if(complete){var cells=new List<object>();var heights=new List<double>();var widths=new List<double>();var textHeights=new List<object>();for(int row=0;row<table.Rows.Count;row++){var values=new List<string>();var sizes=new List<double?>();for(int col=0;col<table.Columns.Count;col++){values.Add(table.Cells[row,col].TextString);sizes.Add(table.Cells[row,col].TextHeight);}cells.Add(values.ToArray());textHeights.Add(sizes.ToArray());heights.Add(table.Rows[row].Height);}for(int col=0;col<table.Columns.Count;col++)widths.Add(table.Columns[col].Width);result["cells"]=cells.ToArray();result["row_heights"]=heights.ToArray();result["column_widths"]=widths.ToArray();result["cell_text_heights"]=textHeights.ToArray();var styles=new List<object>();for(int row=0;row<table.Rows.Count;row++){var names=new List<string>();for(int col=0;col<table.Columns.Count;col++){ObjectId? styleId=table.Cells[row,col].TextStyleId;names.Add(styleId.HasValue&&!styleId.Value.IsNull?((TextStyleTableRecord)tx.GetObject(styleId.Value,OpenMode.ForRead)).Name:null);}styles.Add(names.ToArray());}result["cell_text_styles"]=styles.ToArray();}
         }
 
         private static void DescribeBlockReference(
@@ -244,6 +255,9 @@ namespace Bimwright.Dwg.Plugin.Cad
             result["rotation"] = blockReference.Rotation;
             result["scale"] = Scale(blockReference.ScaleFactors);
             result["attribute_count"] = blockReference.AttributeCollection.Count;
+            var attributes=new List<object>();bool complete=blockReference.AttributeCollection.Count<=64;
+            foreach(ObjectId id in blockReference.AttributeCollection){if(attributes.Count>=64)break;if(tx.GetObject(id,OpenMode.ForRead) is AttributeReference a)attributes.Add(new{handle=a.Handle.ToString(),tag=a.Tag,text=a.TextString,position=Point(a.Position),rotation=a.Rotation,height=a.Height});else complete=false;}
+            result["attributes"]=attributes.ToArray();result["attributes_complete"]=complete;result["nested_geometry_coverage"]="not_read";
 
             var name = TryGetBlockName(blockReference, tx);
             if (!string.IsNullOrEmpty(name))

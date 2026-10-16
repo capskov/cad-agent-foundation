@@ -8,7 +8,7 @@ namespace Bimwright.Dwg.Shared.Execution
 {
  public static partial class FoundationDrawingPlan
  {
-  public static readonly string[] Operations={"layer","line","circle","polyline","text","mtext","callout","hatch","set_text","set_polyline","set_callout","set_callout_format","move","rotate","scale","copy","archive","save","text_style","dimension_style","set_layer","linear_dimension","aligned_dimension","radial_dimension","diameter_dimension"};
+  public static readonly string[] Operations=new[]{"layer","line","circle","polyline","text","mtext","callout","hatch","set_text","set_polyline","set_callout","set_callout_format","move","rotate","scale","copy","archive","save","text_style","set_text_style_font","dimension_style","set_layer","linear_dimension","aligned_dimension","radial_dimension","diameter_dimension"}.Concat(Phase2Operations).Concat(PrintOperations).Concat(CurveOperations).Concat(BlockOperations).Concat(new[]{"export_dxf","angular_dimension"}).ToArray();
   public static void ValidateAttachment(JObject s)
   {if(s["attachment"]!=null&&!new[]{"TopLeft","TopCenter","TopRight","MiddleLeft","MiddleCenter","MiddleRight","BottomLeft","BottomCenter","BottomRight"}.Contains(Text(s,"attachment",32)))throw new ArgumentException("known MTEXT attachment required");}
   public static void KeysWithOptional(JObject s,string[] required,params string[] optional)
@@ -20,6 +20,11 @@ namespace Bimwright.Dwg.Shared.Execution
    var op=s.Value<string>("op");
    switch(op)
    {
+    case "set_text_style_font":
+     Keys(s,"id","op","name","expected_sha256","font_file","big_font_file");Text(s,"name",255);Digest(s,"expected_sha256");
+     foreach(string key in new[]{"font_file","big_font_file"})
+     {if(s[key]?.Type!=JTokenType.String)throw new ArgumentException("font basename required");string f=s.Value<string>(key);if(key=="big_font_file"&&f=="")continue;if(!System.Text.RegularExpressions.Regex.IsMatch(f,@"\A[^/\\:\x00-\x1f]+\.shx\z",System.Text.RegularExpressions.RegexOptions.IgnoreCase)||f.Length>255)throw new ArgumentException("replacement requires installed SHX basenames; empty big font allowed");}
+     break;
     case "text_style":
      Keys(s,"id","op","name","font_file","big_font_file","width_factor");Text(s,"name",255);Text(s,"font_file",255);Positive(s,"width_factor");
      if(s["big_font_file"]?.Type!=JTokenType.String)throw new ArgumentException("big_font_file must be a string (empty for none)");
@@ -47,7 +52,7 @@ namespace Bimwright.Dwg.Shared.Execution
      var ids=new HashSet<string>();foreach(JObject t in ts){Keys(t,"handle","expected_sha256");Expected(t);if(!ids.Add(t.Value<string>("handle")))throw new ArgumentException("duplicate target");}
      if(op=="copy")Point(s["delta"]);else{Point(s["base"]);if(op=="scale"){Positive(s,"factor");if(Number(s["factor"])<1e-6||Number(s["factor"])>1e6)throw new ArgumentException("scale factor outside 1e-6..1e6");}else Number(s["angle"]);}
      count+=ts.Count*(op=="copy"?2:1);break;
-    default:return false;
+    default:return ValidateBlock(s,ref count)||ValidateAngular(s,ref count)||ValidateDxf(s,ref count)||ValidatePhase2(s,ref count)||ValidateCurve(s,ref count)||ValidatePrint(s);
    }
    return true;
   }
@@ -70,23 +75,54 @@ namespace Bimwright.Dwg.Shared.Execution
   }
   public static bool VerifySymbols(JObject receipt,JArray steps)
   {
-   bool needs=steps.Cast<JObject>().Any(s=>s.Value<string>("op") is "text_style" or "dimension_style"||s["text_style"]!=null||s["dimension_style"]!=null);
+   bool needs=steps.Cast<JObject>().Any(s=>s.Value<string>("op") is "text_style" or "set_text_style_font" or "dimension_style"||s["text_style"]!=null||s["dimension_style"]!=null);
    if(receipt["symbols_before"]==null||receipt["symbols_before"].Type==JTokenType.Null||receipt["symbols_after"]==null||receipt["symbols_after"].Type==JTokenType.Null)return !needs;
    if(receipt["symbols_before"] is not JObject old||receipt["symbols_after"] is not JObject next)return false;
    foreach(string table in new[]{"text_styles","dimension_styles"})
    {
     if(old[table] is not JObject a||next[table] is not JObject b)return false;
-    foreach(var row in a.Properties())if(!JToken.DeepEquals(row.Value,b[row.Name]))return false;
+    var changes=steps.Cast<JObject>().Where(s=>s.Value<string>("op")=="set_text_style_font").ToArray();
+    if(changes.Select(s=>s.Value<string>("name")).Distinct(StringComparer.OrdinalIgnoreCase).Count()!=changes.Length)return false;
+    foreach(var row in a.Properties())
+    {var change=table=="text_styles"?changes.SingleOrDefault(s=>s.Value<string>("name")==row.Name):null;
+     if(change!=null){if(!VerifyFontChange(row.Value,b[row.Name],change))return false;}
+     else if(!JToken.DeepEquals(row.Value,b[row.Name])&&!(table=="text_styles"&&steps.Count==1&&steps[0].Value<string>("op")=="save"&&TextStyleSaveEquivalent(row.Value,b[row.Name])))return false;}
+    if(table=="text_styles"&&changes.Any(s=>a[s.Value<string>("name")]==null))return false;
     var added=b.Properties().Select(p=>p.Name).Except(a.Properties().Select(p=>p.Name)).ToHashSet();
     string op=table=="text_styles"?"text_style":"dimension_style";
     if(!added.SetEquals(steps.Cast<JObject>().Where(s=>s.Value<string>("op")==op&&!a.ContainsKey(s.Value<string>("name"))).Select(s=>s.Value<string>("name"))))return false;
    }
+   if(old["block_definitions"] is JObject blocks){if(next["block_definitions"] is not JObject newBlocks)return false;foreach(var row in blocks.Properties())if(!Equivalent(FontGeometryNeutral(row.Value,steps),FontGeometryNeutral(newBlocks[row.Name],steps)))return false;}
    return true;
+  }
+  static JToken FontGeometryNeutral(JToken value,JArray steps)
+  {
+   if(value==null)return JValue.CreateNull();var result=value.DeepClone();
+   var names=steps.Cast<JObject>().Where(s=>s.Value<string>("op")=="set_text_style_font").Select(s=>s.Value<string>("name")).ToHashSet();
+   void Walk(JToken node){if(node is JObject o){if(o.Value<string>("type") is "DBText" or "MText"&&names.Contains(o.Value<string>("text_style")))foreach(string f in new[]{"extents","actual_width","actual_height"})o.Remove(f);foreach(var p in o.Properties().ToArray())Walk(p.Value);}else if(node is JArray a)foreach(var n in a)Walk(n);}
+   Walk(result);return result;
+  }
+  static bool VerifyFontChange(JToken before,JToken after,JObject step)
+  {
+   if(before is not JObject a||after is not JObject b||Hash(a)!=step.Value<string>("expected_sha256")||!string.Equals(b.Value<string>("font_file"),step.Value<string>("font_file"),StringComparison.OrdinalIgnoreCase)||!string.Equals(b.Value<string>("big_font_file"),step.Value<string>("big_font_file"),StringComparison.OrdinalIgnoreCase))return false;
+   var x=(JObject)a.DeepClone();var y=(JObject)b.DeepClone();foreach(string f in new[]{"font_file","big_font_file","resolved_font"}){x.Remove(f);y.Remove(f);}return Equivalent(x,y);
+  }
+  public static bool TextStyleSaveEquivalent(JToken before,JToken after)
+  {
+   if(before is not JObject a||after is not JObject b||a["resolved_font"] is not JObject font||string.IsNullOrWhiteSpace(font.Value<string>("typeface"))||!JToken.DeepEquals(font,b["resolved_font"]))return false;
+   string oldFile=a.Value<string>("font_file")??"",newFile=b.Value<string>("font_file")??"";
+   if(!(oldFile.Length==0||oldFile.EndsWith(".ttf",StringComparison.OrdinalIgnoreCase))||!newFile.EndsWith(".ttf",StringComparison.OrdinalIgnoreCase))return false;
+   var x=(JObject)a.DeepClone();var y=(JObject)b.DeepClone();x.Remove("font_file");y.Remove("font_file");return JToken.DeepEquals(x,y);
   }
   public static bool VerifyExtension(JObject step,JObject receipt,out bool handled)
   {
-   handled=true;var op=step.Value<string>("op");var before=(JObject)receipt["before"];var after=(JObject)receipt["after"];var map=receipt["objects"]?[step.Value<string>("id")] as JObject;
+   if(BlockOperations.Contains(step.Value<string>("op")))return VerifyBlock(step,receipt,out handled);
+   if(CurveOperations.Contains(step.Value<string>("op")))return VerifyCurve(step,receipt,out handled);
+   if(PrintOperations.Contains(step.Value<string>("op")))return VerifyPrint(step,receipt,out handled);
+   if(Phase2Operations.Contains(step.Value<string>("op")))return VerifyPhase2(step,receipt,out handled);
+   handled=true;if(step.Value<string>("op")=="angular_dimension")return VerifyAngular(step,receipt);if(step.Value<string>("op")=="export_dxf")return VerifyDxf(step,receipt);var op=step.Value<string>("op");var before=(JObject)receipt["before"];var after=(JObject)receipt["after"];var map=receipt["objects"]?[step.Value<string>("id")] as JObject;
    if(map==null)return false;
+   if(op=="set_text_style_font")return map.Value<string>("name")==step.Value<string>("name")&&VerifyFontChange(receipt["symbols_before"]?["text_styles"]?[step.Value<string>("name")],receipt["symbols_after"]?["text_styles"]?[step.Value<string>("name")],step);
    if(op is "text_style" or "dimension_style")
    {
     var table=op=="text_style"?"text_styles":"dimension_styles";var facts=receipt["symbols_after"]?[table]?[step.Value<string>("name")] as JObject;

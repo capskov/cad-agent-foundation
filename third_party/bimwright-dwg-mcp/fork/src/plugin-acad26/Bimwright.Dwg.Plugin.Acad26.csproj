@@ -3,7 +3,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0-windows</TargetFramework>
-    <Version>1.1.0-rc.1</Version>
+    <Version>1.2.0-local.4</Version>
     <PlatformTarget>x64</PlatformTarget>
     <RootNamespace>Bimwright.Dwg.Plugin</RootNamespace>
     <AssemblyName>Bimwright.Dwg.Plugin.Acad26</AssemblyName>

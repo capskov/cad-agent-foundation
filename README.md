@@ -1,5 +1,11 @@
 # CAD Agent Foundation — AutoCAD MCP & CLI for AI Agents
 
+## First priority: reliable operations for increasingly capable agents
+
+Foundation development supports the real task. Provide small, reliable, controlled CAD primitives and truthful feedback so the Agent can act and move forward. The Agent owns visual judgment, structure interpretation, example learning, pattern recognition and final review. Do not turn those judgments into programs, fitting algorithms or compulsory verification workflows. Do not add incidental features unless explicitly requested. When current primitives suffice and the Agent judges the result acceptable, continue the main task. Preserve drawing identity, source protection and no replay of unknown writes.
+
+Local unit closeout: `1.2.0-local.4` carries prior bounded primitives, makes INSUNITS consistency optional for raw-coordinate plans and retains the legacy metres interface. The public release below remains `v1.1.0-rc.1`. See [units, precision and paper typography](docs/DRAWING-UNITS-AND-TYPOGRAPHY.zh-CN.md); this is not blanket A–P certification.
+
 **Public source preview v1.1.0-rc.1 (bounded native operations and Windows runtime preview).** Source, documentation and a manifest-bearing Windows runtime ZIP are provided in this preview. [Build prerequisites and limits](docs/BUILD.md). The accepted local runtime v1.0.0-local is a separate baseline. Companion Skill previews are published independently: callout v0.3.0-rc.1 and distress v0.1.0-rc.1.
 
 [简体中文](README.zh-CN.md) · [Quick start](docs/QUICKSTART.md) · [Capabilities](docs/CAPABILITIES.md) · [Compatibility](docs/COMPATIBILITY.md)
@@ -50,7 +56,7 @@ Bind the intended drawing and verify process/session/plugin identity. Persist a 
 
 | Task | Required components | Versions and limits |
 | --- | --- | --- |
-| Supported basic CAD operations | `cad-agent-foundation` only | Local baseline `v1.0.0-local`; public source preview `v1.1.0-rc.1`, with a reviewed runtime ZIP; prerequisites are separate. Bounded 2D operations; current writes require metres; recorded Windows/AutoCAD 2026 host only. Neither Skill is required. |
+| Supported basic CAD operations | `cad-agent-foundation` only | Local baseline `v1.0.0-local`; public source preview `v1.1.0-rc.1`, with a reviewed runtime ZIP; prerequisites are separate. Bounded 2D operations; local.4 raw writes use original drawing values; unit metadata checks are optional; recorded Windows/AutoCAD 2026 host only. Neither Skill is required. |
 | This project's callout style and placement | Foundation + `cad-callout-pair-layout` | Public callout Skill v0.3.0-rc.1 (existing rules v0.3). Metre-based road defaults; Native style/pose interfaces and a bounded synthetic unchanged-Skill integration are verified in v1.1; full real-project/background coverage remains per task. Check backend coverage before writing. |
 | This project's distress/demolition workflow | Foundation + `cad-distress-annotation` + `cad-callout-pair-layout` | Public distress rules preview v0.1.0-rc.1. Requires engineering evidence, classifications and the callout rules; full workflow needs capabilities outside the current Foundation profile and is not certified on these three components alone. |
 
@@ -81,7 +87,7 @@ These are bounded workflow results on a recorded Windows AutoCAD 2026 environmen
 
 Plans write bounded 2D model-space geometry. Coordinates, lengths and annotation sizes are expressed in drawing units. WCS is the CAD coordinate reference; it does not imply metres or a map projection. Foundation performs no projection or unit conversion.
 
-**The current write interface is restricted to metres:** plans require `units: metres`, and the drawing must use metres or explicitly metre-based unitless coordinates. Millimetres and other units are not enabled or validated. This implementation boundary does not limit the intended foundation to road work.
+**Local 1.2.0-local.4 uses raw drawing values:** prefer `units: raw_drawing_units`, with optional `expected_insunits` only for requested metadata consistency. Unknown or unitless metadata does not block ordinary raw operations. Legacy `units: metres` keeps its original 0/6 metadata contract. No coordinate conversion, automatic geometry scaling or INSUNITS changes occur. See [units, precision and paper typography](docs/DRAWING-UNITS-AND-TYPOGRAPHY.zh-CN.md); PDF/DXF output retains its separate current limits.
 
 This release provides four native dimension primitives and bounded closed-boundary/single-hatch updates. It does not provide MLeader, general old-hatch repair/Boolean/holes, arbitrary polyline properties, cross-drawing copy, proxy-object semantics, layout/plotting, engineering decisions or automatic recovery/unlocking of uncertain writes. A committed operation cannot be assumed rolled back because a later verification failed.
 
@@ -119,3 +125,10 @@ This preview uses Apache-2.0, preserving upstream and MIT-origin notices. Earlie
 Human and AI-assisted contributions are welcome when changes and verification evidence are reviewable. The maintainer reviews merges and releases. See [contributing](CONTRIBUTING.md).
 
 AutoCAD and DWG are Autodesk trademarks. This independent project is not endorsed by Autodesk or the upstream maintainers.
+
+
+## 2026-10-16 local font update
+
+Local 1.2.0-local.3 adds guarded existing-style SHX font-pair replacement and anchor-preserving DBText metric scaling. See [scope and parameters](docs/FONT-REPLACEMENT-LOCAL3.zh-CN.md). Native evidence is scoped; prior public releases and global MCP registration are unchanged.
+
+Local 1.2.0-local.4 unit closeout: [changes, native evidence and limits](docs/UNIT-CLOSEOUT-LOCAL4.zh-CN.md). This is a local deliverable; GitHub publication is deferred.

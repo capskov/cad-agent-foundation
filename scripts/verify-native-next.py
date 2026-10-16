@@ -5,9 +5,10 @@ ROOT=Path(__file__).resolve().parents[1]
 def read(p):return json.loads(Path(p).read_text(encoding='utf-8-sig'))
 def write(p,obj):p=Path(p);p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(obj,ensure_ascii=False,indent=2),encoding='utf-8')
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest().upper()
-def seed():
+def seed(units=6):
+    assert units in (0,4,6), "Synthetic unit fixture only"
     root=Path(tempfile.mkdtemp(prefix='caf-synthetic-source-'));drawing=root/'seed.dwg';script=root/'seed.scr'
-    script.write_text('(vl-load-com)\n(setvar "INSUNITS" 6)\n(vla-saveas (vla-get-activedocument (vlax-get-acad-object)) "'+drawing.as_posix()+'")\n(vla-quit (vlax-get-acad-object))\n',encoding='ascii')
+    script.write_text('(vl-load-com)\n(setvar "INSUNITS" ' + str(units) + ')\n(vla-saveas (vla-get-activedocument (vlax-get-acad-object)) "'+drawing.as_posix()+'")\n(vla-quit (vlax-get-acad-object))\n',encoding='ascii')
     startup=subprocess.STARTUPINFO();startup.dwFlags|=subprocess.STARTF_USESHOWWINDOW;startup.wShowWindow=0
     process=subprocess.Popen([r'C:\Program Files\Autodesk\AutoCAD 2026\acad.exe','/nologo','/b',str(script)],startupinfo=startup)
     deadline=time.monotonic()+110

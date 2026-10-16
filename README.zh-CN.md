@@ -1,5 +1,18 @@
 # CAD Agent Foundation — AutoCAD MCP／CLI 智能体操作接口
 
+## 首要任务：为智能 Agent 提供可靠操作，而非编程替代判断
+
+用户于2026-10-16反复明确，本条置于最前，指导后续开发、取舍和验收：
+
+- 底座开发是实战任务的辅助工作。首要目标是提供可靠、可控的基础CAD操作和真实反馈，让Agent能够执行自己的判断并持续向前推进。
+- 按Agent会越来越聪明来设计：审美、结构理解、样图学习、规律归纳、复杂取舍和最终看图复查由Agent承担；不要提前把这些能力固化为程序、规则引擎、拟合算法或强制验证流程。
+- 现有操作足以执行，且Agent综合判断可以继续时，就推进主线。不要为了代替Agent判断，再写一套程序或反复验证。
+- 编程解决明确、小范围的基础操作问题。除用户明确要求增加的小功能外，不主动顺带扩功能；遇到实战阻塞先指出具体基础能力缺口，限定补充范围，不扩大成完整自动化工程。
+- 验收关注操作是否可靠、反馈是否真实。画面是否满意由Agent复查判断；抽查或全面复查按用户当前要求，不自行加码。
+- 保留图纸身份、正式图保护、未知写入不重放等执行安全边界；它们属于可靠操作，不是审美或工程判断算法。
+
+本地单位收尾版：`1.2.0-local.4`，延续既有有界操作，原坐标计划的INSUNITS核对改为可选，保留旧米制接口。[单位、精度与出图字高](docs/DRAWING-UNITS-AND-TYPOGRAPHY.zh-CN.md)。公开Release仍为下文的`v1.1.0-rc.1`；本轮仅本地交付，不表示A～P已全部完成。
+
 **公开源码预览v1.1.0-rc.1（有界原生操作与Windows运行包预览）。** 本次提供源码、文档与带清单Windows运行ZIP，前置软件仍须独立安装。[构建前置条件与限制](docs/BUILD.zh-CN.md)。已验收本地运行版 v1.0.0-local 为独立基线；两个独立Skill已公开：引线v0.3.0-rc.1、病害v0.1.0-rc.1。
 
 [English](README.md) · [安装与快速入门](docs/QUICKSTART.zh-CN.md) · [能力与限制](docs/CAPABILITIES.md)
@@ -58,7 +71,7 @@
 
 当前目标是 Windows x64 的 AutoCAD 2026，向二维模型空间写入有界计划。坐标、长度和标注尺寸按图纸单位解释；WCS 表示 CAD 坐标参照，并不规定米制，也不等于高斯投影。底座不进行地图投影或单位换算。
 
-**当前首版的写入接口仍限制米制**：计划必须声明 `units: metres`，图纸单位须为米，或明确约定为米的无单位图。毫米等其他单位尚未开放、未验证。米制是当前实现边界，不能据此把底座用途限定为道路。默认关闭写入，打开时仍只暴露有限计划入口。已在两份不同来源图纸的工作副本中完成创建、读取、关联文字修改、完整组移动、归档、保存、关闭重开和读回；CLI/MCP 与本地安装包也有验收记录。
+**本地1.2.0-local.4普通写入按DWG原始数值执行**：推荐 `units: raw_drawing_units`，仅任务需要一致性核对时填写可选的 `expected_insunits`。未知单位、无单位不阻止原坐标操作；不换算坐标、不主动缩放图形、不修改INSUNITS。旧 `units: metres` 保留原有0/6元数据约定。[单位、精度及出图字高](docs/DRAWING-UNITS-AND-TYPOGRAPHY.zh-CN.md)说明Agent职责；PDF/DXF仍有独立限制。默认关闭写入，打开时仍只暴露有限计划入口。已在两份不同来源图纸的工作副本中完成创建、读取、关联文字修改、完整组移动、归档、保存、关闭重开和读回；CLI/MCP 与本地安装包也有验收记录。
 
 这些证据不等于任意工程图、任何 AutoCAD 2026 补丁或每个 MCP 客户端均已验证。软件发现的身份未知、提交未知和核验未知必须如实保留，不能统一写成成功，也不能把提交后核验失败当作已经回滚。
 
@@ -72,7 +85,7 @@
 
 | 任务 | 所需组件 | 版本与限制 |
 | --- | --- | --- |
-| 已支持的基础 CAD 操作 | 仅 `cad-agent-foundation` | 本地基线 `v1.0.0-local`；公开源码预览`v1.1.0-rc.1`，提供带清单运行ZIP，前置软件独立安装。有界二维操作，当前写入限米制，仅有记录的 Windows／AutoCAD 2026 宿主实测。无需两个 Skill。 |
+| 已支持的基础 CAD 操作 | 仅 `cad-agent-foundation` | 本地基线 `v1.0.0-local`；公开源码预览`v1.1.0-rc.1`，提供带清单运行ZIP，前置软件独立安装。有界二维操作，local.4按原始数值执行，单位元数据核对可选，仅有记录的 Windows／AutoCAD 2026 宿主实测。无需两个 Skill。 |
 | 本项目的引线标注样式与排布 | 底座 + `cad-callout-pair-layout` | 引线公开预览v0.3.0-rc.1（沿用v0.3规则）。默认与验证来自米制道路图；v1.1已验证样式／位置接口及有限合成Skill联动，完整实战与背景覆盖仍按任务验收，写入前须核对后端覆盖。 |
 | 本项目的病害／拆除标注工作流 | 底座 + `cad-distress-annotation` + `cad-callout-pair-layout` | 病害规则公开预览v0.1.0-rc.1。需要工程依据、分类规则及标注规则；完整流程仍需首版配置之外的能力，尚未验证仅靠这三个组件即可全部复现。 |
 
@@ -95,3 +108,10 @@
 Bimwright 是当前集成宿主，来源固定在 [4d0f756](https://github.com/bimwright/dwg-mcp/commit/4d0f75646631186612af926944d7e33affc4757d)。公开源码采用 Apache-2.0，保留原第三方许可和署名；首个公开源码预览为 `v1.0.0-rc.1`，本版附独立审核的运行ZIP；旧版本保留原范围。字体与依赖不是自动归入代码许可；AutoCAD/SDK不打包，未确定授权的 HZTXT 字体不随公开版分发。项目独立维护，未获 Autodesk 或上游作者背书。
 
 欢迎人类及 AI 辅助贡献者提交可审查的改进和验证证据，合并与发布由维护者审核。见[贡献说明](CONTRIBUTING.md)。
+
+
+## 2026-10-16 local font update
+
+Local 1.2.0-local.3 adds guarded existing-style SHX font-pair replacement and anchor-preserving DBText metric scaling. See [scope and parameters](docs/FONT-REPLACEMENT-LOCAL3.zh-CN.md). Native evidence is scoped; prior public releases and global MCP registration are unchanged.
+
+Local 1.2.0-local.4 unit closeout: [changes, native evidence and limits](docs/UNIT-CLOSEOUT-LOCAL4.zh-CN.md). This is a local deliverable; GitHub publication is deferred.

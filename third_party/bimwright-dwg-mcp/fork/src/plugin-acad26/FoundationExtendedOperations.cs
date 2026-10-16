@@ -21,7 +21,8 @@ namespace Bimwright.Dwg.Plugin
    {
     if(text.Count>=512)throw new InvalidOperationException("text_style_catalog_limit_512");
     var r=(TextStyleTableRecord)tx.GetObject(id,OpenMode.ForRead);
-    text[r.Name]=new JObject{["handle"]=id.Handle.ToString(),["font_file"]=Path.GetFileName(r.FileName),["big_font_file"]=Path.GetFileName(r.BigFontFileName),["width_factor"]=r.XScale,["fixed_height"]=r.TextSize,["is_vertical"]=r.IsVertical};
+    var font=r.Font;
+    text[r.Name]=new JObject{["handle"]=id.Handle.ToString(),["font_file"]=Path.GetFileName(r.FileName),["big_font_file"]=Path.GetFileName(r.BigFontFileName),["width_factor"]=r.XScale,["fixed_height"]=r.TextSize,["is_vertical"]=r.IsVertical,["resolved_font"]=new JObject{["typeface"]=font.TypeFace,["bold"]=font.Bold,["italic"]=font.Italic,["charset"]=font.CharacterSet,["pitch_family"]=font.PitchAndFamily}};
    }
    foreach(ObjectId id in (DimStyleTable)tx.GetObject(db.DimStyleTableId,OpenMode.ForRead))
    {
@@ -29,14 +30,16 @@ namespace Bimwright.Dwg.Plugin
     var r=(DimStyleTableRecord)tx.GetObject(id,OpenMode.ForRead);var ts=(TextStyleTableRecord)tx.GetObject(r.Dimtxsty,OpenMode.ForRead);
     dims[r.Name]=new JObject{["handle"]=id.Handle.ToString(),["text_style"]=ts.Name,["text_height"]=r.Dimtxt,["arrow_size"]=r.Dimasz,["overall_scale"]=r.Dimscale,["gap"]=r.Dimgap,["decimal_places"]=r.Dimdec,["dimension_color"]=(int)r.Dimclrd.ColorIndex,["extension_color"]=(int)r.Dimclre.ColorIndex,["text_color"]=(int)r.Dimclrt.ColorIndex};
    }
-   return new JObject{["text_styles"]=text,["dimension_styles"]=dims};
+   return new JObject{["text_styles"]=text,["dimension_styles"]=dims,["block_definitions"]=BlockDefinitions(db,tx)};
   }
   internal static JObject ReadCatalog(Document doc)
   {
    using var tx=doc.Database.TransactionManager.StartTransaction();var layers=LayerFacts(doc.Database,tx);var symbols=SymbolFacts(doc.Database,tx);
    if(layers.Count>512)throw new InvalidOperationException("layer_catalog_limit_512");
+   var resources=ResourceCatalog(doc.Database,tx);var layoutSettings=LayoutFacts(doc.Database,tx);var layoutDigests=new JObject();foreach(var row in layoutSettings.Properties())layoutDigests[row.Name]=FoundationDrawingPlan.Hash(row.Value);
+   var blockHashes=new JObject();foreach(var row in ((JObject)symbols["block_definitions"]).Properties())blockHashes[row.Name]=FoundationDrawingPlan.Hash(row.Value);
    var hashes=new JObject();foreach(var r in layers.Properties())hashes[r.Name]=FoundationDrawingPlan.Hash(r.Value);
-   tx.Abort();return new JObject{["observation"]="bind_time",["complete"]=true,["plan_operations"]=new JArray(FoundationDrawingPlan.Operations),["writes_enabled"]=App.FoundationWriteEnabled,["layers"]=layers,["layer_digests"]=hashes,["text_styles"]=symbols["text_styles"],["dimension_styles"]=symbols["dimension_styles"]};
+   tx.Abort();return new JObject{["api_revision"]="phase2-local-1",["operation_constraints"]=new JObject{["offset"]="standalone_2D_Line_or_Circle;positive_left_or_outward;source_retained",["mirror_copy"]="standalone_2D_Line_or_Circle;source_retained",["set_text_format"]="standalone_baseline_left_DBText_or_MText;MText_requires_width",["set_text_style_font"]="existing_local_non_shape_style;fresh_style_sha256;installed_SHX_pair;all_references;no_inline_font_override_rewrite",["set_text_metrics"]="standalone_planar_model_DBText;preserved_baseline_or_alignment_anchor;no_fit_align_attributes_or_reactors;1_to_32_targets",["set_dimension_text"]="four_original_dimension_kinds;manual_text_movement_2",["angular_dimension"]="explicit_CCW_sector_less_than_180_degrees;no_live_source_association",["block_definitions"]="256_named;32_members_each;128_detailed_members_shared_budget;unsupported_or_truncated_is_incomplete",["table"]="16_rows_or_columns;128_cells;unmerged;native_minimum_row_height",["plot_pdf"]="current_layout_only;PDF_PC3_only;outputs_basename;no_overwrite;header_and_hash_verified",["export_dxf"]="outputs_basename;no_overwrite;1_to_64_selected_entities_independent_DxfIn_readback"},["print_feature_status"]=new JObject{["M1"]="partial_PC3_media_and_device_style_discovery",["M2"]="implemented_bounded_layout_settings_read",["M3"]="bounded_layout_or_extents_fixed_scale",["M4"]="native_current_layout_device_media_preflight;preview_is_external_PDF_render",["M5"]="single_PDF_only_no_image_export",["M6"]="deferred",["M7"]="deferred"},["runtime_framework"]=System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription,["process_architecture"]=System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString(),["managed_cad_api_version"]=typeof(Database).Assembly.GetName().Version.ToString(),["unit_metadata_role"]="auxiliary_Agent_interpretation_precision_and_plot_guidance;no_conversion;raw_mode_guard_opt_in",["write_units"]="raw_drawing_units_recommended_or_legacy_metres",["deferred_operations"]=new JArray("M6_batch_plot","M7_physical_printer_job_monitor"),["resources"]=resources,["plan_limits"]=new JObject{["steps"]=16,["entity_outcomes"]=64,["semantic_bytes"]=131072,["units"]="raw_drawing_units_optional_expected_insunits_or_legacy_metres"},["layout_settings"]=layoutSettings,["layout_digests"]=layoutDigests,["printing"]=PrintCatalog(doc),["observation"]="bind_time",["complete"]=true,["plan_operations"]=new JArray(FoundationDrawingPlan.Operations),["writes_enabled"]=App.FoundationWriteEnabled,["layers"]=layers,["layer_digests"]=hashes,["block_definition_digests"]=blockHashes,["block_definitions"]=symbols["block_definitions"],["text_styles"]=symbols["text_styles"],["dimension_styles"]=symbols["dimension_styles"]};
   }
   static ObjectId TextStyle(Database db,Transaction tx,string name)
   {var t=(TextStyleTable)tx.GetObject(db.TextStyleTableId,OpenMode.ForRead);if(!t.Has(name))throw new InvalidOperationException("text_style_missing:"+name);return t[name];}
@@ -50,15 +53,34 @@ namespace Bimwright.Dwg.Plugin
   internal static void DimensionFacts(IDictionary<string,object> facts,Dimension d,Transaction tx)
   {
    var style=(DimStyleTableRecord)tx.GetObject(d.DimensionStyle,OpenMode.ForRead);
-   facts["dimension_style"]=style.Name;facts["measurement"]=d.Measurement;facts["dimension_text"]=d.DimensionText;facts["text_position"]=new{x=d.TextPosition.X,y=d.TextPosition.Y,z=d.TextPosition.Z};facts["using_default_text_position"]=d.UsingDefaultTextPosition;
+   facts["dimension_style"]=style.Name;facts["measurement"]=d.Measurement;facts["dimension_text"]=d.DimensionText;facts["text_position"]=new{x=d.TextPosition.X,y=d.TextPosition.Y,z=d.TextPosition.Z};facts["using_default_text_position"]=d.UsingDefaultTextPosition;facts["text_movement"]=d.Dimtmove;
    facts["text_height"]=d.Dimtxt;facts["arrow_size"]=d.Dimasz;facts["overall_scale"]=d.Dimscale;facts["gap"]=d.Dimgap;facts["decimal_places"]=d.Dimdec;facts["dimension_color"]=(int)d.Dimclrd.ColorIndex;facts["extension_color"]=(int)d.Dimclre.ColorIndex;facts["text_color"]=(int)d.Dimclrt.ColorIndex;
    object P(Point3d p)=>new{x=p.X,y=p.Y,z=p.Z};
    switch(d)
    {
     case RotatedDimension r:facts["dimension_kind"]="linear_dimension";facts["start"]=P(r.XLine1Point);facts["end"]=P(r.XLine2Point);facts["dimension_line_point"]=P(r.DimLinePoint);facts["rotation"]=r.Rotation;break;
+    case LineAngularDimension2 a:facts["dimension_kind"]="angular_dimension";facts["line1_start"]=P(a.XLine1Start);facts["line1_end"]=P(a.XLine1End);facts["line2_start"]=P(a.XLine2Start);facts["line2_end"]=P(a.XLine2End);facts["arc_point"]=P(a.ArcPoint);break;
     case AlignedDimension a:facts["dimension_kind"]="aligned_dimension";facts["start"]=P(a.XLine1Point);facts["end"]=P(a.XLine2Point);facts["dimension_line_point"]=P(a.DimLinePoint);break;
     case RadialDimension r:facts["dimension_kind"]="radial_dimension";facts["center"]=P(r.Center);facts["chord"]=P(r.ChordPoint);facts["leader_length"]=r.LeaderLength;break;
     case DiametricDimension d2:facts["dimension_kind"]="diameter_dimension";facts["center"]=P(new Point3d((d2.ChordPoint.X+d2.FarChordPoint.X)/2,(d2.ChordPoint.Y+d2.FarChordPoint.Y)/2,0));facts["chord"]=P(d2.ChordPoint);facts["leader_length"]=d2.LeaderLength;break;
+   }
+  }
+  static void RefreshChangedFontText(Database db,Transaction tx,JObject plan)
+  {
+   var names=((JArray)plan["steps"]).Cast<JObject>().Where(s=>s.Value<string>("op")=="set_text_style_font").Select(s=>s.Value<string>("name")).ToHashSet();if(names.Count==0)return;
+   var styles=(TextStyleTable)tx.GetObject(db.TextStyleTableId,OpenMode.ForRead);var ids=names.Select(n=>styles[n]).ToHashSet();int scanned=0;
+   foreach(ObjectId bid in (BlockTable)tx.GetObject(db.BlockTableId,OpenMode.ForRead))
+   {
+    var block=(BlockTableRecord)tx.GetObject(bid,OpenMode.ForRead);if(block.IsFromExternalReference||block.IsFromOverlayReference)continue;
+    foreach(ObjectId oid in block)
+    {
+     if(++scanned>100000)throw new InvalidOperationException("font_refresh_entity_limit_100000");
+     if(tx.GetObject(oid,OpenMode.ForRead) is not MText mt||!ids.Contains(mt.TextStyleId))continue;
+     // Native MTEXT retains old font layout metrics until reflow. Reparse the
+     // unchanged contents in the same transaction so save/readback agree.
+     string contents=mt.Contents;var location=mt.Location;mt.UpgradeOpen();mt.DisableUndoRecording(false);mt.Contents=contents;mt.Location=location;mt.RecordGraphicsModified(true);
+     if(mt.Contents!=contents)throw new InvalidOperationException("font_refresh_must_preserve_mtext_contents");
+    }
    }
   }
   static bool ExecuteExtendedStep(Database db,Transaction tx,JObject step,JObject map,Dictionary<string,ObjectId> refs,List<string> created,JObject before)
@@ -69,6 +91,15 @@ namespace Bimwright.Dwg.Plugin
    Color C(string key)=>Color.FromColorIndex(ColorMethod.ByAci,(short)step.Value<int>(key));
    switch(op)
    {
+    case "set_text_style_font":
+     var fontTable=(TextStyleTable)tx.GetObject(db.TextStyleTableId,OpenMode.ForRead);string fontName=step.Value<string>("name");
+     if(!fontTable.Has(fontName))throw new InvalidOperationException("existing_text_style_required");
+     var fontRecord=(TextStyleTableRecord)tx.GetObject(fontTable[fontName],OpenMode.ForRead);
+     if(fontRecord.IsDependent||fontRecord.IsShapeFile)throw new InvalidOperationException("local_text_style_required_not_shape_or_xref");
+     if(FoundationDrawingPlan.Hash(SymbolFacts(db,tx)["text_styles"][fontName])!=step.Value<string>("expected_sha256"))throw new InvalidOperationException("text_style_changed:"+fontName);
+     foreach(string key in new[]{"font_file","big_font_file"})
+     {string f=step.Value<string>(key);if(f.Length==0)continue;string resolved=HostApplicationServices.Current.FindFile(f,db,FindFileHint.Default);if(string.IsNullOrEmpty(resolved)||!File.Exists(resolved))throw new InvalidOperationException("installed_font_unavailable:"+f);}
+     fontRecord.UpgradeOpen();fontRecord.DisableUndoRecording(false);fontRecord.FileName=step.Value<string>("font_file");fontRecord.BigFontFileName=step.Value<string>("big_font_file");map["name"]=fontName;break;
     case "text_style":
      var tt=(TextStyleTable)tx.GetObject(db.TextStyleTableId,OpenMode.ForRead);string name=step.Value<string>("name");
      if(tt.Has(name)){map["name"]=name;break;}
@@ -94,6 +125,8 @@ namespace Bimwright.Dwg.Plugin
      if(leaderFormat==null||labelFormat==null||leaderFormat.Annotation!=labelFormat.ObjectId)throw new InvalidOperationException("linked_LEADER_MTEXT_required");
      var location=labelFormat.Location;leaderFormat.DisableUndoRecording(false);labelFormat.DisableUndoRecording(false);leaderFormat.DimensionStyle=DimStyle(db,tx,step.Value<string>("dimension_style"));leaderFormat.Dimtxt=step.Value<double>("height");leaderFormat.Dimgap=step.Value<double>("gap");leaderFormat.Color=C("leader_color");
      labelFormat.TextStyleId=TextStyle(db,tx,step.Value<string>("text_style"));labelFormat.TextHeight=step.Value<double>("height");labelFormat.Width=step.Value<double>("width");labelFormat.Color=C("text_color");if(step["attachment"]!=null)labelFormat.Attachment=Enum.Parse<AttachmentPoint>(step.Value<string>("attachment"));labelFormat.Location=location;map["leader"]=leaderFormat.Handle.ToString();map["text"]=labelFormat.Handle.ToString();break;
+    case "angular_dimension":
+     var angular=new LineAngularDimension2(Point(step["center"]),Point(step["ray1"]),Point(step["center"]),Point(step["ray2"]),Point(step["position"]),"",DimStyle(db,tx,step.Value<string>("dimension_style")));Add(angular);angular.RecomputeDimensionBlock(true);break;
     case "linear_dimension":case "aligned_dimension":case "radial_dimension":case "diameter_dimension":
      var style=DimStyle(db,tx,step.Value<string>("dimension_style"));Dimension entity;
      if(op=="linear_dimension")entity=new RotatedDimension((step.Value<double?>("rotation")??0)*Math.PI/180,Point(step["start"]),Point(step["end"]),Point(step["position"]),"",style);
@@ -136,7 +169,7 @@ namespace Bimwright.Dwg.Plugin
      foreach(var oid in work.Values)if(tx.GetObject(oid,OpenMode.ForWrite) is Hatch h)
      {var ids=h.GetAssociatedObjectIdsAt(0);h.RemoveLoopAt(0);h.Associative=true;h.AppendLoop(HatchLoopTypes.External,ids);h.EvaluateHatch(true);h.RecordGraphicsModified(true);}
      break;
-    default:return false;
+    default:return ExecutePhase2(db,tx,step,map,refs,created)||ExecuteCurve(db,tx,step,map,refs,created,before)||ExecuteBlock(db,tx,step,map,refs,created);
    }
    return true;
   }

@@ -20,6 +20,10 @@ namespace Bimwright.Dwg.Plugin
         {
             if(!App.FoundationWriteEnabled||job==null||!job.IsWrite||job.ToolName!=FoundationDrawingPlan.PluginToolName||!FoundationDrawingPlan.IsCanonicalValid(job.CanonicalParametersJson))
                 return PluginWriteJobResult.RejectedBeforeTransaction("foundation_plan_disabled_or_invalid","The bounded drawing plan is disabled or invalid.");
+            var coordinatePlan=FoundationDrawingPlan.Parse(job.CanonicalParametersJson);
+            int coordinateUnits=Convert.ToInt32(doc.Database.Insunits);
+            if(!FoundationDrawingPlan.UnitMetadataMatches(coordinatePlan,coordinateUnits))
+                return PluginWriteJobResult.RejectedBeforeTransaction("drawing_unit_metadata_mismatch","The opted-in unit metadata check or legacy metres declaration does not match; no transaction opened. Use raw_drawing_units for ordinary raw-coordinate operations.");
             JObject receipt=ExecutePlan(doc,job.CanonicalParametersJson);string json=receipt.ToString(Formatting.None);
             switch(receipt.Value<string>("outcome"))
             {
@@ -66,11 +70,24 @@ namespace Bimwright.Dwg.Plugin
             var model=(BlockTableRecord)tx.GetObject(spaceId.IsNull?SymbolUtilityServices.GetBlockModelSpaceId(db):spaceId,OpenMode.ForWrite);
             ObjectId id=model.AppendEntity(e);tx.AddNewlyCreatedDBObject(e,true);e.DisableUndoRecording(false);return id;
         }
-        static Hatch Fill(Database db,Transaction tx,ObjectId boundary,string layer,int color,string pattern,double scale,double angle)
+        static Hatch Fill(Database db,Transaction tx,ObjectId boundary,string layer,int color,string pattern,double scale,double angle,Hatch template=null)
         {
-            var hatch=new Hatch();hatch.SetDatabaseDefaults(db);Append(db,tx,hatch,layer,color,tx.GetObject(boundary,OpenMode.ForRead).OwnerId);hatch.SetHatchPattern(HatchPatternType.PreDefined,pattern);hatch.PatternScale=scale;hatch.PatternAngle=angle;hatch.Associative=true;
-            var curve=(Entity)tx.GetObject(boundary,OpenMode.ForWrite);curve.DisableUndoRecording(false);
-            hatch.AppendLoop(HatchLoopTypes.External,new ObjectIdCollection{boundary});hatch.EvaluateHatch(true);return hatch;
+            string stage="clone";
+            try
+            {
+                var hatch=template==null?new Hatch():(Hatch)template.Clone();
+                stage="clear_loops";if(template==null)hatch.SetDatabaseDefaults(db);else{hatch.Associative=false;while(hatch.NumberOfLoops>0)hatch.RemoveLoopAt(0);}
+                stage="append";Append(db,tx,hatch,layer,color,tx.GetObject(boundary,OpenMode.ForRead).OwnerId);
+                stage="pattern";if(template==null)hatch.SetHatchPattern(HatchPatternType.PreDefined,pattern);
+                // Reassigning an identical scale can force AutoCAD to look up a missing custom PAT.
+                stage="scale";if(hatch.PatternScale!=scale)hatch.PatternScale=scale;
+                stage="angle";if(hatch.PatternAngle!=angle)hatch.PatternAngle=angle;
+                stage="association";hatch.Associative=true;
+                var curve=(Entity)tx.GetObject(boundary,OpenMode.ForWrite);curve.DisableUndoRecording(false);
+                stage="boundary";hatch.AppendLoop(HatchLoopTypes.External,new ObjectIdCollection{boundary});
+                stage="evaluate";hatch.EvaluateHatch(true);return hatch;
+            }
+            catch(Exception ex){throw new InvalidOperationException("hatch_"+stage+": "+ex.Message,ex);}
         }
         static JObject TextInput(JObject step,bool mtext)
         {
@@ -81,6 +98,7 @@ namespace Bimwright.Dwg.Plugin
         {
             foreach(JObject s in (JArray)plan["steps"])
             {
+                if(s.Value<string>("op")=="hatch"&&s["template"] is JObject template)yield return template;
                 if(s.Value<string>("op") is "set_callout" or "set_callout_format")
                 {yield return s;yield return new JObject{["handle"]=s["text_handle"],["expected_sha256"]=s["text_expected_sha256"]};if(s["dot_companions"] is JArray ds)foreach(JObject d in ds)yield return d;}
                 else if(s.Value<string>("op") is "set_text" or "set_polyline")
@@ -91,8 +109,11 @@ namespace Bimwright.Dwg.Plugin
         static void GuardTargets(Database db,Transaction tx,JObject plan,JObject before)
         {
             var targets=Targets(plan).ToArray();var names=targets.Select(t=>t.Value<string>("handle")).ToHashSet(StringComparer.Ordinal);
+            var phase2Names=((JArray)plan["steps"]).Cast<JObject>().Where(s=>(FoundationDrawingPlan.Phase2Operations.Contains(s.Value<string>("op"))||s.Value<string>("op")=="set_block_attributes")).SelectMany(s=>(s["targets"] as JArray??new JArray()).Cast<JObject>()).Select(t=>t.Value<string>("handle")).ToHashSet(StringComparer.Ordinal);
             var archiveNames=((JArray)plan["steps"]).Cast<JObject>().Where(s=>s.Value<string>("op")=="archive").SelectMany(s=>((JArray)s["targets"]).Cast<JObject>()).Select(t=>t.Value<string>("handle")).ToHashSet(StringComparer.Ordinal);
             var boundaryNames=((JArray)plan["steps"]).Cast<JObject>().Where(s=>s.Value<string>("op")=="set_polyline").SelectMany(s=>new[]{s}.Concat(((JArray)s["companions"]).Cast<JObject>())).Select(t=>t.Value<string>("handle")).ToHashSet(StringComparer.Ordinal);
+            var propertyNames=((JArray)plan["steps"]).Cast<JObject>().Where(s=>s.Value<string>("op")=="set_properties").SelectMany(s=>((JArray)s["targets"]).Cast<JObject>()).Select(t=>t.Value<string>("handle")).ToHashSet(StringComparer.Ordinal);
+            var hatchFormatNames=((JArray)plan["steps"]).Cast<JObject>().Where(s=>s.Value<string>("op")=="set_hatch_pattern").SelectMany(s=>((JArray)s["targets"]).Cast<JObject>()).Select(t=>t.Value<string>("handle")).ToHashSet(StringComparer.Ordinal);
             var transformNames=((JArray)plan["steps"]).Cast<JObject>().Where(s=>s.Value<string>("op") is "rotate" or "scale" or "copy").SelectMany(s=>((JArray)s["targets"]).Cast<JObject>()).Select(t=>t.Value<string>("handle")).ToHashSet(StringComparer.Ordinal);
             if(names.Count!=targets.Length)throw new InvalidOperationException("an_existing_handle_may_be_modified_once_per_plan");
             ObjectId model=SymbolUtilityServices.GetBlockModelSpaceId(db);
@@ -100,24 +121,37 @@ namespace Bimwright.Dwg.Plugin
             {
                 string h=target.Value<string>("handle");var entity=tx.GetObject(Resolve(db,h),OpenMode.ForRead) as Entity;
                 var owner=entity==null?null:tx.GetObject(entity.OwnerId,OpenMode.ForRead) as BlockTableRecord;
-                if(entity==null||owner==null||!owner.IsLayout||entity.OwnerId!=model||(entity is not (Line or Circle or DBText or MText or Leader or Hatch)&&!(archiveNames.Contains(h)&&entity is Polyline)&&!(boundaryNames.Contains(h)&&entity is Polyline{Closed:true})&&!(transformNames.Contains(h)&&entity is Polyline)))throw new InvalidOperationException("unsupported_existing_entity_or_space:"+h);
+                if(entity==null||owner==null||!owner.IsLayout||entity.OwnerId!=model||(entity is not (Line or Circle or DBText or MText or Leader or Hatch)&&!(phase2Names.Contains(h)&&entity is (Polyline or Arc or Ellipse or DBPoint or Table or BlockReference or RotatedDimension or AlignedDimension or RadialDimension or DiametricDimension))&&!(archiveNames.Contains(h)&&entity is (Polyline or RotatedDimension or AlignedDimension or RadialDimension or DiametricDimension))&&!(boundaryNames.Contains(h)&&entity is Polyline{Closed:true})&&!(transformNames.Contains(h)&&entity is Polyline)))throw new InvalidOperationException("unsupported_existing_entity_or_space:"+h);
                 if(((LayerTableRecord)tx.GetObject(entity.LayerId,OpenMode.ForRead)).IsLocked)throw new InvalidOperationException("locked_source_layer:"+h);
                 if(transformNames.Contains(h))
                 {
                     bool planar=entity switch{Line l=>l.StartPoint.Z==0&&l.EndPoint.Z==0&&l.Thickness==0,Circle c=>c.Normal==Vector3d.ZAxis&&c.Center.Z==0&&c.Thickness==0,Polyline p=>p.Normal==Vector3d.ZAxis&&p.Elevation==0&&p.ConstantWidth==0&&Enumerable.Range(0,p.NumberOfVertices).All(i=>p.GetStartWidthAt(i)==0&&p.GetEndWidthAt(i)==0),DBText t=>t.Normal==Vector3d.ZAxis&&t.Position.Z==0&&t.Thickness==0,MText t=>t.Normal==Vector3d.ZAxis&&t.Location.Z==0,Leader l=>l.Normal==Vector3d.ZAxis&&Enumerable.Range(0,l.NumVertices).All(i=>l.VertexAt(i).Z==0),Hatch f=>f.Normal==Vector3d.ZAxis&&f.Elevation==0,_=>false};
                     if(!planar)throw new InvalidOperationException("transform_requires_supported_zero_width_2d_wcs_entities:"+h);
                 }
+                if(phase2Names.Contains(h)&&entity.GetPersistentReactorIds().Count>0&&((JArray)plan["steps"]).Cast<JObject>().Any(s=>s.Value<string>("op") is "set_open_polyline" or "set_text_format" or "set_dimension_text"&&(s["targets"] as JArray??new JArray()).Cast<JObject>().Any(t=>t.Value<string>("handle")==h)))throw new InvalidOperationException("standalone_entity_without_persistent_reactors_required:"+h);
                 if(FoundationDrawingPlan.Hash(before[h])!=target.Value<string>("expected_sha256"))throw new InvalidOperationException("entity_changed:"+h);
                 foreach(ObjectId reactor in entity.GetPersistentReactorIds())
                 {var other=tx.GetObject(reactor,OpenMode.ForRead) as Entity;if(other==null||!names.Contains(other.Handle.ToString()))throw new InvalidOperationException("include_complete_associated_group:"+h);}
                 if(entity is Leader leader&&!leader.Annotation.IsNull&&!names.Contains(leader.Annotation.Handle.ToString()))throw new InvalidOperationException("include_leader_annotation:"+h);
                 if(entity is Hatch hatch)
                 {
+                    if(((JArray)plan["steps"]).Cast<JObject>().Any(s=>s.Value<string>("op")=="hatch"&&s["template"]?.Value<string>("handle")==h))
+                    {
+                        if(hatch.Associative||hatch.Normal!=Vector3d.ZAxis||hatch.Elevation!=0||hatch.GetPersistentReactorIds().Count!=0||before[h].Value<string>("loop_read_status")!="complete")throw new InvalidOperationException("standalone_complete_planar_hatch_template_required");
+                        continue;
+                    }
+                    // A standalone legacy fill can be preserved on the hidden archive layer.
+                    // Its full facts are still digest-checked and verified unchanged except layer.
+                    if(archiveNames.Contains(h)&&!hatch.Associative&&hatch.Normal==Vector3d.ZAxis&&hatch.Elevation==0&&hatch.NumberOfLoops>0&&hatch.NumberOfLoops<=64&&hatch.GetPersistentReactorIds().Count==0)
+                    {
+                        if(before[h].Value<string>("loop_read_status")!="complete")throw new InvalidOperationException("complete_legacy_fill_geometry_required");
+                        continue;
+                    }
                     if(!hatch.Associative||hatch.NumberOfLoops!=1)throw new InvalidOperationException("associated_single_boundary_fill_required");
                     var ids=hatch.GetAssociatedObjectIdsAt(0);
                     if(ids.Count!=1||!names.Contains(ids[0].Handle.ToString()))throw new InvalidOperationException("include_associated_boundary");
                     var boundary=tx.GetObject(ids[0],OpenMode.ForRead);
-                    if(boundary is not Circle&&!(((archiveNames.Contains(h)&&archiveNames.Contains(ids[0].Handle.ToString()))||(boundaryNames.Contains(h)&&boundaryNames.Contains(ids[0].Handle.ToString()))||(transformNames.Contains(h)&&transformNames.Contains(ids[0].Handle.ToString())))&&boundary is Polyline{Closed:true}))throw new InvalidOperationException("closed_surface_group_or_dot_circle_required");
+                    if(boundary is not Circle&&!(((propertyNames.Contains(h)&&propertyNames.Contains(ids[0].Handle.ToString()))||(hatchFormatNames.Contains(h)&&hatchFormatNames.Contains(ids[0].Handle.ToString()))||(archiveNames.Contains(h)&&archiveNames.Contains(ids[0].Handle.ToString()))||(boundaryNames.Contains(h)&&boundaryNames.Contains(ids[0].Handle.ToString()))||(transformNames.Contains(h)&&transformNames.Contains(ids[0].Handle.ToString())))&&boundary is Polyline{Closed:true}))throw new InvalidOperationException("closed_surface_group_or_dot_circle_required");
                 }
             }
         }
@@ -139,20 +173,25 @@ namespace Bimwright.Dwg.Plugin
         internal static JObject ExecutePlan(Document doc,string canonicalPlan,Action<string> checkpoint=null)
         {
             JObject plan=FoundationDrawingPlan.Parse(canonicalPlan);
+            int observedUnits=Convert.ToInt32(doc.Database.Insunits);
+            if(!FoundationDrawingPlan.UnitMetadataMatches(plan,observedUnits))throw new InvalidOperationException("drawing_unit_metadata_mismatch");
             if(((JArray)plan["steps"]).Count==1&&plan["steps"][0].Value<string>("op")=="save")return SaveDocument(doc,plan,canonicalPlan);
-            JObject before=new JObject(),after=new JObject(),objects=new JObject(),layers=new JObject(),allLayersBefore=null,allLayersAfter=null,symbolsBefore=null,symbolsAfter=null;JArray modelBefore=null,modelAfter=null;
+            if(((JArray)plan["steps"]).Count==1&&plan["steps"][0].Value<string>("op")=="plot_pdf")return PlotPdf(doc,plan,canonicalPlan);
+            if(((JArray)plan["steps"]).Count==1&&plan["steps"][0].Value<string>("op")=="export_dxf")return ExportDxf(doc,plan,canonicalPlan);
+            JObject before=new JObject(),after=new JObject(),objects=new JObject(),layers=new JObject(),allLayersBefore=null,allLayersAfter=null,symbolsBefore=null,symbolsAfter=null,layoutsBefore=null,layoutsAfter=null;JArray modelBefore=null,modelAfter=null;
+            string activeStep=null,activeOperation=null,failureStage="preflight";var completedSteps=new JArray();
             Transaction tx=null;bool opened=false,invoked=false,committed=false;string outcome="unknown",error=null;var created=new List<string>();
             using(doc.LockDocument())try
             {
                 if(doc.IsReadOnly||!doc.Database.UndoRecording)throw new InvalidOperationException("document_read_only_or_undo_disabled");
-                int units=Convert.ToInt32(Autodesk.AutoCAD.ApplicationServices.Core.Application.GetSystemVariable("INSUNITS"));if(units!=0&&units!=6)throw new InvalidOperationException("first_release_requires_metres_or_explicit_unitless_metres");
-                tx=doc.Database.TransactionManager.StartTransaction();modelBefore=Handles(doc.Database,tx);allLayersBefore=LayerFacts(doc.Database,tx);symbolsBefore=SymbolFacts(doc.Database,tx);
+                if(!FoundationDrawingPlan.UnitMetadataMatches(plan,Convert.ToInt32(doc.Database.Insunits)))throw new InvalidOperationException("drawing_unit_metadata_changed");
+                tx=doc.Database.TransactionManager.StartTransaction();modelBefore=Handles(doc.Database,tx);allLayersBefore=LayerFacts(doc.Database,tx);symbolsBefore=SymbolFacts(doc.Database,tx);layoutsBefore=LayoutFacts(doc.Database,tx);
                 before=ReadEntities(doc.Database,tx,Targets(plan).Select(v=>v.Value<string>("handle")));GuardTargets(doc.Database,tx,plan,before);
                 // All modifications share one transaction. Symbol/table changes and associated boundaries participate in undo.
                 var db=doc.Database;var refs=new Dictionary<string,ObjectId>();ObjectId creationSpace=SymbolUtilityServices.GetBlockModelSpaceId(db);
                 foreach(JObject step in (JArray)plan["steps"])
                 {
-                    string id=step.Value<string>("id"),op=step.Value<string>("op");var map=new JObject();objects[id]=map;opened=true;
+                    string id=step.Value<string>("id"),op=step.Value<string>("op");activeStep=id;activeOperation=op;failureStage="executing_step";var map=new JObject();objects[id]=map;opened=true;
                     string layer=step.Value<string>("layer");int color=step.Value<int?>("color")??256;
                     ObjectId Add(Entity e,string role="entity",int? explicitColor=null)
                     {ObjectId oid=Append(db,tx,e,layer,explicitColor??color,creationSpace);map[role]=oid.Handle.ToString();created.Add(oid.Handle.ToString());return oid;}
@@ -172,7 +211,8 @@ namespace Bimwright.Dwg.Plugin
                         case "hatch":
                             if(!refs.TryGetValue(step.Value<string>("boundary"),out ObjectId boundary))throw new InvalidOperationException("boundary_reference_unavailable");
                             var curve=tx.GetObject(boundary,OpenMode.ForRead);if(curve is not Circle&&curve is not Polyline{Closed:true})throw new InvalidOperationException("closed_polyline_or_circle_required");
-                            var fill=Fill(db,tx,boundary,layer,color,step.Value<string>("pattern"),step.Value<double>("scale"),step.Value<double>("angle"));map["entity"]=fill.Handle.ToString();created.Add(fill.Handle.ToString());refs[id]=fill.ObjectId;break;
+                            Hatch templateFill=null;if(step["template"] is JObject templateSpec){templateFill=tx.GetObject(Resolve(db,templateSpec.Value<string>("handle")),OpenMode.ForRead) as Hatch;if(templateFill==null||templateFill.PatternName!=step.Value<string>("pattern"))throw new InvalidOperationException("hatch_template_pattern_mismatch");}
+                            var fill=Fill(db,tx,boundary,layer,color,step.Value<string>("pattern"),step.Value<double>("scale"),step.Value<double>("angle"),templateFill);map["entity"]=fill.Handle.ToString();created.Add(fill.Handle.ToString());refs[id]=fill.ObjectId;break;
                         case "callout":
                             if(!AnnotationEntityFactory.TryCreateMText(TextInput(step,true),out MText label,out string labelError))throw new InvalidOperationException(labelError);
                             ApplyTextStyle(db,tx,label,step);label.Attachment=step["attachment"]!=null?Enum.Parse<AttachmentPoint>(step.Value<string>("attachment")):AttachmentPoint.BottomLeft;label.Location=Point(step["position"]);ObjectId labelId=Add(label,"text",step.Value<int?>("text_color"));
@@ -221,35 +261,37 @@ namespace Bimwright.Dwg.Plugin
                             if(op=="archive"){var ar=(LayerTableRecord)tx.GetObject(archiveLayer,OpenMode.ForRead);layers[layer]=new JObject{["is_off"]=ar.IsOff,["is_frozen"]=ar.IsFrozen,["is_plottable"]=ar.IsPlottable};}break;
                         default:if(!ExecuteExtendedStep(db,tx,step,map,refs,created,before))throw new InvalidOperationException("unsupported_plan_step");break;
                     }
-                    checkpoint?.Invoke("after_step:"+id);
+                    completedSteps.Add(id);checkpoint?.Invoke("after_step:"+id);
                 }
-                var observed=before.Properties().Select(p=>p.Name).Concat(created).ToArray();after=ReadEntities(db,tx,observed);modelAfter=Handles(db,tx);allLayersAfter=LayerFacts(db,tx);symbolsAfter=SymbolFacts(db,tx);
-                JObject Receipt()=>Build(plan,before,after,objects,layers,allLayersBefore,allLayersAfter,modelBefore,modelAfter,created,"committed_verified",true,true,null,symbolsBefore,symbolsAfter);
-                if(!FoundationDrawingPlan.VerifyReceipt(Receipt(),canonicalPlan)||!IdentitySetMatches(modelBefore,modelAfter,created))throw new InvalidOperationException("plan_precommit_verification_failed:"+Receipt().ToString(Formatting.None));
-                invoked=true;tx.Commit();committed=true;tx.Dispose();tx=null;checkpoint?.Invoke("after_commit");
-                using(var read=db.TransactionManager.StartTransaction()){after=ReadEntities(db,read,observed);modelAfter=Handles(db,read);allLayersAfter=LayerFacts(db,read);symbolsAfter=SymbolFacts(db,read);read.Abort();}
+                RefreshChangedFontText(db,tx,plan);
+                var observed=before.Properties().Select(p=>p.Name).Concat(created).ToArray();after=ReadEntities(db,tx,observed);modelAfter=Handles(db,tx);allLayersAfter=LayerFacts(db,tx);symbolsAfter=SymbolFacts(db,tx);layoutsAfter=LayoutFacts(db,tx);
+                JObject Receipt(){var r=Build(plan,before,after,objects,layers,allLayersBefore,allLayersAfter,modelBefore,modelAfter,created,"committed_verified",true,true,null,symbolsBefore,symbolsAfter);r["layouts_before"]=layoutsBefore;r["layouts_after"]=layoutsAfter;return r;}
+                failureStage="precommit_verification";activeStep=null;activeOperation=null;
+                if(!FoundationDrawingPlan.VerifyReceipt(Receipt(),canonicalPlan)||!IdentitySetMatches(modelBefore,modelAfter,created))throw new InvalidOperationException("plan_precommit_verification_failed; review_supported_operation_limits_and_fresh_inputs");
+                failureStage="commit";invoked=true;tx.Commit();committed=true;tx.Dispose();tx=null;checkpoint?.Invoke("after_commit");
+                failureStage="postcommit_readback";using(var read=db.TransactionManager.StartTransaction()){after=ReadEntities(db,read,observed);modelAfter=Handles(db,read);allLayersAfter=LayerFacts(db,read);symbolsAfter=SymbolFacts(db,read);layoutsAfter=LayoutFacts(db,read);read.Abort();}
                 outcome=FoundationDrawingPlan.VerifyReceipt(Receipt(),canonicalPlan)&&IdentitySetMatches(modelBefore,modelAfter,created)?"committed_verified":"committed_readback_failed";
             }
             catch(Exception ex)
             {
-                error=ex.Message;
+                error="stage="+failureStage+" "+(activeStep==null?"plan":"step="+activeStep+" op="+activeOperation)+": "+ex.Message;
                 if(committed)outcome="committed_readback_unknown";
                 else if(invoked)outcome="commit_outcome_unknown";
                 else if(!opened)outcome="rejected_before_write";
                 else
                 {
                     try
-                    {tx?.Abort();tx?.Dispose();tx=null;using var read=doc.Database.TransactionManager.StartTransaction();after=ReadEntities(doc.Database,read,before.Properties().Select(p=>p.Name));modelAfter=Handles(doc.Database,read);allLayersAfter=LayerFacts(doc.Database,read);symbolsAfter=SymbolFacts(doc.Database,read);read.Abort();outcome=JToken.DeepEquals(before,after)&&JToken.DeepEquals(allLayersBefore,allLayersAfter)&&JToken.DeepEquals(symbolsBefore,symbolsAfter)&&JToken.DeepEquals(modelBefore,modelAfter)?"aborted_verified":"rollback_outcome_unknown";}
+                    {tx?.Abort();tx?.Dispose();tx=null;using var read=doc.Database.TransactionManager.StartTransaction();after=ReadEntities(doc.Database,read,before.Properties().Select(p=>p.Name));modelAfter=Handles(doc.Database,read);allLayersAfter=LayerFacts(doc.Database,read);symbolsAfter=SymbolFacts(doc.Database,read);layoutsAfter=LayoutFacts(doc.Database,read);read.Abort();outcome=JToken.DeepEquals(layoutsBefore,layoutsAfter)&&JToken.DeepEquals(before,after)&&JToken.DeepEquals(allLayersBefore,allLayersAfter)&&JToken.DeepEquals(symbolsBefore,symbolsAfter)&&JToken.DeepEquals(modelBefore,modelAfter)?"aborted_verified":"rollback_outcome_unknown";}
                     catch{outcome="rollback_outcome_unknown";}
                 }
             }
             finally{tx?.Dispose();}
-            return Build(plan,before,after,objects,layers,allLayersBefore,allLayersAfter,modelBefore,modelAfter,created,outcome,invoked,committed,error,symbolsBefore,symbolsAfter);
+            var final=Build(plan,before,after,objects,layers,allLayersBefore,allLayersAfter,modelBefore,modelAfter,created,outcome,invoked,committed,error,symbolsBefore,symbolsAfter);final["failure_stage"]=error==null?JValue.CreateNull():new JValue(failureStage);final["layouts_before"]=layoutsBefore;final["layouts_after"]=layoutsAfter;final["failed_step"]=error==null?JValue.CreateNull():new JValue(activeStep);final["failed_operation"]=error==null?JValue.CreateNull():new JValue(activeOperation);final["steps_executed_before_outcome"]=completedSteps;final["step_execution_is_not_commit"]=true;return final;
         }
         static bool IdentitySetMatches(JArray before,JArray after,IEnumerable<string> created)=>before!=null&&after!=null&&after.Values<string>().ToHashSet().SetEquals(before.Values<string>().Concat(created))&&created.Distinct().Count()==created.Count();
         static JObject SaveDocument(Document doc,JObject plan,string canonicalPlan)
         {
-            JObject before=new JObject(),after=new JObject(),layersBefore=null,layersAfter=null,symbolsBefore=null,symbolsAfter=null;JArray modelBefore=null,modelAfter=null;
+            JObject before=new JObject(),after=new JObject(),layersBefore=null,layersAfter=null,symbolsBefore=null,symbolsAfter=null,layoutsBefore=null,layoutsAfter=null;JArray modelBefore=null,modelAfter=null;
             var step=(JObject)plan["steps"][0];var map=new JObject();var objects=new JObject{[step.Value<string>("id")]=map};bool invoked=false,returned=false;string outcome="unknown",error=null,fileSha=null;int dbmod=-1;
             using(doc.LockDocument())try
             {
@@ -257,7 +299,8 @@ namespace Bimwright.Dwg.Plugin
                 string[] handles=((JArray)step["expected"]).Cast<JObject>().Select(t=>t.Value<string>("handle")).ToArray();if(handles.Distinct().Count()!=handles.Length)throw new InvalidOperationException("duplicate_save_handle");
                 using(var read=doc.Database.TransactionManager.StartTransaction())
                 {
-                    before=ReadEntities(doc.Database,read,handles);modelBefore=Handles(doc.Database,read);layersBefore=LayerFacts(doc.Database,read);symbolsBefore=SymbolFacts(doc.Database,read);
+                    before=ReadEntities(doc.Database,read,handles);modelBefore=Handles(doc.Database,read);layersBefore=LayerFacts(doc.Database,read);symbolsBefore=SymbolFacts(doc.Database,read);layoutsBefore=LayoutFacts(doc.Database,read);
+                    if(step["expected_layouts"] is JObject expectedLayouts)foreach(var row in expectedLayouts.Properties())if(layoutsBefore[row.Name]==null||FoundationDrawingPlan.Hash(layoutsBefore[row.Name])!=row.Value.Value<string>())throw new InvalidOperationException("save_layout_changed:"+row.Name);
                     foreach(JObject t in (JArray)step["expected"])if(FoundationDrawingPlan.Hash(before[t.Value<string>("handle")])!=t.Value<string>("expected_sha256"))throw new InvalidOperationException("save_entity_changed:"+t.Value<string>("handle"));read.Abort();
                 }
                 foreach(string handle in handles)map[handle]=handle;
@@ -268,14 +311,14 @@ namespace Bimwright.Dwg.Plugin
                 using(var disk=new Database(false,true))
                 {
                     disk.ReadDwgFile(doc.Name,FileOpenMode.OpenForReadAndAllShare,true,null);disk.CloseInput(true);
-                    using var read=disk.TransactionManager.StartTransaction();after=ReadEntities(disk,read,handles);modelAfter=Handles(disk,read);layersAfter=LayerFacts(disk,read);symbolsAfter=SymbolFacts(disk,read);read.Abort();
+                    using var read=disk.TransactionManager.StartTransaction();after=ReadEntities(disk,read,handles);modelAfter=Handles(disk,read);layersAfter=LayerFacts(disk,read);symbolsAfter=SymbolFacts(disk,read);layoutsAfter=LayoutFacts(disk,read);read.Abort();
                 }
                 outcome="committed_verified";
-                var candidate=Build(plan,before,after,objects,new JObject(),layersBefore,layersAfter,modelBefore,modelAfter,Array.Empty<string>(),outcome,invoked,returned,null,symbolsBefore,symbolsAfter);candidate["saved_file_sha256"]=fileSha;candidate["dbmod_after_save"]=dbmod;
+                var candidate=Build(plan,before,after,objects,new JObject(),layersBefore,layersAfter,modelBefore,modelAfter,Array.Empty<string>(),outcome,invoked,returned,null,symbolsBefore,symbolsAfter);candidate["layouts_before"]=layoutsBefore;candidate["layouts_after"]=layoutsAfter;candidate["saved_file_sha256"]=fileSha;candidate["dbmod_after_save"]=dbmod;
                 if(!FoundationDrawingPlan.VerifyReceipt(candidate,canonicalPlan))outcome="committed_readback_failed";
             }
             catch(Exception ex){error=ex.Message;outcome=returned?"committed_readback_unknown":invoked?"commit_outcome_unknown":"rejected_before_write";}
-            var result=Build(plan,before,after,objects,new JObject(),layersBefore,layersAfter,modelBefore,modelAfter,Array.Empty<string>(),outcome,invoked,returned,error,symbolsBefore,symbolsAfter);result["saved_file_sha256"]=fileSha==null?JValue.CreateNull():new JValue(fileSha);result["dbmod_after_save"]=dbmod;return result;
+            var result=Build(plan,before,after,objects,new JObject(),layersBefore,layersAfter,modelBefore,modelAfter,Array.Empty<string>(),outcome,invoked,returned,error,symbolsBefore,symbolsAfter);result["layouts_before"]=layoutsBefore;result["layouts_after"]=layoutsAfter;result["saved_file_sha256"]=fileSha==null?JValue.CreateNull():new JValue(fileSha);result["dbmod_after_save"]=dbmod;return result;
         }
         static JObject Build(JObject plan,JObject before,JObject after,JObject objects,JObject layers,JObject allLayersBefore,JObject allLayersAfter,JArray modelBefore,JArray modelAfter,IEnumerable<string> created,string outcome,bool invoked,bool committed,string error,JObject symbolsBefore=null,JObject symbolsAfter=null)=>new JObject{
             ["symbols_before"]=symbolsBefore,["symbols_after"]=symbolsAfter,

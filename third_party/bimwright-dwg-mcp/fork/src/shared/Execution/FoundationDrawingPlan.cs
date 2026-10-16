@@ -27,8 +27,13 @@ namespace Bimwright.Dwg.Shared.Execution
         {
             if(json==null||json.Length>524288)throw new ArgumentException("encoded plan_json exceeds transport allowance");
             var p=JObject.Parse(json,new JsonLoadSettings{DuplicatePropertyNameHandling=DuplicatePropertyNameHandling.Error});
-            Keys(p,"schema","source_role","units","steps");
-            if(Text(p,"units",32)!="metres")throw new ArgumentException("first release requires explicit metre drawing units");
+            KeysWithOptional(p,new[]{"schema","source_role","units","steps"},"expected_insunits");
+            string coordinateUnits=Text(p,"units",32);
+            if(coordinateUnits=="raw_drawing_units")
+            {
+                if(p["expected_insunits"]!=null&&(p["expected_insunits"].Type!=JTokenType.Integer||p.Value<int>("expected_insunits")<0||p.Value<int>("expected_insunits")>24))throw new ArgumentException("optional expected_insunits must be an integer 0..24; coordinates are never converted");
+            }
+            else if(coordinateUnits!="metres"||p["expected_insunits"]!=null)throw new ArgumentException("units must be metres (legacy) or raw_drawing_units with optional expected_insunits");
             if(Text(p,"schema",64)!=Schema||!new[]{"annotation","existing","demolition","new_design","test"}.Contains(Text(p,"source_role",32)))throw new ArgumentException("plan schema or source_role invalid");
             if(p["steps"] is not JArray steps||steps.Count<1||steps.Count>MaxSteps)throw new ArgumentException("1..16 steps required");
             var ids=new System.Collections.Generic.HashSet<string>(StringComparer.Ordinal);int vertices=0,estimatedHandles=0;
@@ -56,7 +61,8 @@ namespace Bimwright.Dwg.Shared.Execution
                         ValidateAttachment(step);
                         if(step["vertices"] is not JArray lv||lv.Count<2||lv.Count>16)throw new ArgumentException("2..16 ordinary LEADER vertices required");foreach(JToken v in lv)Point(v);vertices+=lv.Count;estimatedHandles+=4;break;
                     case "hatch":
-                        Keys(step,"id","op","boundary","pattern","scale","angle","layer","color");Options(step);Text(step,"pattern",128);Positive(step,"scale");Number(step["angle"]);
+                        KeysWithOptional(step,new[]{"id","op","boundary","pattern","scale","angle","layer","color"},"template");Options(step);Text(step,"pattern",128);Positive(step,"scale");Number(step["angle"]);
+                        if(step["template"] is JObject ht){Keys(ht,"handle","expected_sha256");Expected(ht);estimatedHandles++;}else if(step["template"]!=null)throw new ArgumentException("invalid hatch template");
                         string reference=Text(step,"boundary",40);if(reference==id||!ids.Contains(reference))throw new ArgumentException("hatch boundary must reference an earlier step");estimatedHandles++;break;
                     case "set_text":
                         Keys(step,"id","op","handle","expected_sha256","text","companions");Expected(step);Text(step,"text",2048);
@@ -71,18 +77,25 @@ namespace Bimwright.Dwg.Shared.Execution
                         if(step["vertices"] is not JArray cv||cv.Count!=3)throw new ArgumentException("three ordinary LEADER vertices required");foreach(JToken v in cv)Point(v);Point(step["position"]);vertices+=3;estimatedHandles+=2;
                         if(step["dot_companions"]!=null){if(step["dot_companions"] is not JArray dots||dots.Count!=2)throw new ArgumentException("dot circle and its hatch required");foreach(JObject d in dots){Keys(d,"handle","expected_sha256");Expected(d);}estimatedHandles+=2;}break;
                     case "save":
-                        Keys(step,"id","op","expected");if(steps.Count!=1||step["expected"] is not JArray expected||expected.Count<1||expected.Count>64)throw new ArgumentException("save is a separate whole-document operation with 1..64 expected entities");foreach(JObject t in expected){Keys(t,"handle","expected_sha256");Expected(t);}estimatedHandles+=expected.Count;break;
+                        KeysWithOptional(step,new[]{"id","op","expected"},"expected_layouts");if(step["expected_layouts"]!=null){if(step["expected_layouts"] is not JObject el||el.Count<1||el.Count>64)throw new ArgumentException("1..64 expected layout digests required");foreach(var row in el.Properties()){if(string.IsNullOrWhiteSpace(row.Name)||row.Name.Length>255||!Regex.IsMatch(row.Value.Value<string>()??"","^[A-F0-9]{64}$"))throw new ArgumentException("invalid expected layout digest");}}if(steps.Count!=1||step["expected"] is not JArray expected||expected.Count<1||expected.Count>64)throw new ArgumentException("save is a separate whole-document operation with 1..64 expected entities");foreach(JObject t in expected){Keys(t,"handle","expected_sha256");Expected(t);}estimatedHandles+=expected.Count;break;
                     case "move":case "archive":
                         Keys(step,"id","op","targets",op=="move"?"delta":"layer");
                         if(step["targets"] is not JArray targets||targets.Count<1||targets.Count>32)throw new ArgumentException("1..32 explicit targets required");
                         var handles=new System.Collections.Generic.HashSet<string>();foreach(JObject t in targets){Keys(t,"handle","expected_sha256");Expected(t);if(!handles.Add(t.Value<string>("handle")))throw new ArgumentException("duplicate target");}
                         if(op=="move")Point(step["delta"]);else Text(step,"layer",255);estimatedHandles+=targets.Count;break;
-                    default:if(!ValidateExtension(step,ref estimatedHandles))throw new ArgumentException("unsupported drawing-plan operation: "+op);break;
+                    default:if(!ValidateExtension(step,ref estimatedHandles))throw new ArgumentException("unsupported drawing-plan operation: "+op);if(op=="set_open_polyline")vertices+=((JArray)step["vertices"]).Count;break;
                 }
             }
+            if(steps.Cast<JObject>().Any(s=>(PrintOperations.Contains(s.Value<string>("op"))||s.Value<string>("op")=="export_dxf"))&&steps.Count!=1)throw new ArgumentException("page setup and PDF plotting require separate single-step plans");
             if(vertices>1024||estimatedHandles>MaxHandles||Encoding.UTF8.GetByteCount(Canonical(p))>131072)throw new ArgumentException("plan exceeds 1024 vertices, 64 entity outcomes or semantic 128 KiB");
             return p;
         }
+        // INSUNITS is auxiliary metadata. Only an opted-in check or the legacy
+        // metres interface constrains it; raw plans never convert numeric values.
+        public static bool UnitMetadataMatches(JObject plan,int? observed)=>
+            plan.Value<string>("units")=="raw_drawing_units"
+                ? plan["expected_insunits"]==null||observed==plan.Value<int>("expected_insunits")
+                : observed==0||observed==6;
         public static bool IsCanonicalValid(string json)
         {try{Parse(json);return true;}catch{return false;}} // Journal normalization may escape Unicode; identity is checked by its canonical payload digest.
         public static void Keys(JObject value,params string[] names)
@@ -101,6 +114,8 @@ namespace Bimwright.Dwg.Shared.Execution
         {if(value is not JArray a||a.Count<2||a.Count>(bulge?3:2))throw new ArgumentException("2D point required");foreach(var n in a)Number(n);}
         static void Expected(JObject o)
         {if(!Regex.IsMatch(Text(o,"handle",16),"^[A-F0-9]+$")||!Regex.IsMatch(Text(o,"expected_sha256",64),"^[A-F0-9]{64}$"))throw new ArgumentException("explicit handle and native entity digest required");}
+        // Numerical readback bounds in raw drawing units (area: squared raw units).
+        // These are not professional/engineering acceptance tolerances.
         static bool Near(JToken value,double expected,double tolerance=0.001)=>Math.Abs(Number(value)-expected)<=tolerance;
         static bool PointMatches(JToken point,JArray expected)
         {return point is JObject&&Near(point["x"],Number(expected[0]))&&Near(point["y"],Number(expected[1]))&&Near(point["z"],0);}
@@ -117,7 +132,7 @@ namespace Bimwright.Dwg.Shared.Execution
                 string[] oldIds=oldModel.Values<string>().ToArray(),newIds=newModel.Values<string>().ToArray(),newCreated=created.Values<string>().ToArray();
                 if(oldIds.Length>100000||newCreated.Length>MaxHandles||oldIds.Distinct().Count()!=oldIds.Length||newIds.Distinct().Count()!=newIds.Length||newCreated.Distinct().Count()!=newCreated.Length||newCreated.Intersect(oldIds).Any()||!newIds.ToHashSet().SetEquals(oldIds.Concat(newCreated))||!after.Properties().Select(p=>p.Name).ToHashSet().SetEquals(before.Properties().Select(p=>p.Name).Concat(newCreated)))return false;
                 foreach(var row in after.Properties())if(row.Value?.Value<string>("handle")!=row.Name)return false;
-                if(!VerifyLayerChanges(oldLayers,newLayers,(JArray)plan["steps"])||!VerifySymbols(receipt,(JArray)plan["steps"]))return false;
+                if(!VerifyLayoutChanges(receipt,(JArray)plan["steps"])||!VerifyLayerChanges(oldLayers,newLayers,(JArray)plan["steps"])||!VerifySymbols(receipt,(JArray)plan["steps"]))return false;
                 foreach(JObject step in (JArray)plan["steps"])
                 {
                     string id=step.Value<string>("id"),op=step.Value<string>("op");
@@ -128,6 +143,7 @@ namespace Bimwright.Dwg.Shared.Execution
                     if(op=="save")
                     {
                         if(!Regex.IsMatch(receipt.Value<string>("saved_file_sha256")??"","^[A-F0-9]{64}$")||receipt.Value<int?>("dbmod_after_save")!=0)return false;
+                        if(step["expected_layouts"] is JObject expectedLayouts){if(receipt["layouts_before"] is not JObject layoutsBefore||receipt["layouts_after"] is not JObject layoutsAfter)return false;foreach(var row in expectedLayouts.Properties())if(layoutsBefore[row.Name]==null||Hash(layoutsBefore[row.Name])!=row.Value.Value<string>()||!Equivalent(layoutsBefore[row.Name],layoutsAfter[row.Name]))return false;}
                         foreach(JObject t in (JArray)step["expected"]){string h=t.Value<string>("handle");if(Hash(before[h])!=t.Value<string>("expected_sha256")||!Equivalent(before[h],after[h]))return false;}continue;
                     }
                     if(op=="set_text")
@@ -179,7 +195,8 @@ namespace Bimwright.Dwg.Shared.Execution
                             for(int i=0;i<vertices.Count;i++){var v=(JArray)vertices[i];if(!PointMatches(actualVertices[i],v)||!Near(actualVertices[i]["bulge"],v.Count==3?Number(v[2]):0,1e-10))return false;}break;
                         case "text":case "mtext":if(!TextMatches(entity,step,op=="mtext")||(step["text_style"]!=null&&entity.Value<string>("text_style")!=step.Value<string>("text_style")))return false;break;
                         case "hatch":
-                            var bm=objects[step.Value<string>("boundary")] as JObject;var boundary=after[bm?.Value<string>("entity")??""] as JObject;if(!HatchMatches(entity,boundary)||entity.Value<string>("pattern_name")!=step.Value<string>("pattern")||!Near(entity["pattern_scale"],Number(step["scale"]),1e-10)||!Near(entity["pattern_angle"],Number(step["angle"]),1e-10))return false;break;
+                            var bm=objects[step.Value<string>("boundary")] as JObject;var boundary=after[bm?.Value<string>("entity")??""] as JObject;if(!HatchMatches(entity,boundary)||entity.Value<string>("pattern_name")!=step.Value<string>("pattern")||!Near(entity["pattern_scale"],Number(step["scale"]),1e-10)||!Near(entity["pattern_angle"],Number(step["angle"]),1e-10))return false;
+                            if(step["template"] is JObject template){string sh=template.Value<string>("handle");if(before[sh]==null||Hash(before[sh])!=template.Value<string>("expected_sha256")||!JToken.DeepEquals(before[sh],after[sh])||before[sh].Value<string>("pattern_name")!=step.Value<string>("pattern"))return false;}break;
                         case "callout":
                             var text=E("text");var leader=E("leader");var dot=E("dot_boundary");var fill=E("dot_fill");
                             if(text==null||leader==null||dot==null||fill==null||text.Value<string>("layer")!=step.Value<string>("layer")||text.Value<int?>("color_index")!=(step.Value<int?>("text_color")??step.Value<int>("color"))||!EntityOptions(leader,step)||!TextMatches(text,step,true)||leader.Value<string>("type")!="Leader"||leader.Value<string>("annotation_handle")!=map.Value<string>("text")||!HatchMatches(fill,dot)||dot.Value<int?>("color_index")!=2||fill.Value<int?>("color_index")!=2||!PointMatches(dot["center"],(JArray)step["vertices"][0])||!Near(dot["radius"],Number(step["dot_radius"])))return false;

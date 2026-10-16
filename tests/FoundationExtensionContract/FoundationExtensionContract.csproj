@@ -4,5 +4,11 @@
   <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationDrawingPlan.cs" Link="FoundationDrawingPlan.cs" />
   <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationPlanExtensions.cs" Link="FoundationPlanExtensions.cs" />
- </ItemGroup>
+   <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationPhase2.cs" Link="FoundationPhase2.cs" />
+ <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationPrintContract.cs" Link="FoundationPrintContract.cs" />
+  <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationCurveEdits.cs" Link="FoundationCurveEdits.cs" />
+  <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationDxfContract.cs" Link="FoundationDxfContract.cs" />
+  <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationAngularContract.cs" Link="FoundationAngularContract.cs" />
+  <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationBlockContract.cs" Link="FoundationBlockContract.cs" />
+  </ItemGroup>
 </Project>

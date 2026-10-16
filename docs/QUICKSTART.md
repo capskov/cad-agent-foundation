@@ -6,7 +6,7 @@ The current release provides source and a manifest-bearing Windows runtime ZIP. 
 
 | Task | Required components | Versions and limits |
 | --- | --- | --- |
-| Supported basic CAD operations | `cad-agent-foundation` only | Local baseline `v1.0.0-local`; public source preview `v1.1.0-rc.1`, with a manifest-bearing runtime ZIP. Bounded 2D operations; current writes require metres; recorded Windows/AutoCAD 2026 host only. Neither Skill is required. |
+| Supported basic CAD operations | `cad-agent-foundation` only | Local baseline `v1.0.0-local`; public source preview `v1.1.0-rc.1`, with a manifest-bearing runtime ZIP. Bounded 2D operations; local.4 raw writes use original drawing values; unit metadata checks are optional; recorded Windows/AutoCAD 2026 host only. Neither Skill is required. |
 | This project's callout style and placement | Foundation + `cad-callout-pair-layout` | Public callout Skill v0.3.0-rc.1 (existing rules v0.3). Metre-based road defaults; Native style/pose interfaces and a bounded synthetic unchanged-Skill integration are verified in v1.1; full real-project/background coverage remains per task. Check backend coverage before writing. |
 | This project's distress/demolition workflow | Foundation + `cad-distress-annotation` + `cad-callout-pair-layout` | Public distress rules preview v0.1.0-rc.1. Requires engineering evidence, classifications and the callout rules; full workflow needs capabilities outside the current Foundation profile and is not certified on these three components alone. |
 
@@ -27,7 +27,7 @@ Installation requires write permission in the selected AutoCAD installation's pl
 Example `plan.json`, UTF-8, deliberately synthetic:
 
 ```json
-{"schema":"foundation-drawing-plan-v1","source_role":"test","units":"metres","steps":[{"id":"layer","op":"layer","name":"CF_DEMO","color":2},{"id":"line","op":"line","start":[100,100],"end":[120,100],"layer":"CF_DEMO","color":256},{"id":"label","op":"text","text":"Demo length: 20 m","position":[100,103],"height":2.5,"rotation":0,"layer":"CF_DEMO","color":256}]}
+{"schema":"foundation-drawing-plan-v1","source_role":"test","units":"raw_drawing_units","steps":[{"id":"layer","op":"layer","name":"CF_DEMO","color":2},{"id":"line","op":"line","start":[100,100],"end":[120,100],"layer":"CF_DEMO","color":256},{"id":"label","op":"text","text":"Demo length: 20","position":[100,103],"height":2.5,"rotation":0,"layer":"CF_DEMO","color":256}]}
 ```
 
 ```bat
@@ -46,3 +46,5 @@ Save persists the entire working drawing, including other unsaved edits in that 
 For MCP, start generates `mcp-config.json` in the workspace. Add that fragment to a client supporting local stdio MCP if desired; the installer does not change global client configuration. Bind with `dwg_bind_active_document`, inspect identity/version, then pass the bound `context_id` and a stable `request_id`. CLI and MCP cannot run concurrently in the same workspace.
 
 Keep the workspace private: connection tokens, journals, object facts and drawing paths may be present. Sharing the complete workspace is not a public bug report. For reproductions, create a minimal synthetic case and remove customer/project identifiers.
+
+Local 1.2.0-local.4: ordinary plans use raw DWG values; `expected_insunits` is optional. INSUNITS is auxiliary metadata for Agent interpretation/precision/plotting, not an ordinary raw-write prerequisite. The legacy `metres` mode remains compatible. See [units and typography](DRAWING-UNITS-AND-TYPOGRAPHY.zh-CN.md).

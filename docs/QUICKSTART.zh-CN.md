@@ -6,7 +6,7 @@
 
 | 任务 | 所需组件 | 版本与限制 |
 | --- | --- | --- |
-| 已支持的基础 CAD 操作 | 仅 `cad-agent-foundation` | 本地基线 `v1.0.0-local`；公开源码预览`v1.1.0-rc.1`，提供带清单运行ZIP。有界二维操作，当前写入限米制，仅有记录的 Windows／AutoCAD 2026 宿主实测。无需两个 Skill。 |
+| 已支持的基础 CAD 操作 | 仅 `cad-agent-foundation` | 本地基线 `v1.0.0-local`；公开源码预览`v1.1.0-rc.1`，提供带清单运行ZIP。有界二维操作，local.4原坐标操作不以单位为前置条件，仅有记录的 Windows／AutoCAD 2026 宿主实测。无需两个 Skill。 |
 | 本项目的引线标注样式与排布 | 底座 + `cad-callout-pair-layout` | 引线公开预览v0.3.0-rc.1（沿用v0.3规则）。默认与验证来自米制道路图；v1.1已验证样式／位置接口及有限合成Skill联动，完整实战与背景覆盖仍按任务验收，写入前须核对后端覆盖。 |
 | 本项目的病害／拆除标注工作流 | 底座 + `cad-distress-annotation` + `cad-callout-pair-layout` | 病害规则公开预览v0.1.0-rc.1。需要工程依据、分类规则及标注规则；完整流程仍需首版配置之外的能力，尚未验证仅靠这三个组件即可全部复现。 |
 
@@ -26,7 +26,7 @@ foundation.cmd save --workspace "C:\CAD-work\demo01" --handles 实际返回句�
 foundation.cmd stop --workspace "C:\CAD-work\demo01"
 ```
 
-plan.json 的完整合成例在[英文入门](QUICKSTART.md)。坐标由实际任务确认，不能拿示例代替工程定位；单位必须明确为米。省略 `--write` 时只读。安装使用权限允许的 AutoCAD 受信目录并核哈希，不降低可信加载设置。来源图只复制到工作目录 drawings/work.dwg，不自动覆盖来源。
+plan.json 的完整合成例在[英文入门](QUICKSTART.md)。坐标由实际任务确认，不能拿示例代替工程定位；普通操作推荐 `units: raw_drawing_units`；单位元数据核对可选。省略 `--write` 时只读。安装使用权限允许的 AutoCAD 受信目录并核哈希，不降低可信加载设置。来源图只复制到工作目录 drawings/work.dwg，不自动覆盖来源。
 
 CLI返回应同时核对 effects、verification、write_fence_released；进程退出码或请求已接受不是图纸操作成功的全部证据。相同计划重复调用会查询原请求，未知回应只能按原ID查询，不用新ID、删目录或更换提供者绕过。
 
@@ -35,3 +35,5 @@ CLI返回应同时核对 effects、verification、write_fence_released；进程�
 MCP配置片段在工作目录 mcp-config.json，按客户端要求自行配置本地stdio入口；安装不改全局MCP。CLI/MCP共用工作目录账本且互斥。MCP先绑定、核身份和加载版本，再传context_id/request_id调用；外部工具调用不自动纳入本底座事务。
 
 工作目录包含连接凭据、工程几何与路径，保留为私有。反馈时使用最小合成例并去除具体工程信息，不能把整张工程图或完整运行目录上传公开Issue。
+
+Local 1.2.0-local.4: ordinary plans use raw DWG values; `expected_insunits` is optional. INSUNITS is auxiliary metadata for Agent interpretation/precision/plotting, not an ordinary raw-write prerequisite. The legacy `metres` mode remains compatible. See [units and typography](DRAWING-UNITS-AND-TYPOGRAPHY.zh-CN.md).

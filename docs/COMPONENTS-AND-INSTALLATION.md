@@ -6,7 +6,7 @@ Choose components by task. The two Skills are independent, optional companions, 
 
 | Task | Required components | Versions and limits |
 | --- | --- | --- |
-| Supported basic CAD operations | `cad-agent-foundation` only | Local baseline `v1.0.0-local`; public source preview `v1.1.0-rc.1`, with a manifest-bearing runtime ZIP. Bounded 2D operations; current writes require metres; recorded Windows/AutoCAD 2026 host only. Neither Skill is required. |
+| Supported basic CAD operations | `cad-agent-foundation` only | Local baseline `v1.0.0-local`; public source preview `v1.1.0-rc.1`, with a manifest-bearing runtime ZIP. Bounded 2D operations; local.4 raw writes use original drawing values; unit metadata checks are optional; recorded Windows/AutoCAD 2026 host only. Neither Skill is required. |
 | This project's callout style and placement | Foundation + `cad-callout-pair-layout` | Public callout Skill v0.3.0-rc.1 (existing rules v0.3). Metre-based road defaults; Native style/pose interfaces and a bounded synthetic unchanged-Skill integration are verified in v1.1; full real-project/background coverage remains per task. Check backend coverage before writing. |
 | This project's distress/demolition workflow | Foundation + `cad-distress-annotation` + `cad-callout-pair-layout` | Public distress rules preview v0.1.0-rc.1. Requires engineering evidence, classifications and the callout rules; full workflow needs capabilities outside the current Foundation profile and is not certified on these three components alone. |
 
@@ -16,7 +16,7 @@ Foundation executes supported native operations with drawing identity, request o
 
 The callout Skill supplies text content conventions, dot/leader style, confirmed side and opening constraints, and finite placement/avoidance rules. Foundation's callout primitive does not supply that complete workflow. The distress Skill supplies evidence-based professional scope, classification and engineering rules; it uses the callout Skill for presentation. Foundation does not choose a treatment or infer quantities from a drawing without domain evidence.
 
-Foundation is not restricted to roads or civil engineering: other professions may use these basic primitives within the same execution limits. Actual validation uses metre-based civil drawings. WCS is a coordinate reference, not a unit or projection. The present plan parser requires `units: metres`; millimetres and other units are not enabled or validated. The Skills' other-domain uses, including planting/species labels, also require unvalidated size/style/rule adaptations.
+Foundation is not restricted to roads or civil engineering: other professions may use these basic primitives within the same execution limits. Actual validation uses metre-based civil drawings. WCS is a coordinate reference, not a unit or projection. Local.4 recommends `units: raw_drawing_units` with optional `expected_insunits`; no conversion or INSUNITS change. Legacy `metres` remains compatible. The Skills' other-domain uses, including planting/species labels, also require unvalidated size/style/rule adaptations.
 
 Four native dimension primitives and bounded closed-boundary/single-hatch updates are supplied. MLeader, general old-hatch repair, arbitrary polyline properties, Boolean/complex-hole engineering workflows, layout/plotting and external-reference editing remain outside the profile. Neither adding Skills nor installing another MCP server automatically extends Foundation's governed coverage.
 
