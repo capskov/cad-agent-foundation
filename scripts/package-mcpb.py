@@ -17,12 +17,12 @@ def main():
   for name,digest in manifest['files'].items():assert sha(files[name]).upper()==digest,name
  metadata={
   'manifest_version':'0.3','name':'cad-agent-foundation','display_name':'CAD Agent Foundation — AutoCAD MCP',
-  'version':'1.1.0-rc.1','description':'Native AutoCAD MCP server for AI agents with bounded operations and write/save verification.',
+  'version':'1.1.0-rc.1','description':'Agent-first AutoCAD MCP server and CLI with drawing binding, execution feedback, verified DWG writes/saves, and reusable CAD operations for third-party Skills.',
   'long_description':'Local Windows x64 stdio integration. Requires separately installed licensed compatible AutoCAD 2026 (.NET 8), .NET 8 Desktop Runtime and Python 3.11+. First install the bundled runtime and explicitly start an owned drawing copy; choose that existing workspace below. Starting the extension only connects to that workspace; it does not start CAD or enable writes. Source drawings, private journals and unresolved requests remain protected. See INSTALL.md for limits and verification scope.',
   'author':{'name':'capskov','url':'https://github.com/capskov'},
   'repository':{'type':'git','url':'https://github.com/capskov/cad-agent-foundation'},
   'homepage':'https://github.com/capskov/cad-agent-foundation','support':'https://github.com/capskov/cad-agent-foundation/issues',
-  'license':'Apache-2.0','keywords':['autocad','autocad-mcp','cad-automation','ai-agents','dwg'],
+  'license':'Apache-2.0','keywords':['autocad','autocad-mcp','mcp-server','cad-automation','ai-agents','agent-workflows','dwg','cad-skills'],
   'server':{'type':'python','entry_point':'runtime/client/foundation.py','mcp_config':{'command':'${user_config.python_command}','args':['${__dirname}/runtime/client/foundation.py','mcp','--workspace','${user_config.workspace}'],'env':{'PYTHONIOENCODING':'utf-8'}}},
   'compatibility':{'platforms':['win32'],'runtimes':{'python':'>=3.11'}},'tools_generated':True,
   'user_config':{'python_command':{'type':'string','title':'Python 3.11+ executable','description':'python on PATH or the absolute path to your installed python.exe.','default':'python','required':True},'workspace':{'type':'directory','title':'Existing owned CAD workspace','description':'Select the private workspace already installed and started with Foundation. Do not select an engineering source folder.','required':True}}

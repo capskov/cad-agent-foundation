@@ -6,6 +6,13 @@ Foundation development supports the real task. Provide small, reliable, controll
 
 Local unit closeout: `1.2.0-local.4` carries prior bounded primitives, makes INSUNITS consistency optional for raw-coordinate plans and retains the legacy metres interface. The public release below remains `v1.1.0-rc.1`. See [units, precision and paper typography](docs/DRAWING-UNITS-AND-TYPOGRAPHY.zh-CN.md); this is not blanket A–P certification.
 
+**Agent-first AutoCAD MCP — built for the execution loop, not just command calls.** CAD Agent Foundation helps AI agents bind the right drawing, track each request, receive execution feedback, verify what was written or saved, and continue multi-step CAD work with confidence. Independent or third-party CAD Skills can reuse this execution foundation for their own professional workflows.
+
+**中文简介：面向 AI Agent 的 CAD 执行底座——不止调用命令，还关注图纸绑定、执行反馈、结果核验与安全续作，可与第三方专业 Skill 组合使用。**
+
+While CAD integrations connect AI to drawing commands and data, Foundation focuses on the **agent workflow around each operation**: knowing what was requested, what actually happened, and whether the next step is safe.
+
+
 **Public source preview v1.1.0-rc.1 (bounded native operations and Windows runtime preview).** Source, documentation and a manifest-bearing Windows runtime ZIP are provided in this preview. [Build prerequisites and limits](docs/BUILD.md). The accepted local runtime v1.0.0-local is a separate baseline. Companion Skill previews are published independently: callout v0.3.0-rc.1 and distress v0.1.0-rc.1.
 
 [简体中文](README.zh-CN.md) · [Quick start](docs/QUICKSTART.md) · [Capabilities](docs/CAPABILITIES.md) · [Compatibility](docs/COMPATIBILITY.md)
