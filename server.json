@@ -3,7 +3,7 @@
   "name": "io.github.capskov/cad-agent-foundation",
   "title": "CAD Agent Foundation",
   "description": "Agent-first AutoCAD MCP server and CLI with drawing binding, execution feedback, verified DWG writes/saves, and reusable CAD operations for third-party Skills.",
-  "version": "1.1.0-rc.1",
+  "version": "1.2.0-local.4",
   "websiteUrl": "https://github.com/capskov/cad-agent-foundation",
   "repository": {
     "url": "https://github.com/capskov/cad-agent-foundation",
@@ -12,8 +12,8 @@
   "packages": [
     {
       "registryType": "mcpb",
-      "identifier": "https://github.com/capskov/cad-agent-foundation/releases/download/v1.1.0-rc.1/cad-agent-foundation-v1.1.0-rc.1-win-x64.mcpb",
-      "fileSha256": "8bfc037e21fdc83b8620584f2d4faffb1ac85d4c549f9b44b4b1e5d6c8b5c7f5",
+      "identifier": "https://github.com/capskov/cad-agent-foundation/releases/download/v1.2.0-local.4/cad-agent-foundation-v1.2.0-local.4-win-x64.mcpb",
+      "fileSha256": "06422eae5041fc9d2f28b455163a8235437b288a859b372d04ab59f911ad6df1",
       "transport": {
         "type": "stdio"
       }

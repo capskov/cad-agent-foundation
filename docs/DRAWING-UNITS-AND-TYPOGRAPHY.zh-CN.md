@@ -40,4 +40,4 @@ INSUNITS=0照常执行原坐标操作。Agent可依据尺寸样例、已有标�
 
 local.2的INSUNITS=4实机记录属于历史证据；local.4的实际MVID、米/毫米/无单位验证和安装状态以本轮本地收尾记录为准。构建或旧版本通过不等同于新版本实机通过。
 
-本轮不扩展PDF/DXF：两个输出分支仍有独立INSUNITS=0或6门槛，PDF页面范围仍仅layout/extents。不得以普通写入已放开推断输出限制也已解除。GitHub发布留到下一轮。
+本轮不扩展PDF/DXF：两个输出分支仍有独立INSUNITS=0或6门槛，PDF页面范围仍仅layout/extents。不得以普通写入已放开推断输出限制也已解除。后续GitHub发布按独立版本发布说明执行。

@@ -11,14 +11,14 @@
 - 验收关注操作是否可靠、反馈是否真实。画面是否满意由Agent复查判断；抽查或全面复查按用户当前要求，不自行加码。
 - 保留图纸身份、正式图保护、未知写入不重放等执行安全边界；它们属于可靠操作，不是审美或工程判断算法。
 
-本地单位收尾版：`1.2.0-local.4`，延续既有有界操作，原坐标计划的INSUNITS核对改为可选，保留旧米制接口。[单位、精度与出图字高](docs/DRAWING-UNITS-AND-TYPOGRAPHY.zh-CN.md)。公开Release仍为下文的`v1.1.0-rc.1`；本轮仅本地交付，不表示A～P已全部完成。
+本地单位收尾版：`1.2.0-local.4`，延续既有有界操作，原坐标计划的INSUNITS核对改为可选，保留旧米制接口。[单位、精度与出图字高](docs/DRAWING-UNITS-AND-TYPOGRAPHY.zh-CN.md)。本版以`v1.2.0-local.4`预发布，原公开版本保留，不表示A～P已全部完成。
 
 **从“能调用 CAD”走向“适合 AI Agent 持续执行 CAD 任务”。** 很多 CAD MCP 方案首先解决 AI 如何连接、查询和操作 CAD；CAD Agent Foundation 更重视命令发出后的**执行闭环**：绑定正确图纸、追踪请求与状态、反馈实际结果、核验写入和保存，并据此安全地推进多步骤任务。
 
 **专业规则由 Skill 提供，CAD 操作与执行反馈由底座承担。** 自行开发或第三方专业 Skill 可以复用底座开放的操作接口，组合实现不同工程任务。这不仅是一组 CAD 命令，更是一套面向 AI Agent 协作的执行基础设施。
 
 
-**公开源码预览v1.1.0-rc.1（有界原生操作与Windows运行包预览）。** 本次提供源码、文档与带清单Windows运行ZIP，前置软件仍须独立安装。[构建前置条件与限制](docs/BUILD.zh-CN.md)。已验收本地运行版 v1.0.0-local 为独立基线；两个独立Skill已公开：引线v0.3.0-rc.1、病害v0.1.0-rc.1。
+**运行预览v1.2.0-local.4。** [新版说明与升级方法](docs/RELEASE-v1.2.0-local.4.md)。 本次提供源码、文档与带清单Windows运行ZIP，前置软件仍须独立安装。[构建前置条件与限制](docs/BUILD.zh-CN.md)。已验收本地运行版 v1.0.0-local 为独立基线；两个独立Skill已公开：引线v0.3.0-rc.1、病害v0.1.0-rc.1。
 
 [English](README.md) · [安装与快速入门](docs/QUICKSTART.zh-CN.md) · [能力与限制](docs/CAPABILITIES.md)
 
@@ -30,7 +30,7 @@
 
 让智能体明确绑定图纸，持久记录请求归属与执行状态，在回应不明确时查询原请求，并在写入和保存后核对指定对象。当前实现集成在经过修改、固定来源版本的 [Bimwright DWG MCP](https://github.com/bimwright/dwg-mcp) 宿主中。
 
-维护者：**capskov**。当前预览为**v1.1.0-rc.1**，附独立构建运行ZIP和局部实机证据；已验收v1.0.0-local基线保留，不承诺所有AutoCAD2026补丁兼容。
+维护者：**capskov**。当前预览为**v1.2.0-local.4**，附独立构建运行ZIP和局部实机证据；已验收v1.0.0-local基线保留，不承诺所有AutoCAD2026补丁兼容。
 
 ## 为什么开发
 
@@ -119,4 +119,4 @@ Bimwright 是当前集成宿主，来源固定在 [4d0f756](https://github.com/b
 
 Local 1.2.0-local.3 adds guarded existing-style SHX font-pair replacement and anchor-preserving DBText metric scaling. See [scope and parameters](docs/FONT-REPLACEMENT-LOCAL3.zh-CN.md). Native evidence is scoped; prior public releases and global MCP registration are unchanged.
 
-Local 1.2.0-local.4 unit closeout: [changes, native evidence and limits](docs/UNIT-CLOSEOUT-LOCAL4.zh-CN.md). This is a local deliverable; GitHub publication is deferred.
+Local 1.2.0-local.4 unit closeout: [changes, native evidence and limits](docs/UNIT-CLOSEOUT-LOCAL4.zh-CN.md). The original local closeout has now been authorized for GitHub prerelease publication; see the current release notes.

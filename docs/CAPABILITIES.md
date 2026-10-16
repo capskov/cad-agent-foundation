@@ -1,6 +1,6 @@
 # Capability status
 
-Public runtime preview: v1.1.0-rc.1. The local unit-closeout profile is 1.2.0-local.4. It makes the raw-mode INSUNITS consistency check optional and retains local.3 font primitives and prior bounded operations. See [phase-two implementation and limits](PHASE2-DEVELOPMENT-20261015.zh-CN.md) and the versioned local acceptance records. This is not a public release or blanket A–P completion. The historical table below describes the public v1.1 baseline unless explicitly superseded by those local records. Each new native branch is scoped by its acceptance evidence and versioned catalog.
+Public runtime preview: v1.2.0-local.4; the historical table baseline remains v1.1.0-rc.1. The local unit-closeout profile is 1.2.0-local.4. It makes the raw-mode INSUNITS consistency check optional and retains local.3 font primitives and prior bounded operations. See [phase-two implementation and limits](PHASE2-DEVELOPMENT-20261015.zh-CN.md) and the versioned local acceptance records. This is not a public release or blanket A–P completion. The historical table below describes the public v1.1 baseline unless explicitly superseded by those local records. Each new native branch is scoped by its acceptance evidence and versioned catalog.
 
 | Capability | Current state | Boundary |
 |---|---|---|

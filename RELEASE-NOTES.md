@@ -1,5 +1,9 @@
 # Release notes
 
+## v1.2.0-local.4 — raw drawing units and bounded font operations
+
+Ordinary CAD plans execute raw DWG values with optional INSUNITS consistency checks; legacy metre calls remain compatible. Adds bounded SHX style replacement and explicit DBText metric scaling, plus the earlier 1.2 primitive/curve/text/table/block/page/file operations. Ships a Windows runtime ZIP, matching MCPB, manifests, dependency notices and SHA256 checksums. See [changes, installation, exact native scope and limits](docs/RELEASE-v1.2.0-local.4.md). Prior releases remain available; Registry publication is a separate step.
+
 ## v1.1.0-rc.1 — native operations and Windows runtime preview
 
 Adds four native DIMENSION types, text/dimension styles, layer management, closed boundary/hatch and callout continuation, guarded rotation/scaling/copying, and a manifest-bearing Windows runtime package. See [release details](docs/RELEASE-v1.1.0-rc.1.md), [commands](docs/COMMAND-CATALOG-v1.1.0-rc.1.md) and [native validation](docs/VALIDATION-v1.1.0-rc.1.md). Previous releases remain intact.

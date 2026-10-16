@@ -4,7 +4,7 @@
 
 Foundation development supports the real task. Provide small, reliable, controlled CAD primitives and truthful feedback so the Agent can act and move forward. The Agent owns visual judgment, structure interpretation, example learning, pattern recognition and final review. Do not turn those judgments into programs, fitting algorithms or compulsory verification workflows. Do not add incidental features unless explicitly requested. When current primitives suffice and the Agent judges the result acceptable, continue the main task. Preserve drawing identity, source protection and no replay of unknown writes.
 
-Local unit closeout: `1.2.0-local.4` carries prior bounded primitives, makes INSUNITS consistency optional for raw-coordinate plans and retains the legacy metres interface. The public release below remains `v1.1.0-rc.1`. See [units, precision and paper typography](docs/DRAWING-UNITS-AND-TYPOGRAPHY.zh-CN.md); this is not blanket A–P certification.
+Local unit closeout: `1.2.0-local.4` carries prior bounded primitives, makes INSUNITS consistency optional for raw-coordinate plans and retains the legacy metres interface. This prerelease is published as `v1.2.0-local.4`; earlier releases remain available. See [units, precision and paper typography](docs/DRAWING-UNITS-AND-TYPOGRAPHY.zh-CN.md); this is not blanket A–P certification.
 
 **Agent-first AutoCAD MCP — built for the execution loop, not just command calls.** CAD Agent Foundation helps AI agents bind the right drawing, track each request, receive execution feedback, verify what was written or saved, and continue multi-step CAD work with confidence. Independent or third-party CAD Skills can reuse this execution foundation for their own professional workflows.
 
@@ -13,7 +13,7 @@ Local unit closeout: `1.2.0-local.4` carries prior bounded primitives, makes INS
 While CAD integrations connect AI to drawing commands and data, Foundation focuses on the **agent workflow around each operation**: knowing what was requested, what actually happened, and whether the next step is safe.
 
 
-**Public source preview v1.1.0-rc.1 (bounded native operations and Windows runtime preview).** Source, documentation and a manifest-bearing Windows runtime ZIP are provided in this preview. [Build prerequisites and limits](docs/BUILD.md). The accepted local runtime v1.0.0-local is a separate baseline. Companion Skill previews are published independently: callout v0.3.0-rc.1 and distress v0.1.0-rc.1.
+**Public runtime preview v1.2.0-local.4.** [Release and upgrade notes](docs/RELEASE-v1.2.0-local.4.md). Source, documentation and a manifest-bearing Windows runtime ZIP are provided in this preview. [Build prerequisites and limits](docs/BUILD.md). The accepted local runtime v1.0.0-local is a separate baseline. Companion Skill previews are published independently: callout v0.3.0-rc.1 and distress v0.1.0-rc.1.
 
 [简体中文](README.zh-CN.md) · [Quick start](docs/QUICKSTART.md) · [Capabilities](docs/CAPABILITIES.md) · [Compatibility](docs/COMPATIBILITY.md)
 
@@ -25,7 +25,7 @@ AI agents can inspect and operate a live AutoCAD drawing through structured nati
 
 CAD Agent Foundation gives CAD agents a bounded execution contract: explicitly bind a drawing, persist request ownership and execution state, inspect the original request after an uncertain reply, and verify tracked object facts after writes and saves. The current implementation integrates these mechanisms into a modified, pinned [Bimwright DWG MCP](https://github.com/bimwright/dwg-mcp) host.
 
-This Windows/AutoCAD bridge is maintained by **capskov**. The current preview is **v1.1.0-rc.1**, with an independently built runtime ZIP and scoped native evidence. The accepted **v1.0.0-local** baseline is retained; compatibility with every AutoCAD update is not claimed.
+This Windows/AutoCAD bridge is maintained by **capskov**. The current preview is **v1.2.0-local.4**, with an independently built runtime ZIP and scoped native evidence. The accepted **v1.0.0-local** baseline is retained; compatibility with every AutoCAD update is not claimed.
 
 ## Why this project exists
 
@@ -138,4 +138,4 @@ AutoCAD and DWG are Autodesk trademarks. This independent project is not endorse
 
 Local 1.2.0-local.3 adds guarded existing-style SHX font-pair replacement and anchor-preserving DBText metric scaling. See [scope and parameters](docs/FONT-REPLACEMENT-LOCAL3.zh-CN.md). Native evidence is scoped; prior public releases and global MCP registration are unchanged.
 
-Local 1.2.0-local.4 unit closeout: [changes, native evidence and limits](docs/UNIT-CLOSEOUT-LOCAL4.zh-CN.md). This is a local deliverable; GitHub publication is deferred.
+Local 1.2.0-local.4 unit closeout: [changes, native evidence and limits](docs/UNIT-CLOSEOUT-LOCAL4.zh-CN.md). The original local closeout has now been authorized for GitHub prerelease publication; see the current release notes.

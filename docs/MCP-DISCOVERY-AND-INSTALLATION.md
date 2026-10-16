@@ -4,7 +4,13 @@ CAD Agent Foundation is an **agent-first AutoCAD MCP and CLI execution foundatio
 
 **中文速览：面向 AI Agent 的 CAD 执行底座，提供图纸绑定、执行反馈、结果核验与安全续作；支持与第三方专业 Skill 协同。**
 
-## Official MCP Registry
+## GitHub preview v1.2.0-local.4
+
+[Current release and upgrade notes](RELEASE-v1.2.0-local.4.md). Download the [Windows runtime ZIP](https://github.com/capskov/cad-agent-foundation/releases/download/v1.2.0-local.4/cad-agent-foundation-v1.2.0-local.4-win-x64.zip) or [matching MCPB](https://github.com/capskov/cad-agent-foundation/releases/download/v1.2.0-local.4/cad-agent-foundation-v1.2.0-local.4-win-x64.mcpb), and verify SHA256SUMS.txt from that release. Upgrade into a fresh owned workspace with the matching plugin; close or preserve previous sessions through their original versioned entry. The source server.json describes the current GitHub bundle; this task does not publish a new official Registry record. The Registry section below records the earlier 1.1.0-rc.1 publication.
+
+中文：新版GitHub预览支持原坐标操作及可选单位核对，运行ZIP与MCPB包含相同运行代码。升级使用新工作目录；此次发布不自动更换Registry线上记录，也不修改用户全局MCP。
+
+## Official MCP Registry — earlier published record
 
 Published name: `io.github.capskov/cad-agent-foundation`, version `1.1.0-rc.1`. The repository's [server.json](../server.json) describes a local stdio MCPB distributed through GitHub Releases. Public metadata can be queried through the [official Registry API](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.capskov%2Fcad-agent-foundation). Registry metadata does not install software or grant permission to operate a drawing.
 

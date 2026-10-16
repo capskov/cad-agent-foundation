@@ -1,5 +1,9 @@
 # Publication scope
 
+## v1.2.0-local.4 runtime preview
+
+Publishes the native-tested raw-unit closeout runtime with bounded font/phase-two primitives and matching ZIP/MCPB installation assets. The plugin/server/client/support/dependency bytes match the recorded local.4 native run; only documentation, acceptance metadata and outer packaging are finalized for publication. Current and historical validation scopes remain distinct in [the release notes](RELEASE-v1.2.0-local.4.md). Private DWGs, raw journals/receipts, credentials, machine paths, PDBs, Autodesk assemblies and unlicensed SHX are excluded. Earlier tags/assets remain intact; updating GitHub and repository Registry metadata does not itself publish the official Registry.
+
 ## v1.1.0-rc.1 runtime preview
 
 The new version adds reviewed native operations and an independently packaged Windows runtime with dependency notices, file hashes and plugin MVID. Its scoped acceptance is recorded in [versioned validation](VALIDATION-v1.1.0-rc.1.md). Private engineering DWGs, journals, credentials, PDBs and Autodesk/SHX redistributions remain excluded. The following section describes the historical source preview only.
