@@ -38,6 +38,16 @@ namespace Bimwright.Dwg.Plugin.Cad
 
             switch (entity)
             {
+#if ACAD2026
+                case RasterImage image when image.GetType()==typeof(RasterImage):
+                    var def=(RasterImageDef)tx.GetObject(image.ImageDefId,OpenMode.ForRead);
+                    result["source_file"]=def.SourceFileName;result["definition_handle"]=def.Handle.ToString();
+                    var axes=image.Orientation;result["origin"]=Point(axes.Origin);result["u_axis"]=new[]{axes.Xaxis.X,axes.Xaxis.Y,axes.Xaxis.Z};result["v_axis"]=new[]{axes.Yaxis.X,axes.Yaxis.Y,axes.Yaxis.Z};
+                    result["rotation"]=image.Rotation;result["image_width"]=image.ImageWidth;result["image_height"]=image.ImageHeight;
+                    result["is_clipped"]=image.IsClipped;result["brightness"]=image.Brightness;result["contrast"]=image.Contrast;result["fade"]=image.Fade;result["show_image"]=image.ShowImage;
+                    var clip=new List<object>();foreach(Point2d pt in image.GetClipBoundary())clip.Add(new[]{pt.X,pt.Y});result["clip_boundary"]=clip;
+                    break;
+#endif
                 case DBPoint point:
                     result["position"]=Point(point.Position);break;
                 case Line line:
@@ -119,6 +129,11 @@ namespace Bimwright.Dwg.Plugin.Cad
         {
             result["vertex_count"] = polyline.NumberOfVertices;
             result["is_closed"] = polyline.Closed;
+            // ConstantWidth throws for some variable-width polylines. Keep the
+            // entity readable and report each native segment width below.
+            try { result["constant_width"] = polyline.ConstantWidth; }
+            catch (Autodesk.AutoCAD.Runtime.Exception ex) when (ex.ErrorStatus == Autodesk.AutoCAD.Runtime.ErrorStatus.InvalidInput)
+            { result["constant_width"] = null; }
 
             if (TryGetCurveLength(polyline, out var length))
             {
@@ -140,7 +155,9 @@ namespace Bimwright.Dwg.Plugin.Cad
                     x = point.X,
                     y = point.Y,
                     z = point.Z,
-                    bulge = polyline.GetBulgeAt(i)
+                      bulge = polyline.GetBulgeAt(i),
+                      start_width = polyline.GetStartWidthAt(i),
+                      end_width = polyline.GetEndWidthAt(i)
                 });
             }
 

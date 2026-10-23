@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>disable</Nullable></PropertyGroup>
  <ItemGroup>
+  <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Cad/CadWire.cs" Link="CadWire.cs" />
+  <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Cad/HandleBatchRequest.cs" Link="HandleBatchRequest.cs" />
   <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationDrawingPlan.cs" Link="FoundationDrawingPlan.cs" />
   <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationPlanExtensions.cs" Link="FoundationPlanExtensions.cs" />
@@ -11,4 +13,4 @@
   <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationAngularContract.cs" Link="FoundationAngularContract.cs" />
   <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationBlockContract.cs" Link="FoundationBlockContract.cs" />
   </ItemGroup>
-</Project>
+<ItemGroup><Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationArchiveRoundoffRecovery.cs" Link="FoundationArchiveRoundoffRecovery.cs" /></ItemGroup><ItemGroup><Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationViewRequest.cs" Link="FoundationViewRequest.cs" /></ItemGroup></Project>

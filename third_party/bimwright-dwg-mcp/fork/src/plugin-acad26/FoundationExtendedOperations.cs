@@ -28,7 +28,7 @@ namespace Bimwright.Dwg.Plugin
    {
     if(dims.Count>=512)throw new InvalidOperationException("dimension_style_catalog_limit_512");
     var r=(DimStyleTableRecord)tx.GetObject(id,OpenMode.ForRead);var ts=(TextStyleTableRecord)tx.GetObject(r.Dimtxsty,OpenMode.ForRead);
-    dims[r.Name]=new JObject{["handle"]=id.Handle.ToString(),["text_style"]=ts.Name,["text_height"]=r.Dimtxt,["arrow_size"]=r.Dimasz,["overall_scale"]=r.Dimscale,["gap"]=r.Dimgap,["decimal_places"]=r.Dimdec,["dimension_color"]=(int)r.Dimclrd.ColorIndex,["extension_color"]=(int)r.Dimclre.ColorIndex,["text_color"]=(int)r.Dimclrt.ColorIndex};
+    dims[r.Name]=new JObject{["handle"]=id.Handle.ToString(),["text_style"]=ts.Name,["text_height"]=r.Dimtxt,["arrow_size"]=r.Dimasz,["overall_scale"]=r.Dimscale,["gap"]=r.Dimgap,["decimal_places"]=r.Dimdec,["extension_origin_offset"]=r.Dimexo,["extension_beyond"]=r.Dimexe,["decimal_separator"]=((char)r.Dimdsep).ToString(),["dimension_color"]=(int)r.Dimclrd.ColorIndex,["extension_color"]=(int)r.Dimclre.ColorIndex,["text_color"]=(int)r.Dimclrt.ColorIndex};
    }
    return new JObject{["text_styles"]=text,["dimension_styles"]=dims,["block_definitions"]=BlockDefinitions(db,tx)};
   }
@@ -110,7 +110,7 @@ namespace Bimwright.Dwg.Plugin
     case "dimension_style":
      var dt=(DimStyleTable)tx.GetObject(db.DimStyleTableId,OpenMode.ForRead);string dn=step.Value<string>("name");
      if(dt.Has(dn)){map["name"]=dn;break;}
-     var dim=new DimStyleTableRecord();dim.CopyFrom((DimStyleTableRecord)tx.GetObject(db.Dimstyle,OpenMode.ForRead));dim.Name=dn;dim.Dimtxsty=TextStyle(db,tx,step.Value<string>("text_style"));dim.Dimtxt=step.Value<double>("text_height");dim.Dimasz=step.Value<double>("arrow_size");dim.Dimscale=step.Value<double>("overall_scale");dim.Dimgap=step.Value<double>("gap");dim.Dimdec=step.Value<int>("decimal_places");dim.Dimclrd=C("dimension_color");dim.Dimclre=C("extension_color");dim.Dimclrt=C("text_color");
+     var dim=new DimStyleTableRecord();dim.CopyFrom((DimStyleTableRecord)tx.GetObject(db.Dimstyle,OpenMode.ForRead));dim.Name=dn;dim.Dimtxsty=TextStyle(db,tx,step.Value<string>("text_style"));dim.Dimtxt=step.Value<double>("text_height");dim.Dimasz=step.Value<double>("arrow_size");dim.Dimscale=step.Value<double>("overall_scale");dim.Dimgap=step.Value<double>("gap");dim.Dimdec=step.Value<int>("decimal_places");if(step["extension_origin_offset"]!=null)dim.Dimexo=step.Value<double>("extension_origin_offset");if(step["extension_beyond"]!=null)dim.Dimexe=step.Value<double>("extension_beyond");if(step["decimal_separator"]!=null)dim.Dimdsep=step.Value<string>("decimal_separator")[0];dim.Dimclrd=C("dimension_color");dim.Dimclre=C("extension_color");dim.Dimclrt=C("text_color");
      dt.UpgradeOpen();dt.DisableUndoRecording(false);dt.Add(dim);tx.AddNewlyCreatedDBObject(dim,true);dim.DisableUndoRecording(false);map["name"]=dn;break;
     case "set_layer":
      var lt=(LayerTable)tx.GetObject(db.LayerTableId,OpenMode.ForRead);string ln=step.Value<string>("name");

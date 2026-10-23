@@ -301,7 +301,7 @@ namespace Bimwright.Dwg.Plugin
             }
             else
             {
-                if (toolName is not ("list_layers" or "get_entity_properties" or "query_entities"))
+                if (toolName is not ("list_layers" or "get_entity_properties" or "query_entities" or "foundation_view"))
                     return CommandResult.Fail("tool_not_allowlisted");
 
                 if (!TryParseCanonicalReadParameters(toolName, canonicalParametersJson,
@@ -547,7 +547,7 @@ namespace Bimwright.Dwg.Plugin
         internal static PluginReadOnlyJobResult ExecuteReadOnlyJob(PluginJobSnapshot job)
         {
             if (job == null || job.IsWrite
-                || job.ToolName is not ("list_layers" or "get_entity_properties" or "query_entities" or "d1_preflight_r01" or "h1_preflight_fixed"))
+                || job.ToolName is not ("list_layers" or "get_entity_properties" or "query_entities" or "foundation_view" or "d1_preflight_r01" or "h1_preflight_fixed"))
                 return PluginReadOnlyJobResult.Failure("tool_not_allowlisted", "The job is not an allowlisted read-only tool.");
             if (job.ToolName == H1FixedHatchPreflightContract.PluginToolName && !App.H1PreflightPilotEnabled)
                 return PluginReadOnlyJobResult.Failure("h1_preflight_disabled", "The fixed H1 preflight is disabled in this process.");
@@ -642,6 +642,9 @@ namespace Bimwright.Dwg.Plugin
             out JToken parameters, out string error)
         {
             parameters = null;
+#if ACAD2026
+            if(toolName==FoundationViewRequest.Plugin){error="invalid_view_request";if(!FoundationViewRequest.Valid(canonicalJson))return false;parameters=JObject.Parse(canonicalJson);error=null;return true;}
+#endif
             if (string.Equals(toolName, "list_layers", StringComparison.Ordinal))
             {
                 bool valid = TryParseCanonicalListLayersParameters(canonicalJson, out error);
@@ -692,6 +695,9 @@ namespace Bimwright.Dwg.Plugin
         {
             switch (toolName)
             {
+#if ACAD2026
+                case FoundationViewRequest.Plugin:return new FoundationViewHandler();
+#endif
                 case "list_layers":
                     return new ListLayersHandler();
                 case "get_entity_properties":

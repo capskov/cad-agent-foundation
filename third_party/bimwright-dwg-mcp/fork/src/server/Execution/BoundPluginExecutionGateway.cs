@@ -263,7 +263,8 @@ namespace Bimwright.Dwg.Server.Execution
         }
 
         public static bool IsGovernedReadToolName(string toolName) =>
-            string.Equals(toolName, PilotMcpToolName, StringComparison.Ordinal)
+            string.Equals(toolName, FoundationViewRequest.Mcp, StringComparison.Ordinal)
+            || string.Equals(toolName, PilotMcpToolName, StringComparison.Ordinal)
             || string.Equals(toolName, EntityPropertiesMcpToolName, StringComparison.Ordinal)
             || string.Equals(toolName, QueryEntitiesMcpToolName, StringComparison.Ordinal)
             || string.Equals(toolName, D1PreflightMcpToolName, StringComparison.Ordinal)
@@ -274,6 +275,7 @@ namespace Bimwright.Dwg.Server.Execution
         {
             pluginToolName = null;
             error = "read tool or parameters are not allowlisted";
+            if(toolName==FoundationViewRequest.Mcp){if(!FoundationViewRequest.Valid(canonicalParametersJson))return false;pluginToolName=FoundationViewRequest.Plugin;error=null;return true;}
             if (string.Equals(toolName, H1FixedHatchPreflightContract.McpToolName, StringComparison.Ordinal))
             {
                 if (canonicalParametersJson != H1FixedHatchPreflightContract.CanonicalParametersJson) return false;
@@ -320,6 +322,7 @@ namespace Bimwright.Dwg.Server.Execution
             validatedPluginToolName = null;
             error = "read tool or parameters are not allowlisted";
 
+            if(pluginToolName==FoundationViewRequest.Plugin){if(!FoundationViewRequest.Valid(canonicalParametersJson))return false;mcpToolName=FoundationViewRequest.Mcp;validatedPluginToolName=FoundationViewRequest.Plugin;error=null;return true;}
             if (pluginToolName == H1FixedHatchPreflightContract.PluginToolName)
             {
                 if (canonicalParametersJson != H1FixedHatchPreflightContract.CanonicalParametersJson) return false;
@@ -391,6 +394,14 @@ namespace Bimwright.Dwg.Server.Execution
             request = null;
             error = "read tool or parameters are not allowlisted";
 
+            if(invocation.ToolName==FoundationViewRequest.Mcp){
+                try {
+                    if(invocation.BusinessArguments?.Count!=1||!invocation.BusinessArguments.TryGetValue("request_json",out var a)||a.ValueKind!=JsonValueKind.String)return false;
+                    var p=FoundationViewRequest.Parse(a.GetString());
+                    if(!TryConvertToObject(inputParams,out JObject i)||!TryConvertToObject(pluginParams,out JObject o)||!JToken.DeepEquals(p,i)||!JToken.DeepEquals(p,o))return false;
+                    request=new GovernedReadRequest(FoundationViewRequest.Mcp,FoundationViewRequest.Plugin,FoundationViewRequest.Canonical(a.GetString()));error=null;return true;
+                }catch(Exception ex){error=ex.Message;return false;}
+            }
             if (string.Equals(invocation.ToolName, PilotMcpToolName, StringComparison.Ordinal))
             {
                 if (!IsEmptyObject(inputParams) || !IsEmptyObject(pluginParams)
@@ -442,7 +453,7 @@ namespace Bimwright.Dwg.Server.Execution
 
             foreach (string argumentName in invocation.BusinessArguments.Keys)
             {
-                if (argumentName != "handles" && argumentName != "include_geometry")
+                if (argumentName != "handles" && argumentName != "include_geometry" && argumentName != "geometry_offset")
                 {
                     error = "get_entity_properties contains an unsupported business argument";
                     return false;
@@ -474,6 +485,10 @@ namespace Bimwright.Dwg.Server.Execution
                 ["handles"] = handles,
                 ["include_geometry"] = includeGeometry
             };
+            if(invocation.BusinessArguments.TryGetValue("geometry_offset",out JsonElement offsetArgument)){
+                if(offsetArgument.ValueKind!=JsonValueKind.Number || !offsetArgument.TryGetInt32(out int offset)){error="geometry_offset must be an integer";return false;}
+                parameters["geometry_offset"]=offset;
+            }
             if (!HandleBatchRequest.TryCreate(parameters, out _, out error))
                 return false;
 

@@ -114,6 +114,8 @@ class TransportClosed(ConnectionError):
 
 class RemoteRpcError(RuntimeError):
     """The MCP server returned a JSON-RPC error."""
+    def __init__(self,message,code=None):
+        super().__init__(message);self.code=code
 
 
 class ApplicationFailure(RuntimeError):
@@ -997,7 +999,7 @@ class McpStdioClient:
                 # Notifications and late responses are consumed without
                 # changing the request ID or resubmitting anything.
             if "error" in response:
-                raise RemoteRpcError(redact_text(str(response["error"])))
+                raise RemoteRpcError(redact_text(str(response["error"])), response["error"].get("code") if isinstance(response["error"],dict) else None)
             result = response.get("result")
             if not isinstance(result, dict):
                 raise ProtocolError(f"MCP {method} response did not contain a result object.")

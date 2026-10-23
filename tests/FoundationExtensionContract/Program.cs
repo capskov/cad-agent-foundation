@@ -15,6 +15,13 @@ if(args.Length==2&&args[0]=="--diagnose")
 
 int passed=0;
 void Check(bool ok,string name){if(!ok)throw new Exception(name);passed++;}
+bool ReadArgs(string json)=>Bimwright.Dwg.Plugin.Cad.HandleBatchRequest.TryParseCanonicalJson(json,out _,out _);
+Check(ReadArgs("{\"handles\":[\"A\"],\"include_geometry\":true}"),"legacy read unchanged");
+Check(ReadArgs("{\"handles\":[\"A\"],\"include_geometry\":true,\"geometry_offset\":64}"),"geometry page accepted");
+foreach(string offset in new[]{"-1","4097","1.5","true","999999999999999999999999999999"})Check(!ReadArgs("{\"handles\":[\"A\"],\"include_geometry\":true,\"geometry_offset\":"+offset+"}"),"invalid geometry offset rejected "+offset);
+Check(!ReadArgs("{\"handles\":[\"A\",\"B\"],\"include_geometry\":true,\"geometry_offset\":0}"),"geometry page requires one handle");
+Check(!ReadArgs("{\"handles\":[\"A\"],\"geometry_offset\":0}"),"geometry page requires geometry");
+Check(!ReadArgs("{\"handles\":[\"A\"],\"include_geometry\":true,\"unexpected\":0}"),"unknown read option rejected");
 JObject Point(double x,double y)=>new(){["x"]=x,["y"]=y,["z"]=0};
 JObject Plan(JObject step)=>new(){["schema"]=FoundationDrawingPlan.Schema,["source_role"]="test",["units"]="metres",["steps"]=new JArray(step)};
 bool Valid(JObject step){try{FoundationDrawingPlan.Parse(Plan(step).ToString());return true;}catch{return false;}}
@@ -22,6 +29,16 @@ JObject Receipt(JObject step,JObject before,JObject after,JObject map,JObject la
 bool Verify(JObject step,JObject receipt)=>FoundationDrawingPlan.VerifyReceipt(receipt,Plan(step).ToString());
 
 var rawUnitPlan=Plan(new JObject{["id"]="u",["op"]="line",["start"]=new JArray(0,0),["end"]=new JArray(18,18),["layer"]="T",["color"]=7});
+var widePolyline=new JObject{["handle"]="P",["type"]="Polyline",["layer"]="T",["color_index"]=7,["constant_width"]=0.08,["vertices"]=new JArray(new JObject{["x"]=0,["y"]=0,["z"]=0,["bulge"]=0,["start_width"]=0.08,["end_width"]=0.08},new JObject{["x"]=10,["y"]=0,["z"]=0,["bulge"]=0,["start_width"]=0.08,["end_width"]=0.08}),["is_closed"]=false};
+var wideStep=new JObject{["id"]="wide",["op"]="polyline",["vertices"]=new JArray(new JArray(0,0),new JArray(10,0)),["closed"]=false,["layer"]="T",["color"]=7,["constant_width"]=0.08};
+var wideReceipt=Receipt(wideStep,new JObject(),new JObject{["P"]=widePolyline},new JObject{["entity"]="P"});
+Check(Verify(wideStep,wideReceipt),"constant-width polyline facts verify");
+var wrongWide=(JObject)wideReceipt.DeepClone();wrongWide["after"]["P"]["constant_width"]=0.09;Check(!Verify(wideStep,wrongWide),"wrong constant width rejected");
+var widthScale=FoundationDrawingPlan.TransformFacts(widePolyline,new JObject{["op"]="scale",["factor"]=2,["base"]=new JArray(0,0)});
+Check(widthScale.Value<double>("constant_width")==0.16&&widthScale["vertices"][0].Value<double>("start_width")==0.16&&widthScale["vertices"][1].Value<double>("end_width")==0.16,"scale includes native polyline widths");
+var variableWide=(JObject)widePolyline.DeepClone();variableWide["constant_width"]=JValue.CreateNull();variableWide["vertices"][0]["end_width"]=0.12;
+var variableScaled=FoundationDrawingPlan.TransformFacts(variableWide,new JObject{["op"]="scale",["factor"]=2,["base"]=new JArray(0,0)});
+Check(variableScaled["constant_width"].Type==JTokenType.Null&&variableScaled["vertices"][0].Value<double>("end_width")==0.24,"variable width remains readable and scales without a fabricated constant");
 rawUnitPlan["units"]="raw_drawing_units";rawUnitPlan["expected_insunits"]=4;
 Check(FoundationDrawingPlan.Parse(rawUnitPlan.ToString())["steps"][0]["end"][0].Value<int>()==18,"raw coordinates preserved without conversion");
 bool InvalidPlan(JObject p){try{FoundationDrawingPlan.Parse(p.ToString());return false;}catch{return true;}}
@@ -118,3 +135,22 @@ var metrics=new JObject{["id"]="metrics",["op"]="set_text_metrics",["targets"]=n
 var metricNext=(JObject)metricOld.DeepClone();metricNext["height"]=6;metricNext["width_factor"]=1.1;metricNext["position"]=Point(-2,2);
 var metricReceipt=Receipt(metrics,new JObject{["A"]=metricOld},new JObject{["A"]=metricNext},new JObject{["A"]="A"});Check(Valid(metrics)&&Verify(metrics,metricReceipt),"centered text scales around preserved alignment anchor");corrupt=(JObject)metricReceipt.DeepClone();corrupt["after"]["A"]["alignment_point"]=Point(11,2);Check(!Verify(metrics,corrupt),"moving centered anchor cannot pass metric adjustment");corrupt=(JObject)metricReceipt.DeepClone();corrupt["after"]["A"]["text"]="改字";Check(!Verify(metrics,corrupt),"metrics cannot change text content");
 Console.WriteLine($"Foundation extension invariants: {passed} passed");
+
+if(args.Length==1){
+ var caseData=JObject.Parse(System.IO.File.ReadAllText(args[0]));var original=JObject.Parse(caseData["job"].Value<string>("result_json"));var canonical=JObject.Parse(System.IO.File.ReadAllText(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(args[0]),"requests/v10-copy-actual-complete-section.json")))["plan"].ToString(Newtonsoft.Json.Formatting.None);
+ var fresh=(JObject)original.DeepClone();fresh["outcome"]="committed_verified";var proof=new JObject{["schema"]="foundation-archive-roundoff-recovery-v1",["original_result_sha256"]=FoundationDrawingPlan.Hash(original),["plan_sha256"]=FoundationDrawingPlan.Hash(JObject.Parse(canonical)),["native_readback"]=fresh};
+ Check(FoundationDrawingPlan.VerifyReadback(original.ToString(),proof.ToString(),canonical),"archive roundoff complete recovery proof passes");
+ var wrong=(JObject)proof.DeepClone();wrong["original_result_sha256"]=new string('0',64);Check(!FoundationDrawingPlan.VerifyReadback(original.ToString(),wrong.ToString(),canonical),"recovery rejects other committed result");
+ wrong=(JObject)proof.DeepClone();wrong["native_readback"]["after"]["754"]["vertices"][0]["x"]=270.01;Check(!FoundationDrawingPlan.VerifyReadback(original.ToString(),wrong.ToString(),canonical),"recovery rejects changed geometry");
+ wrong=(JObject)proof.DeepClone();wrong["native_readback"]["after"]["2FC"]["color_index"]=1;Check(!FoundationDrawingPlan.VerifyReadback(original.ToString(),wrong.ToString(),canonical),"recovery protects original source properties");
+ wrong=(JObject)proof.DeepClone();wrong["native_readback"]["layouts_after"]["Model"]["rotation"]=2;Check(!FoundationDrawingPlan.VerifyReadback(original.ToString(),wrong.ToString(),canonical),"recovery protects layout state");
+ Console.WriteLine($"Including recovery: {passed} passed");
+}
+
+// Scoped view and raster repair contract checks; no CAD process here.
+foreach(string json in new[]{"{\"action\":\"read\"}","{\"action\":\"window\",\"min_x\":100,\"min_y\":200,\"max_x\":140,\"max_y\":240}","{\"action\":\"center\",\"x\":100,\"y\":200,\"height\":40}","{\"action\":\"capture\",\"file_name\":\"view.png\"}"})Check(FoundationViewRequest.Valid(FoundationViewRequest.Canonical(json)),"valid view action");
+foreach(string json in new[]{"{\"action\":\"window\",\"min_x\":0,\"min_y\":0,\"max_x\":0,\"max_y\":5}","{\"action\":\"center\",\"x\":1,\"y\":2,\"height\":-1}","{\"action\":\"capture\",\"file_name\":\"../old.png\"}","{\"action\":\"read\",\"command\":\"ZOOM\"}","{\"action\":\"read\",\"pixel_size\":300}"}){bool viewRejected=false;try{FoundationViewRequest.Parse(json);}catch{viewRejected=true;}Check(viewRejected,"invalid view refused");}
+var rasterStep=new JObject{["id"]="raster",["op"]="set_raster_path",["targets"]=new JArray(new JObject{["handle"]="A",["expected_sha256"]=new string('A',64)}),["path"]="C:/fixture/image.png"};
+Check(Valid(rasterStep),"explicit raster path contract");
+rasterStep["path"]="relative.png";Check(!Valid(rasterStep),"relative raster repair refused");
+Console.WriteLine($"With view/raster contracts: {passed} passed");

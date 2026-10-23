@@ -121,7 +121,7 @@ namespace Bimwright.Dwg.Plugin
             {
                 string h=target.Value<string>("handle");var entity=tx.GetObject(Resolve(db,h),OpenMode.ForRead) as Entity;
                 var owner=entity==null?null:tx.GetObject(entity.OwnerId,OpenMode.ForRead) as BlockTableRecord;
-                if(entity==null||owner==null||!owner.IsLayout||entity.OwnerId!=model||(entity is not (Line or Circle or DBText or MText or Leader or Hatch)&&!(phase2Names.Contains(h)&&entity is (Polyline or Arc or Ellipse or DBPoint or Table or BlockReference or RotatedDimension or AlignedDimension or RadialDimension or DiametricDimension))&&!(archiveNames.Contains(h)&&entity is (Polyline or RotatedDimension or AlignedDimension or RadialDimension or DiametricDimension))&&!(boundaryNames.Contains(h)&&entity is Polyline{Closed:true})&&!(transformNames.Contains(h)&&entity is Polyline)))throw new InvalidOperationException("unsupported_existing_entity_or_space:"+h);
+                if(entity==null||owner==null||!owner.IsLayout||entity.OwnerId!=model||(entity is not (Line or Circle or DBText or MText or Leader or Hatch)&&!(phase2Names.Contains(h)&&entity is (Polyline or Arc or Ellipse or DBPoint or Table or BlockReference or RasterImage or RotatedDimension or AlignedDimension or RadialDimension or DiametricDimension))&&!(archiveNames.Contains(h)&&entity is (Polyline or RotatedDimension or AlignedDimension or RadialDimension or DiametricDimension))&&!(boundaryNames.Contains(h)&&entity is Polyline{Closed:true})&&!(transformNames.Contains(h)&&entity is Polyline)))throw new InvalidOperationException("unsupported_existing_entity_or_space:"+h);
                 if(((LayerTableRecord)tx.GetObject(entity.LayerId,OpenMode.ForRead)).IsLocked)throw new InvalidOperationException("locked_source_layer:"+h);
                 if(transformNames.Contains(h))
                 {
@@ -130,8 +130,9 @@ namespace Bimwright.Dwg.Plugin
                 }
                 if(phase2Names.Contains(h)&&entity.GetPersistentReactorIds().Count>0&&((JArray)plan["steps"]).Cast<JObject>().Any(s=>s.Value<string>("op") is "set_open_polyline" or "set_text_format" or "set_dimension_text"&&(s["targets"] as JArray??new JArray()).Cast<JObject>().Any(t=>t.Value<string>("handle")==h)))throw new InvalidOperationException("standalone_entity_without_persistent_reactors_required:"+h);
                 if(FoundationDrawingPlan.Hash(before[h])!=target.Value<string>("expected_sha256"))throw new InvalidOperationException("entity_changed:"+h);
+                if(entity is RasterImage&& !((JArray)plan["steps"]).Cast<JObject>().Any(s=>s.Value<string>("op")=="set_raster_path"&&((JArray)s["targets"]).Cast<JObject>().Any(t=>t.Value<string>("handle")==h)))throw new InvalidOperationException("raster_only_supports_explicit_path_repair");
                 foreach(ObjectId reactor in entity.GetPersistentReactorIds())
-                {var other=tx.GetObject(reactor,OpenMode.ForRead) as Entity;if(other==null||!names.Contains(other.Handle.ToString()))throw new InvalidOperationException("include_complete_associated_group:"+h);}
+                {if(entity is RasterImage ri&&reactor==ri.ReactorId)continue;var other=tx.GetObject(reactor,OpenMode.ForRead) as Entity;if(other==null||!names.Contains(other.Handle.ToString()))throw new InvalidOperationException("include_complete_associated_group:"+h);}
                 if(entity is Leader leader&&!leader.Annotation.IsNull&&!names.Contains(leader.Annotation.Handle.ToString()))throw new InvalidOperationException("include_leader_annotation:"+h);
                 if(entity is Hatch hatch)
                 {
@@ -203,7 +204,7 @@ namespace Bimwright.Dwg.Plugin
                         case "line":refs[id]=Add(new Line(Point(step["start"]),Point(step["end"])));break;
                         case "circle":refs[id]=Add(new Circle(Point(step["center"]),Vector3d.ZAxis,step.Value<double>("radius")));break;
                         case "polyline":
-                            var poly=new Polyline();poly.SetDatabaseDefaults(db);var points=(JArray)step["vertices"];for(int i=0;i<points.Count;i++){var p=(JArray)points[i];poly.AddVertexAt(i,new Point2d(p[0].Value<double>(),p[1].Value<double>()),p.Count==3?p[2].Value<double>():0,0,0);}poly.Closed=step.Value<bool>("closed");refs[id]=Add(poly);break;
+                            var poly=new Polyline();poly.SetDatabaseDefaults(db);var points=(JArray)step["vertices"];for(int i=0;i<points.Count;i++){var p=(JArray)points[i];poly.AddVertexAt(i,new Point2d(p[0].Value<double>(),p[1].Value<double>()),p.Count==3?p[2].Value<double>():0,0,0);}poly.Closed=step.Value<bool>("closed");if(step["constant_width"]!=null)poly.ConstantWidth=step.Value<double>("constant_width");refs[id]=Add(poly);break;
                         case "text":
                             if(!AnnotationEntityFactory.TryCreateText(TextInput(step,false),out DBText text,out string textError))throw new InvalidOperationException(textError);ApplyTextStyle(db,tx,text,step);refs[id]=Add(text);break;
                         case "mtext":
@@ -237,7 +238,7 @@ namespace Bimwright.Dwg.Plugin
                             var oldLeader=tx.GetObject(Resolve(db,step.Value<string>("handle")),OpenMode.ForWrite) as Leader;var pairedText=tx.GetObject(Resolve(db,step.Value<string>("text_handle")),OpenMode.ForWrite) as MText;
                             if(oldLeader==null||pairedText==null||oldLeader.Annotation!=pairedText.ObjectId||oldLeader.NumVertices!=3||oldLeader.IsSplined)throw new InvalidOperationException("three_vertex_LEADER_and_its_MTEXT_required");
                             if(!oldLeader.HasArrowHead&&oldLeader.VertexAt(0).DistanceTo(Point(step["vertices"][0]))>0.001&&step["dot_companions"]==null)throw new InvalidOperationException("moving_separate_dot_anchor_requires_dot_companions");
-                            oldLeader.DisableUndoRecording(false);pairedText.DisableUndoRecording(false);for(int i=0;i<3;i++)oldLeader.SetVertexAt(i,Point(step["vertices"][i]));pairedText.Location=Point(step["position"]);map["leader"]=oldLeader.Handle.ToString();map["text"]=pairedText.Handle.ToString();
+                            oldLeader.DisableUndoRecording(false);pairedText.DisableUndoRecording(false);for(int i=0;i<3;i++)oldLeader.SetVertexAt(i,Point(step["vertices"][i]));pairedText.Location=Point(step["position"]);if(step["dimtad"]!=null)oldLeader.Dimtad=(short)step.Value<int>("dimtad");if(step["annotation_offset"]!=null){var off=Point(step["annotation_offset"]);oldLeader.AnnotationOffset=new Vector3d(off.X,off.Y,off.Z);}if(step["annotation_offset"]!=null||step["dimtad"]!=null)oldLeader.EvaluateLeader();if(step["has_hook_line"]!=null&&oldLeader.HasHookLine!=step.Value<bool>("has_hook_line"))throw new InvalidOperationException("native_hook_line_state_differs");map["leader"]=oldLeader.Handle.ToString();map["text"]=pairedText.Handle.ToString();
                             if(step["dot_companions"] is JArray dots)
                             {
                                 var members=dots.Cast<JObject>().Select(t=>(Entity)tx.GetObject(Resolve(db,t.Value<string>("handle")),OpenMode.ForWrite)).ToArray();

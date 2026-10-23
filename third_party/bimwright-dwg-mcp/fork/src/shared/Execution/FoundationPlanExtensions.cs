@@ -31,7 +31,7 @@ namespace Bimwright.Dwg.Shared.Execution
      foreach(string f in new[]{s.Value<string>("font_file"),s.Value<string>("big_font_file")})if(f.Contains('/')||f.Contains('\\')||f.Contains(':')||f.Contains('\0')||f.Length>255)throw new ArgumentException("font_file must be an installed font basename");
      break;
     case "dimension_style":
-     Keys(s,"id","op","name","text_style","text_height","arrow_size","overall_scale","gap","decimal_places","dimension_color","extension_color","text_color");
+     KeysWithOptional(s,new[]{"id","op","name","text_style","text_height","arrow_size","overall_scale","gap","decimal_places","dimension_color","extension_color","text_color"},"extension_origin_offset","extension_beyond","decimal_separator");if(s["extension_origin_offset"]!=null&&Number(s["extension_origin_offset"])<0)throw new ArgumentException("nonnegative extension origin offset required");if(s["extension_beyond"]!=null&&Number(s["extension_beyond"])<0)throw new ArgumentException("nonnegative extension beyond required");if(s["decimal_separator"]!=null&&(s["decimal_separator"].Type!=JTokenType.String||s.Value<string>("decimal_separator").Length!=1||!"., ".Contains(s.Value<string>("decimal_separator"))))throw new ArgumentException("decimal separator must be dot comma or space");
      Text(s,"name",255);Text(s,"text_style",255);Positive(s,"text_height");Positive(s,"arrow_size");Positive(s,"overall_scale");Number(s["gap"]);
      foreach(string f in new[]{"dimension_color","extension_color","text_color"})Color(s,f);
      if(s["decimal_places"]?.Type!=JTokenType.Integer||s.Value<int>("decimal_places")<0||s.Value<int>("decimal_places")>8)throw new ArgumentException("decimal_places 0..8 required");break;
@@ -203,11 +203,13 @@ namespace Bimwright.Dwg.Shared.Execution
     var p=(JObject)token.DeepClone();double x=Number(p["x"]),y=Number(p["y"]);
     if(op=="copy"){x+=Number(step["delta"][0]);y+=Number(step["delta"][1]);}
     else{double bx=Number(step["base"][0]),by=Number(step["base"][1]);double dx=x-bx,dy=y-by;x=bx+factor*(dx*Math.Cos(angle)-dy*Math.Sin(angle));y=by+factor*(dx*Math.Sin(angle)+dy*Math.Cos(angle));}
-    p["x"]=x;p["y"]=y;return p;
+    p["x"]=x;p["y"]=y;
+    foreach(string width in new[]{"start_width","end_width"})if(p[width]!=null&&p[width].Type!=JTokenType.Null)p[width]=Number(p[width])*factor;
+    return p;
    }
    foreach(string f in new[]{"start","end","center","position","location"})if(value[f] is JObject)value[f]=P(value[f]);
    foreach(string f in new[]{"vertices","vertices_wcs"})if(value[f] is JArray vs)value[f]=new JArray(vs.Select(P));
-   foreach(string f in new[]{"radius","diameter","circumference","length","height","text_height","width","actual_width","actual_height"})if(value[f]!=null)value[f]=Number(value[f])*factor;
+   foreach(string f in new[]{"radius","diameter","circumference","length","height","text_height","width","actual_width","actual_height","constant_width"})if(value[f]!=null&&value[f].Type!=JTokenType.Null)value[f]=Number(value[f])*factor;
    if(type=="Leader"&&value["gap"]!=null)value["gap"]=Number(value["gap"])*factor;
    if(value["area"]!=null)value["area"]=Number(value["area"])*factor*factor;
    if(value["rotation"]!=null)value["rotation"]=NormalizeAngle(Number(value["rotation"])+angle);

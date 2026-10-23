@@ -568,6 +568,26 @@ UPDATE request_jobs SET plugin_sequence=$sequence,write_fence_released=1,server_
         return new VerificationResult(VerificationDisposition.Applied, finalized);
     }
 
+    // Evidence-based failed-stage recovery. Does not release any fence or alter the committed result.
+    public bool RecoverArchiveRoundoffStage(VerificationRequest request, string nativeProof, long expectedPreviousSequence)
+    {
+        using IDisposable lease=EnterOperation(); _operationsStarted=true;
+        using SqliteConnection connection=OpenConnection();
+        using SqliteTransaction transaction=connection.BeginTransaction(deferred:false);
+        LedgerJob? current=ReadJob(connection,transaction,request.RequestId);
+        if(current==null || !current.IsWrite || current.WriteFenceReleased || current.Phase!=JobPhase.Completed || current.Effects!=EffectState.Committed
+          || current.Verification!=VerificationState.Failed || current.PluginSequence!=expectedPreviousSequence
+          || current.VerificationStagedPluginSequence!=expectedPreviousSequence || current.ReadbackRevision!=expectedPreviousSequence
+          || current.ContextId!=request.ContextId || current.CompleteTargetJson!=CanonicalizeJsonObject(request.CompleteTargetJson,"target")
+          || current.ProviderGeneration!=request.ProviderGeneration || request.Verification!=VerificationState.Passed
+          || request.ExpectedPluginSequence!=expectedPreviousSequence+1 || request.ReadbackRevision!=expectedPreviousSequence+1
+          || !FoundationDrawingPlan.VerifyReadback(current.ResultJson,nativeProof,current.CanonicalParametersJson)
+          || Newtonsoft.Json.Linq.JObject.Parse(nativeProof).Value<string>("schema")!="foundation-archive-roundoff-recovery-v1") {transaction.Rollback();return false;}
+        string digest=ComputeVerificationDigest(current.RequestId,current.ContextId,current.CompleteTargetJson,current.ProviderGeneration,request);
+        using var update=CreateCommand(connection,transaction,@"UPDATE request_jobs SET plugin_sequence=$sequence,verification='passed',observation='independent_readback',readback_revision=$sequence,readback_digest=$digest,verification_result_json=$result,verification_error_code=NULL,verification_error_message=NULL,verification_staged_sequence=$sequence,updated_at_utc=$updated,server_unavailable=0 WHERE request_id=$id;");
+        update.Parameters.AddWithValue("$sequence",request.ReadbackRevision);update.Parameters.AddWithValue("$digest",digest);update.Parameters.AddWithValue("$result",request.ResultJson!);update.Parameters.AddWithValue("$updated",FormatTimestamp(DateTimeOffset.UtcNow));update.Parameters.AddWithValue("$id",current.RequestId);update.ExecuteNonQuery();transaction.Commit();return true;
+    }
+
     public LedgerJob? Get(string requestId)
     {
         using IDisposable lease = EnterOperation();

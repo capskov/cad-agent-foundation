@@ -34,6 +34,17 @@ namespace Bimwright.Dwg.Plugin
     case "set_hatch_pattern":
      string hh=s.Value<string>("hatch_handle");var hatch=tx.GetObject(Resolve(db,hh),OpenMode.ForWrite) as Hatch;if(hatch==null)throw new InvalidOperationException("associated_hatch_required");
      hatch.DisableUndoRecording(false);hatch.SetHatchPattern(HatchPatternType.PreDefined,s.Value<string>("pattern"));hatch.PatternScale=s.Value<double>("scale");hatch.PatternAngle=FoundationDrawingPlan.NormalizeAngle(s.Value<double>("angle"));hatch.EvaluateHatch(true);hatch.RecordGraphicsModified(true);foreach(JObject t in (JArray)s["targets"])map[t.Value<string>("handle")]=t["handle"];break;
+    case "set_raster_path":
+     var rasterTarget=(JObject)s["targets"][0];string rh=rasterTarget.Value<string>("handle");
+     if(tx.GetObject(Resolve(db,rh),OpenMode.ForRead) is not RasterImage ri||ri.GetType()!=typeof(RasterImage)||ri.ImageDefId.IsNull)throw new InvalidOperationException("native_raster_reference_required_not_proxy_or_wipeout");
+     string path=s.Value<string>("path");if(!System.IO.File.Exists(path))throw new InvalidOperationException("replacement_image_missing");
+     int references=0,scanned=0;foreach(ObjectId bid in (BlockTable)tx.GetObject(db.BlockTableId,OpenMode.ForRead)){
+      var b=(BlockTableRecord)tx.GetObject(bid,OpenMode.ForRead);foreach(ObjectId eid in b){if(++scanned>100000)throw new InvalidOperationException("raster_reference_scan_limit");if(tx.GetObject(eid,OpenMode.ForRead) is RasterImage other&&other.ImageDefId==ri.ImageDefId)references++;}
+     }
+     if(references!=1)throw new InvalidOperationException("shared_raster_definition_refused_path_change_affects_multiple_references");
+     var definition=(RasterImageDef)tx.GetObject(ri.ImageDefId,OpenMode.ForWrite);definition.DisableUndoRecording(false);definition.SourceFileName=path;definition.Load();
+     if(!definition.IsLoaded)throw new InvalidOperationException("native_image_load_failed");
+     map[rh]=rh;break;
     case "set_properties":case "set_open_polyline":case "set_text_format":case "set_text_metrics":case "set_dimension_text":case "set_table_cell":case "set_line":case "set_circle":
      foreach(JObject target in (JArray)s["targets"])
      {

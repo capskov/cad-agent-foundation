@@ -7,12 +7,15 @@ namespace Bimwright.Dwg.Shared.Execution
 {
  public static partial class FoundationDrawingPlan
  {
-  public static string[] Phase2Operations=>new[]{"point","arc","ellipse","rectangle","set_properties","set_open_polyline","set_text_format","set_text_metrics","set_dimension_text","table","set_table_cell","set_line","set_circle","set_hatch_pattern"};
+  public static string[] Phase2Operations=>new[]{"point","arc","ellipse","rectangle","set_properties","set_open_polyline","set_text_format","set_text_metrics","set_dimension_text","table","set_table_cell","set_line","set_circle","set_hatch_pattern","set_raster_path"};
   static bool ValidatePhase2(JObject s,ref int count)
   {
    string op=s.Value<string>("op");
    switch(op)
    {
+    case "set_raster_path":
+     Keys(s,"id","op","targets","path");ValidateTargets(s,ref count);
+     if(((JArray)s["targets"]).Count!=1||s["path"].Type!=JTokenType.String||!System.IO.Path.IsPathFullyQualified(s.Value<string>("path"))||s.Value<string>("path").Length>1024||s.Value<string>("path").Any(char.IsControl)||new[]{".dwg",".dxf",".exe",".dll"}.Contains(System.IO.Path.GetExtension(s.Value<string>("path")).ToLowerInvariant()))throw new ArgumentException("one raster reference and explicit absolute image path required");break;
     case "set_text_metrics":
      Keys(s,"id","op","targets","height_scale","width_scale");ValidateTargets(s,ref count);
      foreach(string key in new[]{"height_scale","width_scale"}){Positive(s,key);if(Number(s[key])<0.01||Number(s[key])>100)throw new ArgumentException("text metric scale requires 0.01..100");}break;
@@ -89,7 +92,9 @@ namespace Bimwright.Dwg.Shared.Execution
     string h=t.Value<string>("handle");var old=before[h] as JObject;var current=after[h] as JObject;
     if(old==null||current==null||Hash(old)!=t.Value<string>("expected_sha256")||map.Value<string>(h)!=h)return false;
     var a=(JObject)old.DeepClone();var b=(JObject)current.DeepClone();string[] mutable;
-    if(op=="set_hatch_pattern")
+    if(op=="set_raster_path")
+    {if(old.Value<string>("type")!="RasterImage"||current.Value<string>("source_file")!=s.Value<string>("path"))return false;mutable=new[]{"source_file"};}
+    else if(op=="set_hatch_pattern")
     {
      if(h==s.Value<string>("hatch_handle"))
      {string boundary=targets.Cast<JObject>().Select(v=>v.Value<string>("handle")).Single(v=>v!=h);if(old.Value<string>("type")!="Hatch"||current.Value<string>("pattern_name")!=s.Value<string>("pattern")||!Near(current["pattern_scale"],Number(s["scale"]),1e-10)||!Near(current["pattern_angle"],NormalizeAngle(Number(s["angle"])),1e-10)||!HatchMatches(current,(JObject)after[boundary],false))return false;mutable=new[]{"pattern_name","pattern_scale","pattern_angle","area","area_status","loops","extents"};}

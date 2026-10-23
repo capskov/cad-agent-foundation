@@ -378,6 +378,19 @@ namespace Bimwright.Dwg.Server.Execution
             if (!MatchesD1LedgerJob(current, bound, requestId, identity, out error))
                 return false;
 
+            if (IsFoundationWriteProfile && current.Verification==VerificationState.Failed && !current.WriteFenceReleased
+                && TryGetInt64(snapshot,"verification_staged_sequence",out long recoveryStage) && recoveryStage==current.PluginSequence+1
+                && snapshot.Value<long>("plugin_sequence")==recoveryStage+1 && snapshot.Value<bool>("write_fence_finalized") && snapshot.Value<bool>("write_fence_released")
+                && snapshot.Value<string>("verification")=="passed" && snapshot.Value<string>("result_json")==current.ResultJson
+                && ComputePluginReadbackDigest(snapshot)==snapshot.Value<string>("readback_digest")
+                && FoundationDrawingPlan.VerifyReadback(current.ResultJson,snapshot.Value<string>("verification_result_json"),current.CanonicalParametersJson))
+            {
+                string proof=snapshot.Value<string>("verification_result_json");
+                string verified=JsonConvert.SerializeObject(new {validator_version=D1ReadbackValidatorVersion,passed=true,failure_codes=Array.Empty<string>(),source_handles=ActiveWriteSourceHandles,plugin_readback_stage_digest=snapshot.Value<string>("readback_digest"),readback_sha256=ComputeContentDigest(proof)},Formatting.None);
+                var recovery=new VerificationRequest(requestId,bound.ContextId,bound.CompleteTargetJson,identity.ProviderGeneration,recoveryStage,VerificationState.Passed,verified,ExpectedPluginSequence:recoveryStage);
+                if(!_ledger.RecoverArchiveRoundoffStage(recovery,proof,current.PluginSequence.Value)){error="archive_roundoff_recovery_stage_rejected";return false;}
+                current=_ledger.Get(requestId);
+            }
             if (current.VerificationStagedPluginSequence.HasValue)
             {
                 long stagedSequence = current.VerificationStagedPluginSequence.Value;

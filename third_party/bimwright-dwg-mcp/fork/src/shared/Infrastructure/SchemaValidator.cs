@@ -155,7 +155,8 @@ namespace Bimwright.Dwg.Plugin
 
         public static readonly CommandSchema GetEntityProperties = CommandSchema.Object(
             SchemaProperty.Required("handles", JTokenType.Array),
-            SchemaProperty.Optional("include_geometry", JTokenType.Boolean));
+            SchemaProperty.Optional("include_geometry", JTokenType.Boolean),
+            SchemaProperty.Optional("geometry_offset", JTokenType.Integer));
 
         public static readonly CommandSchema ListLayers = CommandSchema.Empty;
 

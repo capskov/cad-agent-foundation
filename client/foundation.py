@@ -164,7 +164,7 @@ class Gateway:
         try:
             self.client.initialize(30);names={t['name'] for t in self.client.tools_list(30)['tools']}
             expected=set(E.CATALOG_ALLOWLIST)
-            if self.session['write_enabled']:expected.remove('dwg_inspect_lisp');expected.add('dwg_apply_plan')
+            if self.session['write_enabled']:expected.remove('dwg_inspect_lisp');expected.add('dwg_apply_plan');expected.add('dwg_view')
             require(names==expected,'Unexpected tool catalog')
             self.bound=self.call('dwg_bind_active_document',{})
             gate,issues=E.check_binding_identity(self.bound['binding_snapshot'],self.session['pid'],self.session['started'],self.session['drawing']);require(gate=='identity_matched',str(issues))
@@ -194,6 +194,8 @@ class Gateway:
     def submit_read(self,name,args):
         request={'request_id':'read-'+uuid.uuid4().hex,'context_id':self.context}
         reply=self.call(name,dict(args,**request))
+        if reply.get('status')=='rejected_before_submission' and reply.get('registered') is False and reply.get('effects')=='none' and reply.get('request_id')==request['request_id'] and reply.get('context_id')==self.context:
+            request['terminal_rejection']=reply;write(self.work/'requests'/(request['request_id']+'.json'),request);return reply
         result=self.query(request)
         raw=result.get('job',{}).get('result_json')
         if isinstance(raw,str):result['data']=json.loads(raw)
@@ -206,20 +208,26 @@ class Gateway:
         path=self.work/'requests'/(request_id+'.json')
         if path.exists():
             previous=read(path);require(previous.get('plan_digest')==digest,'Request ID already belongs to different parameters')
-            return self.query(previous)
+            return previous['terminal_rejection'] if 'terminal_rejection' in previous else self.query(previous)
         request={'request_id':request_id,'context_id':self.context,'plan_digest':digest,'plan':plan,'submit_attempts':1}
         write(path,request) # Before transport: uncertain submission is never automatically retried.
         try:request['submit_reply']=self.call('dwg_apply_plan',{'context_id':self.context,'request_id':request_id,'plan_json':canonical})
         except Exception as ex:
+            if isinstance(ex,E.RemoteRpcError) and ex.code == -32602:
+                reply={'status':'rejected_before_submission','pending':False,'effects':'none','registered':False,'request_id':request_id,'context_id':self.context,'error':str(ex)}
+                request['terminal_rejection']=reply;write(path,request);return reply
             request['submission']='unknown';request['submit_error']=str(ex);write(path,request)
             # Like the proven read entry: a refused or lost reply is reconciled only
             # through the same request, never by a second submission.
             return self.query(request)
+        reply=request['submit_reply']
+        if reply.get('status')=='rejected_before_submission' and reply.get('registered') is False and reply.get('effects')=='none' and reply.get('request_id')==request_id and reply.get('context_id')==self.context:
+            request['terminal_rejection']=reply;write(path,request);return reply
         write(path,request);return self.query(request)
 
 def main():
     p=argparse.ArgumentParser(description='CAD foundation first release; all drawings are owned copies')
-    p.add_argument('action',choices=['install','start','doctor','read','query','apply','save','stop','status','mcp'])
+    p.add_argument('action',choices=['install','start','doctor','read','query','apply','save','stop','status','mcp','view'])
     p.add_argument('--workspace',type=Path,required=True);p.add_argument('--cad',default=r'C:\Program Files\Autodesk\AutoCAD 2026')
     p.add_argument('--source');p.add_argument('--write',action='store_true');p.add_argument('--headless',action='store_true')
     p.add_argument('--handles');p.add_argument('--plan',type=Path);p.add_argument('--request-id');p.add_argument('--arguments',type=Path)
@@ -237,6 +245,7 @@ def main():
             with Gateway(args.workspace) as g:
                 if args.action=='doctor':result=g.bound
                 elif args.action=='read':result=g.submit_read('dwg_get_entity_properties',{'handles':json.dumps(E.parse_handles(args.handles)),'include_geometry':True})
+                elif args.action=='view':result=g.submit_read('dwg_view',{'request_json':json.dumps(read(args.arguments),ensure_ascii=False)})
                 elif args.action=='query':result=g.submit_read('dwg_query_entities',read(args.arguments))
                 elif args.action=='apply':result=g.apply(read(args.plan),args.request_id)
                 elif args.action=='save':

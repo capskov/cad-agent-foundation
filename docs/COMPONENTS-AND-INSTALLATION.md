@@ -42,3 +42,8 @@ Use your Agent client's supported manual Skill installation procedure for the pu
 Reusable native primitives and execution constraints belong in Foundation. Professional decisions, classifications, style and placement rules belong in Skills. Future capability work must preserve that boundary; this documentation update adds no installer or CAD operation.
 
 The Foundation-based rows describe one selected execution route, not a mandatory backend for independent scope review, offline geometry or BZYD. / 上表的底座组合描述选用底座的执行路线；范围分析、离线几何与BZYD不强制依赖底座。
+
+
+## Optional satellite/aerial road tracing / 可选影像道路描绘
+
+[Agentic Map Tracing](https://github.com/capskov/agentic-map-tracing), v0.1.0-beta.1, supplies the `satellite-road-edge-tracing` Agent Skill. Recommended native backend: Foundation v1.2.0-beta.3. Agent interprets markings, road composition, occlusion and human guidance; Foundation handles bounded native operations and feedback. Optional for this task, not a prerequisite for basic CAD or other Skills. Installing a Skill does not install Foundation or provide missing native operations.

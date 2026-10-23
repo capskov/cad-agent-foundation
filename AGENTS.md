@@ -27,7 +27,7 @@ Effect state and verification are separate. A later verification failure does no
 
 Keep source drawings and runtime credentials private. Use authorized working copies and synthetic public reproductions. Respect the documented profile limits and separate engineering Skills. Offline tests or documentation changes do not prove CAD execution; report the exact evidence and missing coverage.
 
-The two companion Skills and future binary assets require separate maintainer review. These Agent instructions do not authorize external publication, configuration changes or tool fallback.
+Optional road-image interpretation uses [Agentic Map Tracing](https://github.com/capskov/agentic-map-tracing), loading `satellite-road-edge-tracing`. Domain judgment stays with the Agent; native execution stays with Foundation. Basic CAD does not require any interpretation Skill. Further components require their applicable maintainer review. These Agent instructions do not authorize external publication, configuration changes or tool fallback.
 
 ## Units, precision and plotting guidance (local.4, 2026-10-16)
 
