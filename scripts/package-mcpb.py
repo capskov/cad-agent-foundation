@@ -18,7 +18,7 @@ def main():
   for name,digest in manifest['files'].items():assert sha(files[name]).upper()==digest,name
  metadata={
   'manifest_version':'0.3','name':'cad-agent-foundation','display_name':'CAD Agent Foundation — AutoCAD MCP',
-  'version':version,'description':'Agent-first AutoCAD MCP server and CLI with drawing binding, execution feedback, verified DWG writes/saves, and reusable CAD operations for third-party Skills.',
+  'version':version,'description':'AutoCAD MCP/CLI for agents: native CAD, views, proxy reads, verified writes and saves.',
   'long_description':'Local Windows x64 stdio integration. Requires separately installed licensed compatible AutoCAD 2026 (.NET 8), .NET 8 Desktop Runtime and Python 3.11+. First install the bundled runtime and explicitly start an owned drawing copy; choose that existing workspace below. Starting the extension only connects to that workspace; it does not start CAD or enable writes. Source drawings, private journals and unresolved requests remain protected. See INSTALL.md for limits and verification scope.',
   'author':{'name':'capskov','url':'https://github.com/capskov'},
   'repository':{'type':'git','url':'https://github.com/capskov/cad-agent-foundation'},
