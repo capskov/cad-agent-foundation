@@ -13,7 +13,7 @@
     {
       "registryType": "mcpb",
       "identifier": "https://github.com/capskov/cad-agent-foundation/releases/download/v1.2.0-beta.3.18/cad-agent-foundation-v1.2.0-beta.3.18-win-x64.mcpb",
-      "fileSha256": "7bc2377bae20dabb76c597903859e085b164db692046c61451c85e70b895f22b",
+      "fileSha256": "aa67bf389d61d0b05303f95c07bce0328a1a2df5ebfc62f03dfc636c7db4212b",
       "transport": {
         "type": "stdio"
       }
