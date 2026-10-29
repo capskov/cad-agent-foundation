@@ -1,3 +1,4 @@
+using System.Linq;
 // Modified for CAD Agent Foundation by capskov (2026); derived from Bimwright DWG MCP pinned at 4d0f75646631186612af926944d7e33affc4757d. See NOTICE.md.
 using System;
 using System.Collections.Generic;
@@ -38,6 +39,18 @@ namespace Bimwright.Dwg.Plugin.Cad
 
             switch (entity)
             {
+#if ACAD2026
+                case Wipeout mask:
+                    result["wipeout_boundary"]=mask.GetClipBoundary().Cast<Point2d>().Select(p=>Point(new Point3d(p.X,p.Y,0).TransformBy(mask.PixelToModelTransform))).ToArray();break;
+                case RasterImage image when image.GetType()==typeof(RasterImage):
+                    var def=(RasterImageDef)tx.GetObject(image.ImageDefId,OpenMode.ForRead);
+                    result["source_file"]=def.SourceFileName;result["definition_handle"]=def.Handle.ToString();
+                    var axes=image.Orientation;result["origin"]=Point(axes.Origin);result["u_axis"]=new[]{axes.Xaxis.X,axes.Xaxis.Y,axes.Xaxis.Z};result["v_axis"]=new[]{axes.Yaxis.X,axes.Yaxis.Y,axes.Yaxis.Z};
+                    result["rotation"]=image.Rotation;result["image_width"]=image.ImageWidth;result["image_height"]=image.ImageHeight;
+                    result["is_clipped"]=image.IsClipped;result["brightness"]=image.Brightness;result["contrast"]=image.Contrast;result["fade"]=image.Fade;result["show_image"]=image.ShowImage;
+                    var clip=new List<object>();foreach(Point2d pt in image.GetClipBoundary())clip.Add(new[]{pt.X,pt.Y});result["clip_boundary"]=clip;
+                    break;
+#endif
                 case DBPoint point:
                     result["position"]=Point(point.Position);break;
                 case Line line:
@@ -119,6 +132,11 @@ namespace Bimwright.Dwg.Plugin.Cad
         {
             result["vertex_count"] = polyline.NumberOfVertices;
             result["is_closed"] = polyline.Closed;
+            // ConstantWidth throws for some variable-width polylines. Keep the
+            // entity readable and report each native segment width below.
+            try { result["constant_width"] = polyline.ConstantWidth; }
+            catch (Autodesk.AutoCAD.Runtime.Exception ex) when (ex.ErrorStatus == Autodesk.AutoCAD.Runtime.ErrorStatus.InvalidInput)
+            { result["constant_width"] = null; }
 
             if (TryGetCurveLength(polyline, out var length))
             {
@@ -140,7 +158,9 @@ namespace Bimwright.Dwg.Plugin.Cad
                     x = point.X,
                     y = point.Y,
                     z = point.Z,
-                    bulge = polyline.GetBulgeAt(i)
+                      bulge = polyline.GetBulgeAt(i),
+                      start_width = polyline.GetStartWidthAt(i),
+                      end_width = polyline.GetEndWidthAt(i)
                 });
             }
 
@@ -230,7 +250,11 @@ namespace Bimwright.Dwg.Plugin.Cad
             result["style_name"] = leader.DimensionStyleName;
             result["text_height"] = leader.Dimtxt;
             result["gap"] = leader.Dimgap;
+            result["dimtad"] = leader.Dimtad;
+            var offset = leader.AnnotationOffset;
+            result["annotation_offset"] = new { x = offset.X, y = offset.Y, z = offset.Z };
             var annotationId = leader.Annotation;
+            result["annotation_reactor_present"] = !annotationId.IsNull && tx.GetObject(annotationId, OpenMode.ForRead).GetPersistentReactorIds().Cast<ObjectId>().Contains(leader.ObjectId);
             result["annotation_handle"] = annotationId.IsNull
                 ? null
                 : tx.GetObject(annotationId, OpenMode.ForRead).Handle.ToString();

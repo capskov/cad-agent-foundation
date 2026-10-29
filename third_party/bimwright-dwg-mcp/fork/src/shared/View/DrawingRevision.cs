@@ -86,6 +86,10 @@ namespace Bimwright.Dwg.Plugin.View
 
         private void Changed(DBObject value)
         {
+            // Explode creates temporary, non-resident objects whose disposal or
+            // formatting can raise database notifications. They are not edits
+            // to the source drawing and must not invalidate a paged read.
+            if (value == null || value.ObjectId.IsNull) return;
             // Navigation itself updates view state; its full metadata is checked
             // independently. All other observed database-object changes invalidate history.
             if (!(value is ViewportTableRecord) && !(value is Viewport))

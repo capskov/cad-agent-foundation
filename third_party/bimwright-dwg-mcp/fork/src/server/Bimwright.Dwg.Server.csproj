@@ -15,7 +15,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>bimwright-dwg</ToolCommandName>
     <PackageId>Capskov.CadAgentFoundation.Host</PackageId>
-    <Version>1.2.0-local.4</Version>
+    <Version>1.2.0-beta.3</Version>
     <Authors>Khoa Le; capskov</Authors>
     <Description>Bounded AutoCAD 2026 MCP/CLI automation with drawing identity, native dimensions, styles, guarded editing and write/save verification.</Description>
     <PackageProjectUrl>https://github.com/capskov/cad-agent-foundation</PackageProjectUrl>
@@ -37,6 +37,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\shared\Execution\FoundationSaveFontRecovery.cs" Link="FoundationSaveFontRecovery.cs" />
+    <Compile Include="..\shared\Execution\FoundationSaveXrefCacheRecovery.cs" Link="FoundationSaveXrefCacheRecovery.cs" />
+    <Compile Include="..\shared\Execution\FoundationTextAnchorRecovery.cs" Link="FoundationTextAnchorRecovery.cs" />
+    <Compile Include="..\shared\Execution\FoundationBlockCacheRecovery.cs" Link="FoundationBlockCacheRecovery.cs" />
     <PackageReference Include="ModelContextProtocol" Version="1.1.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.6" />
@@ -64,4 +68,4 @@
     <Compile Include="..\shared\Security\LispExecutionPolicy.cs" LinkBase="Shared\Security" />
   </ItemGroup>
 
-</Project>
+<ItemGroup><Compile Include="..\shared\Execution\FoundationArchiveRoundoffRecovery.cs" Link="FoundationArchiveRoundoffRecovery.cs" /></ItemGroup><ItemGroup><Compile Include="..\shared\Execution\FoundationViewRequest.cs" Link="FoundationViewRequest.cs" /></ItemGroup><ItemGroup><Compile Include="../shared/Execution/FoundationXrefPathContract.cs" Link="FoundationXrefPathContract.cs" /></ItemGroup><ItemGroup><Compile Include="../shared/Execution/FoundationPaperViewportContract.cs" Link="FoundationPaperViewportContract.cs" /></ItemGroup></Project>

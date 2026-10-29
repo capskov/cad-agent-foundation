@@ -16,7 +16,7 @@ namespace Bimwright.Dwg.Plugin
    }
    foreach(ObjectId id in (LinetypeTable)tx.GetObject(db.LinetypeTableId,OpenMode.ForRead))
    {if(lineTypes.Count>=256){lineTypesComplete=false;break;}var l=(LinetypeTableRecord)tx.GetObject(id,OpenMode.ForRead);lineTypes.Add(new JObject{["name"]=l.Name,["handle"]=l.Handle.ToString(),["description"]=l.AsciiDescription,["pattern_length"]=l.PatternLength,["is_dependent"]=l.IsDependent});}
-   return new JObject{["observation"]="bind_time",["blocks"]=blocks,["blocks_complete"]=blocksComplete,["linetypes"]=lineTypes,["linetypes_complete"]=lineTypesComplete,["xref_editing_enabled"]=false};
+   return new JObject{["observation"]="bind_time",["blocks"]=blocks,["blocks_complete"]=blocksComplete,["linetypes"]=lineTypes,["linetypes_complete"]=lineTypesComplete,["xref_editing_enabled"]=false,["xref_path_repair_enabled"]=true};
   }
  }
 }

@@ -16,6 +16,17 @@ namespace Bimwright.Dwg.Plugin
 {
     internal static partial class FoundationPlanWriteHandler
     {
+        // AutoCAD2026/x64 only: attach both sides of the ordinary LEADER association.
+        // Merely setting the annotation ID can leave the MTEXT persistent reactor absent.
+        [System.Runtime.InteropServices.DllImport("acdb25.dll", CallingConvention=System.Runtime.InteropServices.CallingConvention.ThisCall, EntryPoint="?attachAnnotation@AcDbLeader@@UEAA?AW4ErrorStatus@Acad@@AEBVAcDbObjectId@@@Z")]
+        static extern Autodesk.AutoCAD.Runtime.ErrorStatus AttachAnnotation26(IntPtr leader, ref ObjectId annotation);
+        static void AttachCalloutAnnotation(Leader leader,MText text)
+        {
+            if(text.GetPersistentReactorIds().Cast<ObjectId>().Contains(leader.ObjectId))return;
+            ObjectId annotation=text.ObjectId;
+            var status=AttachAnnotation26(leader.UnmanagedObject,ref annotation);
+            if(status!=Autodesk.AutoCAD.Runtime.ErrorStatus.OK || leader.Annotation!=text.ObjectId || !text.GetPersistentReactorIds().Cast<ObjectId>().Contains(leader.ObjectId))throw new InvalidOperationException("callout_annotation_attach_failed:"+status);
+        }
         internal static PluginWriteJobResult Execute(Document doc,PluginJobSnapshot job)
         {
             if(!App.FoundationWriteEnabled||job==null||!job.IsWrite||job.ToolName!=FoundationDrawingPlan.PluginToolName||!FoundationDrawingPlan.IsCanonicalValid(job.CanonicalParametersJson))
@@ -121,7 +132,7 @@ namespace Bimwright.Dwg.Plugin
             {
                 string h=target.Value<string>("handle");var entity=tx.GetObject(Resolve(db,h),OpenMode.ForRead) as Entity;
                 var owner=entity==null?null:tx.GetObject(entity.OwnerId,OpenMode.ForRead) as BlockTableRecord;
-                if(entity==null||owner==null||!owner.IsLayout||entity.OwnerId!=model||(entity is not (Line or Circle or DBText or MText or Leader or Hatch)&&!(phase2Names.Contains(h)&&entity is (Polyline or Arc or Ellipse or DBPoint or Table or BlockReference or RotatedDimension or AlignedDimension or RadialDimension or DiametricDimension))&&!(archiveNames.Contains(h)&&entity is (Polyline or RotatedDimension or AlignedDimension or RadialDimension or DiametricDimension))&&!(boundaryNames.Contains(h)&&entity is Polyline{Closed:true})&&!(transformNames.Contains(h)&&entity is Polyline)))throw new InvalidOperationException("unsupported_existing_entity_or_space:"+h);
+                if(entity==null||owner==null||!owner.IsLayout||entity.OwnerId!=model||(entity is not (Line or Circle or DBText or MText or Leader or Hatch)&&!(phase2Names.Contains(h)&&entity is (Polyline or Arc or Ellipse or DBPoint or Table or BlockReference or RasterImage or RotatedDimension or AlignedDimension or RadialDimension or DiametricDimension))&&!(archiveNames.Contains(h)&&entity is (Polyline or RotatedDimension or AlignedDimension or RadialDimension or DiametricDimension))&&!(boundaryNames.Contains(h)&&entity is Polyline{Closed:true})&&!(transformNames.Contains(h)&&entity is Polyline)))throw new InvalidOperationException("unsupported_existing_entity_or_space:"+h);
                 if(((LayerTableRecord)tx.GetObject(entity.LayerId,OpenMode.ForRead)).IsLocked)throw new InvalidOperationException("locked_source_layer:"+h);
                 if(transformNames.Contains(h))
                 {
@@ -130,8 +141,9 @@ namespace Bimwright.Dwg.Plugin
                 }
                 if(phase2Names.Contains(h)&&entity.GetPersistentReactorIds().Count>0&&((JArray)plan["steps"]).Cast<JObject>().Any(s=>s.Value<string>("op") is "set_open_polyline" or "set_text_format" or "set_dimension_text"&&(s["targets"] as JArray??new JArray()).Cast<JObject>().Any(t=>t.Value<string>("handle")==h)))throw new InvalidOperationException("standalone_entity_without_persistent_reactors_required:"+h);
                 if(FoundationDrawingPlan.Hash(before[h])!=target.Value<string>("expected_sha256"))throw new InvalidOperationException("entity_changed:"+h);
+                if(entity is RasterImage&& !((JArray)plan["steps"]).Cast<JObject>().Any(s=>s.Value<string>("op")=="set_raster_path"&&((JArray)s["targets"]).Cast<JObject>().Any(t=>t.Value<string>("handle")==h)))throw new InvalidOperationException("raster_only_supports_explicit_path_repair");
                 foreach(ObjectId reactor in entity.GetPersistentReactorIds())
-                {var other=tx.GetObject(reactor,OpenMode.ForRead) as Entity;if(other==null||!names.Contains(other.Handle.ToString()))throw new InvalidOperationException("include_complete_associated_group:"+h);}
+                {if(entity is RasterImage ri&&reactor==ri.ReactorId)continue;var other=tx.GetObject(reactor,OpenMode.ForRead) as Entity;if(other==null||!names.Contains(other.Handle.ToString()))throw new InvalidOperationException("include_complete_associated_group:"+h);}
                 if(entity is Leader leader&&!leader.Annotation.IsNull&&!names.Contains(leader.Annotation.Handle.ToString()))throw new InvalidOperationException("include_leader_annotation:"+h);
                 if(entity is Hatch hatch)
                 {
@@ -197,13 +209,23 @@ namespace Bimwright.Dwg.Plugin
                     {ObjectId oid=Append(db,tx,e,layer,explicitColor??color,creationSpace);map[role]=oid.Handle.ToString();created.Add(oid.Handle.ToString());return oid;}
                     switch(op)
                     {
+                        case "wipeout_rectangle":
+                            var mask=new Wipeout();mask.SetDatabaseDefaults(db);double x0=step["min"][0].Value<double>(),y0=step["min"][1].Value<double>(),x1=step["max"][0].Value<double>(),y1=step["max"][1].Value<double>();mask.SetFrom(new Point2dCollection(new[]{new Point2d(x0,y0),new Point2d(x1,y0),new Point2d(x1,y1),new Point2d(x0,y1),new Point2d(x0,y0)}),Vector3d.ZAxis);refs[id]=Add(mask);break;
+                        case "copy_paper_frame":
+                            CopyPaperFrame(db,tx,step,map,created);break;
+                        case "set_paper_text":
+                            SetPaperText(db,tx,step,map);break;
+                        case "set_paper_viewport":
+                            SetPaperViewport(db,tx,step,map);break;
+                        case "set_xref_path":
+                            if(((JArray)plan["steps"]).Count!=1)throw new InvalidOperationException("xref_path_repair_is_a_separate_operation");SetXrefPath(doc,tx,step,map);break;
                         case "layer":
                             string name=step.Value<string>("name");var lid=Layer(db,tx,name,step.Value<int>("color"));var lr=(LayerTableRecord)tx.GetObject(lid,OpenMode.ForRead);
                             if(lr.Color.ColorIndex!=step.Value<int>("color"))throw new InvalidOperationException("existing_layer_color_mismatch:"+name);map["layer"]=name;layers[name]=new JObject{["color_index"]=(int)lr.Color.ColorIndex,["is_off"]=lr.IsOff,["is_frozen"]=lr.IsFrozen,["is_plottable"]=lr.IsPlottable};break;
                         case "line":refs[id]=Add(new Line(Point(step["start"]),Point(step["end"])));break;
                         case "circle":refs[id]=Add(new Circle(Point(step["center"]),Vector3d.ZAxis,step.Value<double>("radius")));break;
                         case "polyline":
-                            var poly=new Polyline();poly.SetDatabaseDefaults(db);var points=(JArray)step["vertices"];for(int i=0;i<points.Count;i++){var p=(JArray)points[i];poly.AddVertexAt(i,new Point2d(p[0].Value<double>(),p[1].Value<double>()),p.Count==3?p[2].Value<double>():0,0,0);}poly.Closed=step.Value<bool>("closed");refs[id]=Add(poly);break;
+                            var poly=new Polyline();poly.SetDatabaseDefaults(db);var points=(JArray)step["vertices"];for(int i=0;i<points.Count;i++){var p=(JArray)points[i];poly.AddVertexAt(i,new Point2d(p[0].Value<double>(),p[1].Value<double>()),p.Count==3?p[2].Value<double>():0,0,0);}poly.Closed=step.Value<bool>("closed");if(step["constant_width"]!=null)poly.ConstantWidth=step.Value<double>("constant_width");refs[id]=Add(poly);break;
                         case "text":
                             if(!AnnotationEntityFactory.TryCreateText(TextInput(step,false),out DBText text,out string textError))throw new InvalidOperationException(textError);ApplyTextStyle(db,tx,text,step);refs[id]=Add(text);break;
                         case "mtext":
@@ -217,8 +239,8 @@ namespace Bimwright.Dwg.Plugin
                             if(!AnnotationEntityFactory.TryCreateMText(TextInput(step,true),out MText label,out string labelError))throw new InvalidOperationException(labelError);
                             ApplyTextStyle(db,tx,label,step);label.Attachment=step["attachment"]!=null?Enum.Parse<AttachmentPoint>(step.Value<string>("attachment")):AttachmentPoint.BottomLeft;label.Location=Point(step["position"]);ObjectId labelId=Add(label,"text",step.Value<int?>("text_color"));
                             var leader=new Leader();leader.SetDatabaseDefaults(db);leader.HasArrowHead=false;leader.IsSplined=false;leader.Dimtxt=step.Value<double>("height");leader.Dimgap=0;leader.Dimtad=0;
-                            if(step["dimension_style"]!=null)leader.DimensionStyle=DimStyle(db,tx,step.Value<string>("dimension_style"));leader.HasArrowHead=false;leader.Dimtxt=step.Value<double>("height");leader.Dimgap=step.Value<double?>("gap")??0;
-                            foreach(var vertex in (JArray)step["vertices"])if(!leader.AppendVertex(Point(vertex)))throw new InvalidOperationException("leader_vertex_failed");Add(leader,"leader");leader.Annotation=labelId;
+                            if(step["dimension_style"]!=null)leader.DimensionStyle=DimStyle(db,tx,step.Value<string>("dimension_style"));leader.HasArrowHead=false;leader.Dimtxt=step.Value<double>("height");leader.Dimgap=step.Value<double?>("gap")??0;leader.Dimtad=0;
+                            foreach(var vertex in (JArray)step["vertices"])if(!leader.AppendVertex(Point(vertex)))throw new InvalidOperationException("leader_vertex_failed");Add(leader,"leader");leader.Annotation=labelId;AttachCalloutAnnotation(leader,label);
                             for(int i=0;i<leader.NumVertices;i++)leader.SetVertexAt(i,Point(step["vertices"][i]));label.Location=Point(step["position"]);
                             ObjectId dot=Add(new Circle(Point(step["vertices"][0]),Vector3d.ZAxis,step.Value<double>("dot_radius")),"dot_boundary",2);
                             var dotFill=Fill(db,tx,dot,layer,2,"SOLID",1,0);map["dot_fill"]=dotFill.Handle.ToString();created.Add(dotFill.Handle.ToString());break;
@@ -237,7 +259,7 @@ namespace Bimwright.Dwg.Plugin
                             var oldLeader=tx.GetObject(Resolve(db,step.Value<string>("handle")),OpenMode.ForWrite) as Leader;var pairedText=tx.GetObject(Resolve(db,step.Value<string>("text_handle")),OpenMode.ForWrite) as MText;
                             if(oldLeader==null||pairedText==null||oldLeader.Annotation!=pairedText.ObjectId||oldLeader.NumVertices!=3||oldLeader.IsSplined)throw new InvalidOperationException("three_vertex_LEADER_and_its_MTEXT_required");
                             if(!oldLeader.HasArrowHead&&oldLeader.VertexAt(0).DistanceTo(Point(step["vertices"][0]))>0.001&&step["dot_companions"]==null)throw new InvalidOperationException("moving_separate_dot_anchor_requires_dot_companions");
-                            oldLeader.DisableUndoRecording(false);pairedText.DisableUndoRecording(false);for(int i=0;i<3;i++)oldLeader.SetVertexAt(i,Point(step["vertices"][i]));pairedText.Location=Point(step["position"]);map["leader"]=oldLeader.Handle.ToString();map["text"]=pairedText.Handle.ToString();
+                            oldLeader.DisableUndoRecording(false);pairedText.DisableUndoRecording(false);if(step.Value<bool?>("repair_association")==true)AttachCalloutAnnotation(oldLeader,pairedText);for(int i=0;i<3;i++)oldLeader.SetVertexAt(i,Point(step["vertices"][i]));pairedText.Location=Point(step["position"]);if(step["dimtad"]!=null)oldLeader.Dimtad=(short)step.Value<int>("dimtad");if(step["annotation_offset"]!=null){var off=Point(step["annotation_offset"]);oldLeader.AnnotationOffset=new Vector3d(off.X,off.Y,off.Z);}if(step["annotation_offset"]!=null||step["dimtad"]!=null)oldLeader.EvaluateLeader();if(step["has_hook_line"]!=null&&oldLeader.HasHookLine!=step.Value<bool>("has_hook_line"))throw new InvalidOperationException("native_hook_line_state_differs");map["leader"]=oldLeader.Handle.ToString();map["text"]=pairedText.Handle.ToString();
                             if(step["dot_companions"] is JArray dots)
                             {
                                 var members=dots.Cast<JObject>().Select(t=>(Entity)tx.GetObject(Resolve(db,t.Value<string>("handle")),OpenMode.ForWrite)).ToArray();
@@ -266,11 +288,29 @@ namespace Bimwright.Dwg.Plugin
                 RefreshChangedFontText(db,tx,plan);
                 var observed=before.Properties().Select(p=>p.Name).Concat(created).ToArray();after=ReadEntities(db,tx,observed);modelAfter=Handles(db,tx);allLayersAfter=LayerFacts(db,tx);symbolsAfter=SymbolFacts(db,tx);layoutsAfter=LayoutFacts(db,tx);
                 JObject Receipt(){var r=Build(plan,before,after,objects,layers,allLayersBefore,allLayersAfter,modelBefore,modelAfter,created,"committed_verified",true,true,null,symbolsBefore,symbolsAfter);r["layouts_before"]=layoutsBefore;r["layouts_after"]=layoutsAfter;return r;}
+                var paperCreated=((JArray)plan["steps"]).Cast<JObject>().Where(s=>s.Value<string>("op")=="copy_paper_frame").Select(s=>objects[s.Value<string>("id")]?.Value<string>("entity")).ToHashSet();var modelCreated=created.Where(h=>!paperCreated.Contains(h)).ToArray();
                 failureStage="precommit_verification";activeStep=null;activeOperation=null;
-                if(!FoundationDrawingPlan.VerifyReceipt(Receipt(),canonicalPlan)||!IdentitySetMatches(modelBefore,modelAfter,created))throw new InvalidOperationException("plan_precommit_verification_failed; review_supported_operation_limits_and_fresh_inputs");
+                if(!FoundationDrawingPlan.VerifyReceipt(Receipt(),canonicalPlan)||!IdentitySetMatches(modelBefore,modelAfter,modelCreated))
+                {
+                    string detail="";
+                    foreach(JObject transform in ((JArray)plan["steps"]).Where(s=>s.Value<string>("op") is "rotate" or "scale"))
+                    foreach(JObject target in (JArray)transform["targets"])
+                    {
+                        string h=target.Value<string>("handle");var expected=FoundationDrawingPlan.TransformFacts((JObject)before[h],transform);var actual=(JObject)after[h];
+                        foreach(var field in expected.Properties())
+                        {
+                            if(field.Name=="extents"||(expected.Value<string>("type")=="Hatch"&&field.Name is "loops" or "area"))continue;
+                            if(field.Name=="rotation"&&actual[field.Name]!=null){double d=FoundationDrawingPlan.NormalizeAngle(field.Value.Value<double>()-actual[field.Name].Value<double>());if(Math.Min(d,2*Math.PI-d)<=1e-10)continue;}
+                            if(!FoundationDrawingPlan.Equivalent(field.Value,actual[field.Name],field.Name))
+                            {detail="; transform="+transform.Value<string>("id")+" type="+expected.Value<string>("type")+" field="+field.Name+" expected="+field.Value.ToString(Formatting.None)+" actual="+(actual[field.Name]?.ToString(Formatting.None)??"missing");if(detail.Length>700)detail=detail.Substring(0,700);break;}
+                        }
+                        if(detail.Length>0)break;
+                    }
+                    throw new InvalidOperationException("plan_precommit_verification_failed"+detail+"; review_supported_operation_limits_and_fresh_inputs");
+                }
                 failureStage="commit";invoked=true;tx.Commit();committed=true;tx.Dispose();tx=null;checkpoint?.Invoke("after_commit");
                 failureStage="postcommit_readback";using(var read=db.TransactionManager.StartTransaction()){after=ReadEntities(db,read,observed);modelAfter=Handles(db,read);allLayersAfter=LayerFacts(db,read);symbolsAfter=SymbolFacts(db,read);layoutsAfter=LayoutFacts(db,read);read.Abort();}
-                outcome=FoundationDrawingPlan.VerifyReceipt(Receipt(),canonicalPlan)&&IdentitySetMatches(modelBefore,modelAfter,created)?"committed_verified":"committed_readback_failed";
+                outcome=FoundationDrawingPlan.VerifyReceipt(Receipt(),canonicalPlan)&&IdentitySetMatches(modelBefore,modelAfter,modelCreated)?"committed_verified":"committed_readback_failed";
             }
             catch(Exception ex)
             {

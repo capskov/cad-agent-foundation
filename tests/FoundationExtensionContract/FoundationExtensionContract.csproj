@@ -1,7 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>disable</Nullable></PropertyGroup>
  <ItemGroup>
+  <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Cad/CadWire.cs" Link="CadWire.cs" />
+  <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Cad/HandleBatchRequest.cs" Link="HandleBatchRequest.cs" />
   <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationSaveFontRecovery.cs" Link="FoundationSaveFontRecovery.cs" />
+  <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationSaveXrefCacheRecovery.cs" Link="FoundationSaveXrefCacheRecovery.cs" />
+  <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationTextAnchorRecovery.cs" Link="FoundationTextAnchorRecovery.cs" />
+  <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationBlockCacheRecovery.cs" Link="FoundationBlockCacheRecovery.cs" />
   <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationDrawingPlan.cs" Link="FoundationDrawingPlan.cs" />
   <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationPlanExtensions.cs" Link="FoundationPlanExtensions.cs" />
    <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationPhase2.cs" Link="FoundationPhase2.cs" />
@@ -11,4 +17,4 @@
   <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationAngularContract.cs" Link="FoundationAngularContract.cs" />
   <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationBlockContract.cs" Link="FoundationBlockContract.cs" />
   </ItemGroup>
-</Project>
+<ItemGroup><Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationArchiveRoundoffRecovery.cs" Link="FoundationArchiveRoundoffRecovery.cs" /></ItemGroup><ItemGroup><Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationViewRequest.cs" Link="FoundationViewRequest.cs" /></ItemGroup><ItemGroup><None Update="centered-text-receipt.json" CopyToOutputDirectory="PreserveNewest" /></ItemGroup><ItemGroup><Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationXrefPathContract.cs" Link="FoundationXrefPathContract.cs" /></ItemGroup><ItemGroup><Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationPaperViewportContract.cs" Link="FoundationPaperViewportContract.cs" /></ItemGroup></Project>

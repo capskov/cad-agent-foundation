@@ -51,13 +51,25 @@ namespace Bimwright.Dwg.Plugin
     using var tx=doc.Database.TransactionManager.StartTransaction();var db=doc.Database;layers=LayerFacts(db,tx);symbols=SymbolFacts(db,tx);layouts=LayoutFacts(db,tx);model=Handles(db,tx);
     string name=s.Value<string>("layout");var layout=FindLayout(db,tx,name,OpenMode.ForRead);
     if(FoundationDrawingPlan.Hash(layouts[name])!=s.Value<string>("expected_sha256"))throw new InvalidOperationException("layout_changed");
-    if(!layout.PlotConfigurationName.EndsWith(".pc3",StringComparison.OrdinalIgnoreCase)||layout.PlotConfigurationName.IndexOf("PDF",StringComparison.OrdinalIgnoreCase)<0)throw new InvalidOperationException("PDF_PC3_page_setup_required_no_physical_printer_submission");
     if(LayoutManager.Current.CurrentLayout!=name)throw new InvalidOperationException("plot_requires_explicit_current_layout_no_silent_switch");
     string parent=Path.GetDirectoryName(doc.Name);if(string.IsNullOrEmpty(parent)||!File.Exists(doc.Name))throw new InvalidOperationException("saved_owned_drawing_required");
     string folder=Path.Combine(parent,"outputs");
     for(var d=new DirectoryInfo(folder);d!=null;d=d.Parent)if(d.Exists&&(d.Attributes&FileAttributes.ReparsePoint)!=0)throw new InvalidOperationException("output_reparse_path_refused");
     output=Path.Combine(folder,s.Value<string>("file_name"));if(File.Exists(output))throw new InvalidOperationException("output_exists_no_overwrite");temp=Path.Combine(folder,"pending-"+Guid.NewGuid().ToString("N")+".pdf");
     using var settings=new PlotSettings(layout.ModelType);settings.CopyFrom(layout);
+    if(s["window_settings"] is JObject w){
+     // Transient settings only: never replace or save the user's layout setup.
+     var v=PlotSettingsValidator.Current;string device=w.Value<string>("device"),style=w.Value<string>("plot_style"),media=w.Value<string>("media");
+     v.RefreshLists(settings);
+     if(!v.GetPlotDeviceList().Cast<string>().Contains(device)||!v.GetPlotStyleSheetList().Cast<string>().Contains(style))throw new InvalidOperationException("installed_plot_device_and_style_required");
+     v.SetPlotConfigurationName(settings,device,null);v.RefreshLists(settings);
+     if(!v.GetCanonicalMediaNameList(settings).Cast<string>().Contains(media))throw new InvalidOperationException("media_not_supported_by_selected_device");
+     v.SetCanonicalMediaName(settings,media);v.SetPlotPaperUnits(settings,PlotPaperUnit.Millimeters);v.SetPlotRotation(settings,(PlotRotation)(w.Value<int>("rotation")/90));
+     v.SetPlotWindowArea(settings,new Extents2d(new Point2d(w["min"][0].Value<double>(),w["min"][1].Value<double>()),new Point2d(w["max"][0].Value<double>(),w["max"][1].Value<double>())));
+     v.SetPlotType(settings,PlotType.Window);v.SetUseStandardScale(settings,false);v.SetCustomPrintScale(settings,new CustomScale(w.Value<double>("scale_numerator"),w.Value<double>("scale_denominator")));v.SetPlotCentered(settings,w.Value<bool>("center"));v.SetCurrentStyleSheet(settings,style);
+     settings.PlotPlotStyles=true;settings.PrintLineweights=true;settings.ScaleLineweights=false;
+    }
+    if(!settings.PlotConfigurationName.EndsWith(".pc3",StringComparison.OrdinalIgnoreCase)||settings.PlotConfigurationName.IndexOf("PDF",StringComparison.OrdinalIgnoreCase)<0)throw new InvalidOperationException("PDF_PC3_page_setup_required_no_physical_printer_submission");
     using var info=new PlotInfo{Layout=layout.ObjectId,OverrideSettings=settings};using var validator=new PlotInfoValidator{MediaMatchingPolicy=MatchingPolicy.MatchEnabled};validator.Validate(info);if(info.ValidatedSettings.PlotConfigurationName!=settings.PlotConfigurationName||info.ValidatedSettings.CanonicalMediaName!=settings.CanonicalMediaName)throw new InvalidOperationException("plot_validation_changed_device_or_media");
     using(var engine=PlotFactory.CreatePublishEngine())
     {
@@ -74,6 +86,7 @@ namespace Bimwright.Dwg.Plugin
    catch(Exception ex){error="step="+s.Value<string>("id")+" op=plot_pdf: "+ex.Message;outcome=published?"committed_readback_unknown":invoked?"commit_outcome_unknown":"rejected_before_write";}
    var objects=new JObject{[s.Value<string>("id")]=new JObject{["layout"]=s["layout"]}};
    var result=Build(plan,empty,empty,objects,new JObject(),layers,layers,model,model,Array.Empty<string>(),outcome,invoked,published,error,symbols,symbols);result["layouts_before"]=layouts;result["layouts_after"]=layouts;result["effects_scope"]="output_file_only";result["output_file"]=artifact;result["pending_output_path"]=temp;result["failed_step"]=error==null?JValue.CreateNull():s["id"].DeepClone();
+   if(s["window_settings"]!=null&&outcome=="committed_verified"){result["plot_window_settings_used"]=s["window_settings"].DeepClone();result["plot_styles_enabled"]=true;result["print_lineweights_enabled"]=true;result["scale_lineweights_enabled"]=false;}
    if(outcome=="committed_verified"&&!FoundationDrawingPlan.VerifyReceipt(result,canonicalPlan)){result["outcome"]="committed_readback_failed";result["error"]="plot_receipt_verification_failed";}
    return result;
   }

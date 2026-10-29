@@ -1,0 +1,143 @@
+{
+  "plan": {
+    "schema": "foundation-drawing-plan-v1",
+    "source_role": "annotation",
+    "units": "raw_drawing_units",
+    "steps": [
+      {
+        "id": "title",
+        "op": "set_text",
+        "handle": "A",
+        "expected_sha256": "A56BDCFD260188590373D13DE313C65D1CC9E1EC30D4683871412A4360FFC6C2",
+        "text": "after",
+        "companions": []
+      }
+    ]
+  },
+  "receipt": {
+    "verification_scope": "declared_plan_properties",
+    "schema": "foundation-plan-receipt-v1",
+    "plan_sha256": "BF27E66013A24B7C94EE2C8A09D964C793D881932E9C5D4314C76078898B2916",
+    "outcome": "committed_readback_failed",
+    "effects": "committed",
+    "commit_invoked": true,
+    "commit_returned": true,
+    "error": null,
+    "created_handles": [],
+    "layers": {},
+    "journal_finalized": false,
+    "fence_release_authorized": false,
+    "failure_stage": null,
+    "failed_step": null,
+    "failed_operation": null,
+    "steps_executed_before_outcome": [
+      "title"
+    ],
+    "step_execution_is_not_commit": true,
+    "before": {
+      "A": {
+        "handle": "A",
+        "type": "DBText",
+        "layer": "0",
+        "color_index": 256,
+        "linetype": "CONTINUOUS",
+        "lineweight": -1,
+        "extents": {
+          "min": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "max": {
+            "x": 1,
+            "y": 1,
+            "z": 0
+          }
+        },
+        "owner_handle": "2",
+        "layout_name": "Model",
+        "text": "before",
+        "position": {
+          "x": 10,
+          "y": 20,
+          "z": 0.0
+        },
+        "height": 3.5,
+        "width_factor": 0.7,
+        "alignment_point": {
+          "x": 15,
+          "y": 20,
+          "z": 0.0
+        },
+        "rotation": 0.0,
+        "text_style": "HZ",
+        "horizontal_mode": "TextCenter",
+        "vertical_mode": "TextBase"
+      }
+    },
+    "after": {
+      "A": {
+        "handle": "A",
+        "type": "DBText",
+        "layer": "0",
+        "color_index": 256,
+        "linetype": "CONTINUOUS",
+        "lineweight": -1,
+        "extents": {
+          "min": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "max": {
+            "x": 1,
+            "y": 1,
+            "z": 0
+          }
+        },
+        "owner_handle": "2",
+        "layout_name": "Model",
+        "text": "after",
+        "position": {
+          "x": 9,
+          "y": 20,
+          "z": 0.0
+        },
+        "height": 3.5,
+        "width_factor": 0.7,
+        "alignment_point": {
+          "x": 15,
+          "y": 20,
+          "z": 0.0
+        },
+        "rotation": 0.0,
+        "text_style": "HZ",
+        "horizontal_mode": "TextCenter",
+        "vertical_mode": "TextBase"
+      }
+    },
+    "objects": {
+      "title": {
+        "entity": "A"
+      }
+    },
+    "symbols_before": {
+      "text_styles": {},
+      "dimension_styles": {}
+    },
+    "symbols_after": {
+      "text_styles": {},
+      "dimension_styles": {}
+    },
+    "all_layers_before": {},
+    "all_layers_after": {},
+    "model_handles_before": [
+      "A"
+    ],
+    "model_handles_after": [
+      "A"
+    ],
+    "layouts_before": {},
+    "layouts_after": {}
+  }
+}

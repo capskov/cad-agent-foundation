@@ -23,6 +23,9 @@ namespace Bimwright.Dwg.Plugin.Handlers
 
             var results = new List<object>();
             var db = doc.Database;
+#if ACAD2026
+            var geometryReader = new FoundationGeometryReader();
+#endif
 
             using (var tx = db.TransactionManager.StartTransaction())
             {
@@ -51,12 +54,32 @@ namespace Bimwright.Dwg.Plugin.Handlers
                         }
 
                         object facts=CadEntityProperties.Describe(entity,tx,request.IncludeGeometry);
+#if ACAD2026
+                        JObject geometry=null;
+                        if(request.IncludeGeometry){
+                            var revision=Bimwright.Dwg.Plugin.View.DrawingRevision.For(doc);
+                            long beforeRevision=revision.Revision;
+                            geometry=geometryReader.Read(entity,tx,request.GeometryOffset);
+                            geometry["document_session_id"]=revision.SessionId;
+                            geometry["drawing_revision"]=beforeRevision;
+                            if(revision.Revision!=beforeRevision)throw new InvalidOperationException("drawing_changed_during_geometry_read");
+                        }
+#endif
+                        // Native decomposition may refresh derived block text extents. Capture facts after it.
+                        facts=CadEntityProperties.Describe(entity,tx,request.IncludeGeometry);
+                        string digest=null,digestError=null;
+                        try{digest=Bimwright.Dwg.Shared.Execution.FoundationDrawingPlan.Hash(JToken.FromObject(request.IncludeGeometry?facts:CadEntityProperties.Describe(entity,tx,true)));}catch(Exception ex){digestError=ex.Message;}
                         results.Add(new
                         {
                             handle,
                             ok = true,
-                            entity_digest = request.IncludeGeometry ? Bimwright.Dwg.Shared.Execution.FoundationDrawingPlan.Hash(JToken.FromObject(facts)) : null,
+                            entity_digest = digest,
+                            digest_error = digestError,
                             entity = facts,
+#if ACAD2026
+                            geometry_read = geometry,
+                            reference_read = entity is RasterImage raster && raster.GetType()==typeof(RasterImage) ? FoundationPlanWriteHandler.RasterReferenceStatus(doc,raster,tx) : null,
+#endif
                             error = (string)null
                         });
                     }

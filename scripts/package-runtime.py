@@ -10,7 +10,7 @@ FORK=ROOT/'third_party/bimwright-dwg-mcp/fork'
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest().upper()
 def put(p,text):p.parent.mkdir(parents=True,exist_ok=True);p.write_text(text,encoding='utf-8',newline='\n')
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--version',default='1.1.0-rc.1');parser.add_argument('--output',type=Path);a=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--version',default='1.1.0-rc.1');parser.add_argument('--output',type=Path);parser.add_argument('--signing-config',type=Path);a=parser.parse_args()
     output=a.output or ROOT/'artifacts/packages'/datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d-%H%M%S')
     output=output.resolve();output.mkdir(parents=True,exist_ok=False)
     for label,target in [('server','net8.0'),('plugin','net8.0-windows')]:
@@ -25,6 +25,7 @@ def main():
             dest=output/label/rel;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(f,dest)
     for source,name in [(ROOT/'AGENTS.md','AGENTS.md'),(ROOT/'client/foundation.py','client/foundation.py'),(ROOT/'scripts/readonly-entry.py','support/readonly-entry.py'),(ROOT/'foundation.cmd','foundation.cmd'),(ROOT/'LICENSE','LICENSE'),(ROOT/'NOTICE.md','NOTICE.md'),(ROOT/'THIRD_PARTY_NOTICES.md','THIRD_PARTY_NOTICES.md')]:
         dest=output/name;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(source,dest)
+    shutil.copy2(ROOT/'client/plot_style.py',output/'client/plot_style.py')
     (output/'docs').mkdir()
     for f in (ROOT/'docs').glob('*.md'):shutil.copy2(f,output/'docs'/f.name)
     # Runtime ZIP is not a source checkout. Link missing source/example assets
@@ -72,13 +73,23 @@ def main():
         assert shipped,'No license text resolved: '+name
         notices.append({'package':name,'license':expression,'included_license_files':shipped,'source':'NuGet package notices; SPDX text for declared expressions'})
     put(output/'DEPENDENCIES.json',json.dumps(notices,indent=2)+'\n')
-    put(output/'README.md', '# CAD Agent Foundation '+a.version+' runtime preview\n\nWindows x64, compatible licensed AutoCAD 2026/.NET 8 and Python 3.11+ required.\n\nInstall with foundation.cmd install --workspace C:\\CAD-work\\demo01, then start an owned drawing copy. Default is read-only; use --write for bounded plans. See docs/QUICKSTART.md and docs/PHASE2-DEVELOPMENT-20261015.zh-CN.md for the local 1.2 scope, and docs/DRAWING-UNITS-AND-TYPOGRAPHY.zh-CN.md for raw coordinates, optional unit metadata checks and Agent typography guidance; older public scope remains versioned. Native acceptance is scoped by the versioned release record and manifest. No global MCP changes or Autodesk/SHX redistribution.\n')
-    put(output/'README.zh-CN.md','# CAD Agent Foundation '+a.version+' 运行包\n\n需合法兼容的Windows x64 AutoCAD2026／.NET8桌面运行时及Python3.11+。完整解压后执行foundation.cmd install --workspace C:\\CAD-work\\demo01，再用start启动来源图的自有副本。默认只读，--write开启有界计划。见docs/QUICKSTART.zh-CN.md及版本验收；不修改全局MCP，不再分发Autodesk或SHX。\n')
+    put(output/'README.md', '# CAD Agent Foundation '+a.version+' runtime preview\n\nWindows x64, compatible licensed AutoCAD 2026/.NET 8 and Python 3.11+ required.\n\nInstall with foundation.cmd install --workspace C:\\CAD-work\\demo01, then start an owned drawing copy. Default is read-only; use --write for bounded plans. See docs/QUICKSTART.md and docs/PHASE2-DEVELOPMENT-20261015.zh-CN.md for the local 1.2 scope, and docs/DRAWING-UNITS-AND-TYPOGRAPHY.zh-CN.md for raw coordinates, optional unit metadata checks and Agent typography guidance; older public scope remains versioned. Native acceptance is scoped by the versioned release record and manifest. See docs/FEEDBACK-BETA2-20261023.zh-CN.md for the new bounded view/capture and raster path profile. No global MCP changes or Autodesk/SHX redistribution.\n')
+    put(output/'README.zh-CN.md','# CAD Agent Foundation '+a.version+' 运行包\n\n需合法兼容的Windows x64 AutoCAD2026／.NET8桌面运行时及Python3.11+。完整解压后执行foundation.cmd install --workspace C:\\CAD-work\\demo01，再用start启动来源图的自有副本。默认只读，--write开启有界计划。见docs/QUICKSTART.zh-CN.md及版本验收；新版视图截图与光栅路径修复见docs/FEEDBACK-BETA2-20261023.zh-CN.md；不修改全局MCP，不再分发Autodesk或SHX。\n')
+    signing=None
+    signing_config=a.signing_config or ROOT/'private/signing/capskov-local.json'
+    if signing_config.is_file():
+        # Sign only this project's copied binaries, before computing manifest hashes.
+        powershell=shutil.which('pwsh.exe') or shutil.which('powershell.exe')
+        assert powershell,'PowerShell Authenticode support is required for configured signing'
+        raw=subprocess.check_output([powershell,'-NoProfile','-NonInteractive','-File',str(ROOT/'scripts/sign-foundation-artifacts.ps1'),'-RuntimeRoot',str(output),'-Configuration',str(signing_config)],text=True,encoding='utf-8-sig')
+        signing=json.loads(raw)
+        shutil.copy2(ROOT/'scripts/verify-runtime-signatures.ps1',output/'support/verify-runtime-signatures.ps1')
+        put(output/'SIGNING.json',json.dumps(signing,ensure_ascii=False,indent=2)+'\n')
     plugin=output/'plugin/Bimwright.Dwg.Plugin.Acad26.dll'
     info=json.loads(subprocess.check_output(['dotnet',str(ROOT/'tools/assembly-info/bin/Release/net8.0/assembly-info.dll'),str(plugin)],text=True,encoding='utf-8'))
     files={f.relative_to(output).as_posix():sha(f) for f in sorted(output.rglob('*')) if f.is_file()}
     bundle=hashlib.sha256(json.dumps({k:v for k,v in files.items() if k.startswith('plugin/')},sort_keys=True,separators=(',',':')).encode()).hexdigest().upper()
-    manifest={'schema':'foundation-release-manifest-v1','version':a.version,'acceptance':'candidate-native-acceptance-pending','plugin_sha256':sha(plugin),'plugin_bundle_sha256':bundle,'plugin_mvid':info['mvid'],'files':files,'limits':['recorded AutoCAD2026/.NET8 host only','2D WCS raw drawing values; optional INSUNITS consistency check; legacy metres mode retained','bounded operations; no arbitrary code','unknown writes never replayed','owned working copies only','dependency notices in licenses/']}
+    manifest={'schema':'foundation-release-manifest-v1','version':a.version,'acceptance':'candidate-native-acceptance-pending','plugin_sha256':sha(plugin),'plugin_bundle_sha256':bundle,'plugin_mvid':info['mvid'],'files':files,'signing':signing,'limits':['recorded AutoCAD2026/.NET8 host only','2D WCS bounded writes; 3D WCS geometry reads where supported; raw drawing values; optional INSUNITS check; legacy metres mode retained','bounded operations; no arbitrary code','unknown writes never replayed','owned working copies only','dependency notices in licenses/']}
     put(output/'manifest.json',json.dumps(manifest,indent=2)+'\n')
     archive=output.with_suffix('.zip')
     with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED) as z:

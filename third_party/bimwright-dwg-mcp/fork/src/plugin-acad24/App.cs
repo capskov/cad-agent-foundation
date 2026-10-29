@@ -374,7 +374,7 @@ namespace Bimwright.Dwg.Plugin
             PluginExecutionQueue queue;
             if (FoundationWriteEnabled)
             {
-                queue=new PluginExecutionQueue(PluginJournal,new[]{"list_layers","get_entity_properties","query_entities"},new[]{Bimwright.Dwg.Shared.Execution.FoundationDrawingPlan.PluginToolName},CommandDispatcher.VerifyExactPluginContext,CommandDispatcher.ExecuteReadOnlyJob,CommandDispatcher.ExecuteFoundationWriteJob);
+                queue=new PluginExecutionQueue(PluginJournal,new[]{"list_layers","get_entity_properties","query_entities","foundation_view"},new[]{Bimwright.Dwg.Shared.Execution.FoundationDrawingPlan.PluginToolName},CommandDispatcher.VerifyExactPluginContext,CommandDispatcher.ExecuteReadOnlyJob,CommandDispatcher.ExecuteFoundationWriteJob);
             }
             else if (_h1WritePilotEnabled)
             {

@@ -19,6 +19,7 @@ namespace Bimwright.Dwg.Plugin.Cad
 
         internal IReadOnlyList<string> Handles { get; }
         internal bool IncludeGeometry { get; }
+        internal int GeometryOffset { get; private set; }
 
         internal static bool TryCreate(JToken parameters, out HandleBatchRequest request, out string error)
         {
@@ -85,7 +86,10 @@ namespace Bimwright.Dwg.Plugin.Cad
                 includeGeometry = includeGeometryToken.Value<bool>();
             }
 
+            var offset=obj["geometry_offset"];
+            if(offset!=null && (offset.Type!=JTokenType.Integer || !long.TryParse(offset.ToString(),out long offsetValue) || offsetValue<0 || offsetValue>4096 || !includeGeometry || handles.Count!=1)){error="geometry_offset requires include_geometry=true, one handle and integer 0..4096";return false;}
             request = new HandleBatchRequest(handles, includeGeometry);
+            request.GeometryOffset=offset==null?0:offset.Value<int>();
             return true;
         }
 
@@ -134,7 +138,8 @@ namespace Bimwright.Dwg.Plugin.Cad
             var allowedProperties = new HashSet<string>(StringComparer.Ordinal)
             {
                 "handles",
-                "include_geometry"
+                "include_geometry",
+                "geometry_offset"
             };
             var unsupportedProperty = obj.Properties()
                 .Select(property => property.Name)

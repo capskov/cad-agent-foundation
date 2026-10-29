@@ -39,4 +39,13 @@ User or Skill typography and output rules take precedence. Otherwise derive mode
 
 ## Foundation versus Agent (user clarified 2026-10-16)
 
+Release naming (user confirmed 2026-10-16): preserve the published, verified v1.2.0-local.4 tag and assets. Do not rebuild, retag or republish solely to change its name. On the next normal upgrade, consider v1.2.0-beta.1 when features are substantially formed and field testing continues; v1.2.0-rc.1 when functionality is approaching stability and pre-release verification begins; v1.2.0 when the declared supported scope meets formal release requirements. These are maturity-based choices, not scheduled releases or automatic promotion.
+
 Foundation supplies small explicit native primitives and truthful execution/error/readback feedback. The Agent owns broad interpretation, difficult judgments, font choice, style/layout decisions, visual review and acceptance. Do not reimplement or repeatedly test Agent reasoning as Foundation algorithms. Font replacement and user-specified metric scaling are primitives; fitting factors, typography preferences and drawing-wide appearance are Agent/Skill work. Fix current execution blockers and important cases, then return to delivery; sampling/full review follows the task, not an imposed font-layout audit.
+
+
+## 本机签名与加载授权 2026-10-28
+
+用户已明确要求创建 capskov 本机自签名代码签名证书，并要求 Agent 自行点击信任、加载底座插件及本次维修组件，不再为相同加载操作反复询问。
+先核对当前构建产物路径、manifest 哈希、签名指纹和原生插件身份；有签名时要求签名 Valid 且签名者为本机配置指定的 capskov。只处理已核实的底座本体及维护组件，不把这项授权扩展到未知发布者或其他软件。保留 SECURELOAD，不关闭安全校验；对当前已核实发布者的提示，Agent 应按授权处理信任并继续加载。
+本机证书私钥保留于 CurrentUser\My 且不可导出；配置在被 Git 忽略的 private/signing/capskov-local.json。打包入口默认读取此配置，先签名再生成哈希与清单；不要对已验收或在用旧运行包原地重签，也不要把自签名描述为公共 CA 身份认证。其他机器需由其用户另行信任该发布者。

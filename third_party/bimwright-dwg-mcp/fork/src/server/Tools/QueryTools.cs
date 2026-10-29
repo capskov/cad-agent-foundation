@@ -24,14 +24,17 @@ namespace Bimwright.Dwg.Server.Tools
         [McpServerTool(Name = "dwg_get_entity_properties", ReadOnly = true, Idempotent = true), Description(
             "Return properties for AutoCAD entities identified by handle. " +
             "Input handles is a JSON array of 1-64 hex handles, e.g. [\"7F5AD\"]. " +
-            "Returns one result record per handle; bad handles do not abort siblings. " +
+            "Returns one result record per handle; bad handles do not abort siblings. entity_digest is attempted independently of include_geometry; digest_error explains unavailable digests. Never submit a write with an empty digest. " +
+            "AutoCAD 2026 include_geometry=true also returns geometry_read: read-only native transient decomposition of proxies, blocks and compound entities into WCS primitives, with paths, status and issues. " +
+            "Proxy results are saved display graphics, not proprietary design data. Collection order does not establish connectivity; partial/unavailable must be checked. Query candidates first, then read small handle batches. " +
             "With include_geometry=true, ordinary Leader records include ordered vertices and an annotation handle; " +
             "the linked annotation text is not expanded and must be read separately by that handle. " +
             "Polyline area is AutoCAD's native value; an open polyline's area is not a region area, so check is_closed. " +
             "Large results are explicitly marked truncated.")]
         public static Task<string> GetEntityProperties(
             [Description("JSON array of AutoCAD handles, e.g. [\"7F5AD\",\"2A4F\"].")] string handles,
-            [Description("When true, include lightweight geometry such as extents, points, lengths, and text positions where available.")] bool include_geometry = false)
+            [Description("When true, include lightweight geometry such as extents, points, lengths, and text positions where available.")] bool include_geometry = false,
+            [Description("Optional geometry page offset, integer 0..4096; requires one handle and include_geometry=true. Use geometry_read.next_offset with the same entity_digest, document_session_id and drawing_revision; restart if any changes. Always check geometry_read issues and has_more.")] int? geometry_offset = null)
         {
             if (string.IsNullOrWhiteSpace(handles))
             {
@@ -48,7 +51,8 @@ namespace Bimwright.Dwg.Server.Tools
                 return ToolInputError($"handles must be a JSON array: {ex.Message}");
             }
 
-            var request = new { handles = parsed, include_geometry };
+            var request = new JObject { ["handles"]=parsed, ["include_geometry"]=include_geometry };
+            if(geometry_offset.HasValue)request["geometry_offset"]=geometry_offset.Value;
             return ToolGateway.LoggedCall("get_entity_properties", request, request);
         }
 

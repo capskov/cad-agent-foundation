@@ -21,8 +21,18 @@ namespace Bimwright.Dwg.Shared.Execution
    }
    else
    {
-    Keys(s,"id","op","layout","expected_sha256","file_name");Text(s,"layout",255);Digest(s,"expected_sha256");
+    KeysWithOptional(s,new[]{"id","op","layout","expected_sha256","file_name"},"window_settings");Text(s,"layout",255);Digest(s,"expected_sha256");
     if(!Regex.IsMatch(Text(s,"file_name",100),"^[A-Za-z0-9][A-Za-z0-9_-]{0,79}\\.pdf\\z"))throw new ArgumentException("file_name must be a simple ASCII PDF basename");
+    if(s["window_settings"] is JToken options){
+     if(options is not JObject w)throw new ArgumentException("window_settings must be object");
+     Keys(w,"device","media","plot_style","rotation","min","max","scale_numerator","scale_denominator","center");
+     foreach(string k in new[]{"device","media","plot_style"})Text(w,k,255);
+     if(!w.Value<string>("device").EndsWith(".pc3",StringComparison.OrdinalIgnoreCase)||w.Value<string>("device").IndexOf("PDF",StringComparison.OrdinalIgnoreCase)<0)throw new ArgumentException("PDF PC3 required");
+     if(w["rotation"]?.Type!=JTokenType.Integer||!new[]{0,90,180,270}.Contains(w.Value<int>("rotation")))throw new ArgumentException("rotation must be 0,90,180,270");
+     foreach(string k in new[]{"min","max"}){if(w[k] is not JArray a||a.Count!=2)throw new ArgumentException("two plot DCS coordinates required");foreach(var n in a)Number(n);}
+     if(Number(w["max"][0])<=Number(w["min"][0])||Number(w["max"][1])<=Number(w["min"][1]))throw new ArgumentException("ordered nonempty plot window required");
+     Positive(w,"scale_numerator");Positive(w,"scale_denominator");Bool(w,"center");
+    }
    }
    return true;
   }
@@ -46,6 +56,7 @@ namespace Bimwright.Dwg.Shared.Execution
    var map=receipt["objects"]?[step.Value<string>("id")] as JObject;string name=step.Value<string>("layout");
    if(map?.Value<string>("layout")!=name||receipt["layouts_before"]?[name]==null||Hash(receipt["layouts_before"][name])!=step.Value<string>("expected_sha256"))return false;
    if(op=="page_setup")return true;
+   if(step["window_settings"]!=null&&(!JToken.DeepEquals(step["window_settings"],receipt["plot_window_settings_used"])||receipt.Value<bool?>("plot_styles_enabled")!=true||receipt.Value<bool?>("print_lineweights_enabled")!=true||receipt.Value<bool?>("scale_lineweights_enabled")!=false))return false;
    var file=receipt["output_file"] as JObject;
    return file!=null&&file.Value<string>("file_name")==step.Value<string>("file_name")&&Regex.IsMatch(file.Value<string>("sha256")??"","^[A-F0-9]{64}$")&&file.Value<long?>("bytes")>5&&file.Value<bool?>("pdf_header_verified")==true&&file.Value<bool?>("published_without_overwrite")==true&&receipt.Value<string>("effects_scope")=="output_file_only";
   }

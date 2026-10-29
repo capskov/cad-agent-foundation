@@ -1,5 +1,11 @@
 # CAD Agent Foundation — AutoCAD MCP & CLI for AI Agents
 
+Current field release preparation: **1.2.0-beta.3.18**, with local CTB configuration, native window PDF printing and save/annotation reliability fixes. See [validation and limits](docs/RELEASE-v1.2.0-beta.3.18.md). Earlier local milestones below remain historical evidence.
+
+Local **1.2.0-beta.2** adds a bound native view/readback/PNG endpoint, guarded native raster-reference path repair, explicit pre-submission rejection classification, digests independent of geometry output, and transient ordinary text reads. Existing proxy/local.5 work is preserved. Scoped packaged-MCP checks passed on a synthetic AutoCAD 2026 drawing; satellite interpretation and road tracing remain Agent/Skill work. See [scope and evidence](docs/FEEDBACK-BETA2-20261023.zh-CN.md). Not automatically published to GitHub.
+
+Local development `1.2.0-beta.1` adds [read-only proxy/compound geometry](docs/PROXY-GEOMETRY-READ.zh-CN.md): native transient decomposition, WCS primitives, NURBS data, geometry paging and explicit limitations on AutoCAD 2026. This local upgrade has not been published to GitHub.
+
 ## First priority: reliable operations for increasingly capable agents
 
 Foundation development supports the real task. Provide small, reliable, controlled CAD primitives and truthful feedback so the Agent can act and move forward. The Agent owns visual judgment, structure interpretation, example learning, pattern recognition and final review. Do not turn those judgments into programs, fitting algorithms or compulsory verification workflows. Do not add incidental features unless explicitly requested. When current primitives suffice and the Agent judges the result acceptable, continue the main task. Preserve drawing identity, source protection and no replay of unknown writes.

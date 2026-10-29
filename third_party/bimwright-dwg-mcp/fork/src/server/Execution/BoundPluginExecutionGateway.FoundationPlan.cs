@@ -14,13 +14,18 @@ namespace Bimwright.Dwg.Server.Execution
  }
  public sealed partial class BoundPluginExecutionGateway
  {
+  public Task<string> SubmitFoundationViewAsync(ToolInvocationEnvelope invocation,string json)
+  {
+   try {var p=FoundationViewRequest.Parse(json);return SubmitNamedGovernedReadAsync(invocation,FoundationViewRequest.Mcp,p,p);}
+   catch(Exception ex){return Task.FromResult(Envelope(Guid.NewGuid().ToString("N"),true,new {status="rejected_before_submission",pending=false,effects="none",registered=false,request_id=invocation?.RequestId,context_id=invocation?.ContextId,error=ex.Message},null));}
+  }
   private bool IsFoundationWriteProfile=>_foundationWriteScope!=null;
   public Task<string> SubmitFoundationPlanAsync(ToolInvocationEnvelope invocation)
   {
    if(!IsFoundationWriteProfile||invocation==null||invocation.BusinessArguments?.Count!=1||!invocation.BusinessArguments.TryGetValue("plan_json",out JsonElement input)||input.ValueKind!=JsonValueKind.String)
     return Task.FromResult(Envelope(Guid.NewGuid().ToString("N"),false,null,"The first-release drawing plan is disabled or invalid."));
    try {string canonical=FoundationDrawingPlan.Canonical(FoundationDrawingPlan.Parse(input.GetString()));return SubmitFixedWriteAsync(invocation,canonical);}
-   catch(Exception ex){return Task.FromResult(Envelope(Guid.NewGuid().ToString("N"),false,null,ex.Message));}
+   catch(Exception ex){return Task.FromResult(Envelope(Guid.NewGuid().ToString("N"),true,new {status="rejected_before_submission",pending=false,effects="none",registered=false,request_id=invocation?.RequestId,context_id=invocation?.ContextId,error=ex.Message},null));}
   }
   private string OwnedWriteParameters(string requestId,BoundPluginContext bound)
   {

@@ -8,7 +8,7 @@ namespace Bimwright.Dwg.Shared.Execution
 {
  public static partial class FoundationDrawingPlan
  {
-  public static readonly string[] Operations=new[]{"layer","line","circle","polyline","text","mtext","callout","hatch","set_text","set_polyline","set_callout","set_callout_format","move","rotate","scale","copy","archive","save","text_style","set_text_style_font","dimension_style","set_layer","linear_dimension","aligned_dimension","radial_dimension","diameter_dimension"}.Concat(Phase2Operations).Concat(PrintOperations).Concat(CurveOperations).Concat(BlockOperations).Concat(new[]{"export_dxf","angular_dimension"}).ToArray();
+  public static readonly string[] Operations=new[]{"layer","line","circle","polyline","text","mtext","callout","hatch","set_text","set_polyline","set_callout","set_callout_format","move","rotate","scale","copy","archive","save","text_style","set_text_style_font","dimension_style","set_layer","linear_dimension","aligned_dimension","radial_dimension","diameter_dimension"}.Concat(Phase2Operations).Concat(PrintOperations).Concat(CurveOperations).Concat(BlockOperations).Concat(new[]{"export_dxf","angular_dimension","set_xref_path","set_paper_viewport","set_paper_text","copy_paper_frame","wipeout_rectangle"}).ToArray();
   public static void ValidateAttachment(JObject s)
   {if(s["attachment"]!=null&&!new[]{"TopLeft","TopCenter","TopRight","MiddleLeft","MiddleCenter","MiddleRight","BottomLeft","BottomCenter","BottomRight"}.Contains(Text(s,"attachment",32)))throw new ArgumentException("known MTEXT attachment required");}
   public static void KeysWithOptional(JObject s,string[] required,params string[] optional)
@@ -20,6 +20,7 @@ namespace Bimwright.Dwg.Shared.Execution
    var op=s.Value<string>("op");
    switch(op)
    {
+    case "wipeout_rectangle":Keys(s,"id","op","min","max","layer","color");Point(s["min"]);Point(s["max"]);Options(s);if(Number(s["min"][0])>=Number(s["max"][0])||Number(s["min"][1])>=Number(s["max"][1]))throw new ArgumentException("positive rectangular mask required");count++;break;
     case "set_text_style_font":
      Keys(s,"id","op","name","expected_sha256","font_file","big_font_file");Text(s,"name",255);Digest(s,"expected_sha256");
      foreach(string key in new[]{"font_file","big_font_file"})
@@ -31,7 +32,7 @@ namespace Bimwright.Dwg.Shared.Execution
      foreach(string f in new[]{s.Value<string>("font_file"),s.Value<string>("big_font_file")})if(f.Contains('/')||f.Contains('\\')||f.Contains(':')||f.Contains('\0')||f.Length>255)throw new ArgumentException("font_file must be an installed font basename");
      break;
     case "dimension_style":
-     Keys(s,"id","op","name","text_style","text_height","arrow_size","overall_scale","gap","decimal_places","dimension_color","extension_color","text_color");
+     KeysWithOptional(s,new[]{"id","op","name","text_style","text_height","arrow_size","overall_scale","gap","decimal_places","dimension_color","extension_color","text_color"},"extension_origin_offset","extension_beyond","decimal_separator");if(s["extension_origin_offset"]!=null&&Number(s["extension_origin_offset"])<0)throw new ArgumentException("nonnegative extension origin offset required");if(s["extension_beyond"]!=null&&Number(s["extension_beyond"])<0)throw new ArgumentException("nonnegative extension beyond required");if(s["decimal_separator"]!=null&&(s["decimal_separator"].Type!=JTokenType.String||s.Value<string>("decimal_separator").Length!=1||!"., ".Contains(s.Value<string>("decimal_separator"))))throw new ArgumentException("decimal separator must be dot comma or space");
      Text(s,"name",255);Text(s,"text_style",255);Positive(s,"text_height");Positive(s,"arrow_size");Positive(s,"overall_scale");Number(s["gap"]);
      foreach(string f in new[]{"dimension_color","extension_color","text_color"})Color(s,f);
      if(s["decimal_places"]?.Type!=JTokenType.Integer||s.Value<int>("decimal_places")<0||s.Value<int>("decimal_places")>8)throw new ArgumentException("decimal_places 0..8 required");break;
@@ -52,7 +53,7 @@ namespace Bimwright.Dwg.Shared.Execution
      var ids=new HashSet<string>();foreach(JObject t in ts){Keys(t,"handle","expected_sha256");Expected(t);if(!ids.Add(t.Value<string>("handle")))throw new ArgumentException("duplicate target");}
      if(op=="copy")Point(s["delta"]);else{Point(s["base"]);if(op=="scale"){Positive(s,"factor");if(Number(s["factor"])<1e-6||Number(s["factor"])>1e6)throw new ArgumentException("scale factor outside 1e-6..1e6");}else Number(s["angle"]);}
      count+=ts.Count*(op=="copy"?2:1);break;
-    default:return ValidateBlock(s,ref count)||ValidateAngular(s,ref count)||ValidateDxf(s,ref count)||ValidatePhase2(s,ref count)||ValidateCurve(s,ref count)||ValidatePrint(s);
+    default:if(s.Value<string>("op")=="copy_paper_frame")count++;return ValidatePaperViewport(s)||ValidateXrefPath(s)||ValidateBlock(s,ref count)||ValidateAngular(s,ref count)||ValidateDxf(s,ref count)||ValidatePhase2(s,ref count)||ValidateCurve(s,ref count)||ValidatePrint(s);
    }
    return true;
   }
@@ -93,7 +94,7 @@ namespace Bimwright.Dwg.Shared.Execution
     if(!added.SetEquals(steps.Cast<JObject>().Where(s=>s.Value<string>("op")==op&&!a.ContainsKey(s.Value<string>("name"))).Select(s=>s.Value<string>("name"))))return false;
    }
    if(old["block_definitions"] is JObject blocks){if(next["block_definitions"] is not JObject newBlocks)return false;foreach(var row in blocks.Properties())if(!Equivalent(FontGeometryNeutral(row.Value,steps),FontGeometryNeutral(newBlocks[row.Name],steps)))return false;}
-   return true;
+   return VerifyXrefPathChanges(old["xrefs"] as JObject,next["xrefs"] as JObject,steps)&&VerifyPaperViewportChanges(old["paper_viewports"] as JObject,next["paper_viewports"] as JObject,steps)&&VerifyPaperTextChanges(old["paper_texts"] as JObject,next["paper_texts"] as JObject,steps)&&VerifyPaperBlockChanges(old["paper_blocks"] as JObject,next["paper_blocks"] as JObject,steps,receipt);
   }
   static JToken FontGeometryNeutral(JToken value,JArray steps)
   {
@@ -111,11 +112,22 @@ namespace Bimwright.Dwg.Shared.Execution
   {
    if(before is not JObject a||after is not JObject b||a["resolved_font"] is not JObject font||string.IsNullOrWhiteSpace(font.Value<string>("typeface"))||!JToken.DeepEquals(font,b["resolved_font"]))return false;
    string oldFile=a.Value<string>("font_file")??"",newFile=b.Value<string>("font_file")??"";
-   if(!(oldFile.Length==0||oldFile.EndsWith(".ttf",StringComparison.OrdinalIgnoreCase))||!newFile.EndsWith(".ttf",StringComparison.OrdinalIgnoreCase))return false;
+   // AutoCAD can canonicalize either direction: a resolved TrueType face may
+   // gain its installed filename on save, or a legacy filename may become empty.
+   // Only this filename is neutral; the complete resolved face and every other
+   // style property must remain identical. SHX/BigFont styles are never neutral.
+   bool TrueTypeOrEmpty(string name)=>name.Length==0||name.EndsWith(".ttf",StringComparison.OrdinalIgnoreCase);
+   if(!TrueTypeOrEmpty(oldFile)||!TrueTypeOrEmpty(newFile)
+      ||!string.IsNullOrEmpty(a.Value<string>("big_font_file"))||!string.IsNullOrEmpty(b.Value<string>("big_font_file")))return false;
    var x=(JObject)a.DeepClone();var y=(JObject)b.DeepClone();x.Remove("font_file");y.Remove("font_file");return JToken.DeepEquals(x,y);
   }
   public static bool VerifyExtension(JObject step,JObject receipt,out bool handled)
   {
+   if(step.Value<string>("op")=="wipeout_rectangle"){handled=true;var e=receipt["after"]?[receipt["objects"]?[step.Value<string>("id")]?.Value<string>("entity")??""];if(e==null||e.Value<string>("type")!="Wipeout"||!EntityOptions((JObject)e,step)||e["wipeout_boundary"] is not JArray points||points.Count<4||points.Count>5)return false;var corners=new[]{new JArray(step["min"][0],step["min"][1]),new JArray(step["max"][0],step["min"][1]),new JArray(step["max"][0],step["max"][1]),new JArray(step["min"][0],step["max"][1])};return corners.All(c=>points.Any(p=>PointMatches(p,c)))&&points.All(p=>corners.Any(c=>PointMatches(p,c)));}
+   if(step.Value<string>("op")=="copy_paper_frame"){handled=true;return receipt["after"]?[receipt["objects"]?[step.Value<string>("id")]?.Value<string>("entity")??""]?.Value<string>("layout_name")==step.Value<string>("layout");}
+   if(step.Value<string>("op")=="set_paper_text"){handled=true;return receipt["objects"]?[step.Value<string>("id")]?.Value<string>("paper_text")==step.Value<string>("paper_handle");}
+   if(step.Value<string>("op")=="set_paper_viewport"){handled=true;return receipt["objects"]?[step.Value<string>("id")]?.Value<string>("viewport")==step.Value<string>("viewport_handle");}
+   if(step.Value<string>("op")=="set_xref_path"){handled=true;var m=receipt["objects"]?[step.Value<string>("id")];return m?.Value<string>("xref")==step.Value<string>("name")&&m.Value<string>("file_sha256")==step.Value<string>("file_sha256");}
    if(BlockOperations.Contains(step.Value<string>("op")))return VerifyBlock(step,receipt,out handled);
    if(CurveOperations.Contains(step.Value<string>("op")))return VerifyCurve(step,receipt,out handled);
    if(PrintOperations.Contains(step.Value<string>("op")))return VerifyPrint(step,receipt,out handled);
@@ -152,7 +164,7 @@ namespace Bimwright.Dwg.Shared.Execution
      if(op!="copy"&&nh!=h)return false;
      var expected=TransformFacts(old,step);
      if(op=="copy"){expected["handle"]=nh;RemapReferences(expected,map);}
-     var actual=after[nh] as JObject;if(actual==null||!TransformEquivalent(expected,actual))return false;
+     var actual=after[nh] as JObject;if(actual==null||!TransformEquivalent(expected,actual,op=="rotate"&&old.Value<string>("type")=="Leader"))return false;
      if(actual.Value<string>("type")=="Hatch")
      {
       if(!(receipt.Value<string>("verification_scope")??"").EndsWith(";cached_hatch_area_requires_independent_read",StringComparison.Ordinal))return false;
@@ -203,22 +215,41 @@ namespace Bimwright.Dwg.Shared.Execution
     var p=(JObject)token.DeepClone();double x=Number(p["x"]),y=Number(p["y"]);
     if(op=="copy"){x+=Number(step["delta"][0]);y+=Number(step["delta"][1]);}
     else{double bx=Number(step["base"][0]),by=Number(step["base"][1]);double dx=x-bx,dy=y-by;x=bx+factor*(dx*Math.Cos(angle)-dy*Math.Sin(angle));y=by+factor*(dx*Math.Sin(angle)+dy*Math.Cos(angle));}
-    p["x"]=x;p["y"]=y;return p;
+    p["x"]=x;p["y"]=y;
+    foreach(string width in new[]{"start_width","end_width"})if(p[width]!=null&&p[width].Type!=JTokenType.Null)p[width]=Number(p[width])*factor;
+    return p;
    }
    foreach(string f in new[]{"start","end","center","position","location"})if(value[f] is JObject)value[f]=P(value[f]);
    foreach(string f in new[]{"vertices","vertices_wcs"})if(value[f] is JArray vs)value[f]=new JArray(vs.Select(P));
-   foreach(string f in new[]{"radius","diameter","circumference","length","height","text_height","width","actual_width","actual_height"})if(value[f]!=null)value[f]=Number(value[f])*factor;
+   foreach(string f in new[]{"radius","diameter","circumference","length","height","text_height","width","actual_width","actual_height","constant_width"})if(value[f]!=null&&value[f].Type!=JTokenType.Null)value[f]=Number(value[f])*factor;
    if(type=="Leader"&&value["gap"]!=null)value["gap"]=Number(value["gap"])*factor;
    if(value["area"]!=null)value["area"]=Number(value["area"])*factor*factor;
    if(value["rotation"]!=null)value["rotation"]=NormalizeAngle(Number(value["rotation"])+angle);
    return value;
   }
   public static double NormalizeAngle(double a){a%=2*Math.PI;return a<0?a+2*Math.PI:a;}
-  static bool TransformEquivalent(JObject expected,JObject actual)
+  static bool TransformEquivalent(JObject expected,JObject actual,bool rotatedLeader=false)
   {
    var a=(JObject)expected.DeepClone();var b=(JObject)actual.DeepClone();a.Remove("extents");b.Remove("extents");
+   // HasHookLine is a native derived display flag, not a settable Leader pose.
+   // Rotating associated MTEXT can recalculate it without changing the requested
+   // three vertices. Preserve and verify all vertex/annotation/style facts; report
+   // the actual hook flag instead of requiring the pre-rotation derived value.
+   if(rotatedLeader)
+   {
+    if(a["has_hook_line"]?.Type!=JTokenType.Boolean||b["has_hook_line"]?.Type!=JTokenType.Boolean)return false;
+    a.Remove("has_hook_line");b.Remove("has_hook_line");
+   }
    if(a.Value<string>("type")=="Hatch")foreach(string f in new[]{"loops","area"}){a.Remove(f);b.Remove(f);}
-   foreach(string f in new[]{"rotation"})if(a[f]!=null&&b[f]!=null){a[f]=NormalizeAngle(Number(a[f]));b[f]=NormalizeAngle(Number(b[f]));}
+   // Native MTEXT stores a direction and reads its angle back; that round trip
+   // can differ by a double ULP. Compare the circular angle at the existing
+   // 1e-10-radian rotation readback precision, rather than bit equality.
+   if(a["rotation"]!=null&&b["rotation"]!=null)
+   {
+    double delta=NormalizeAngle(Number(a["rotation"])-Number(b["rotation"]));
+    if(Math.Min(delta,2*Math.PI-delta)>1e-10)return false;
+    a.Remove("rotation");b.Remove("rotation");
+   }
    return Equivalent(a,b);
   }
   static bool VerifyCalloutDot(JObject step,JObject before,JObject after,JObject oldLeader,JObject nextLeader)

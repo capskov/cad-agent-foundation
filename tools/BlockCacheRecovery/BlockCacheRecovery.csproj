@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+<PropertyGroup><TargetFramework>net8.0-windows</TargetFramework><AssemblyName>Foundation.BlockCacheRecovery2</AssemblyName><ImplicitUsings>enable</ImplicitUsings><PlatformTarget>x64</PlatformTarget><LangVersion>latest</LangVersion></PropertyGroup>
+<ItemGroup><PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+<Reference Include="accoremgd"><HintPath>C:\Program Files\Autodesk\AutoCAD 2026\accoremgd.dll</HintPath><Private>false</Private></Reference>
+<Reference Include="acdbmgd"><HintPath>C:\Program Files\Autodesk\AutoCAD 2026\acdbmgd.dll</HintPath><Private>false</Private></Reference>
+<Reference Include="acmgd"><HintPath>C:\Program Files\Autodesk\AutoCAD 2026\acmgd.dll</HintPath><Private>false</Private></Reference>
+<Reference Include="Bimwright.Dwg.Plugin.Journal"><HintPath>..\..\third_party\bimwright-dwg-mcp\fork\src\plugin-journal-net8\bin\Release\net8.0\Bimwright.Dwg.Plugin.Journal.dll</HintPath><Private>false</Private></Reference>
+<Compile Include="..\..\third_party\bimwright-dwg-mcp\fork\src\shared\Execution\Foundation*.cs" LinkBase="Foundation" />
+<Compile Include="..\..\third_party\bimwright-dwg-mcp\fork\src\shared\Cad\CadWire.cs" Link="CadWire.cs" />
+<Compile Include="..\..\third_party\bimwright-dwg-mcp\fork\src\shared\Cad\HandleBatchRequest.cs" Link="HandleBatchRequest.cs" />
+<Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/FoundationGeometryReader.cs" Link="FoundationGeometryReader.cs" /></ItemGroup></Project>
