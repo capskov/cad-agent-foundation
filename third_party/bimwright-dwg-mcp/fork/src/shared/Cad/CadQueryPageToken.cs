@@ -23,7 +23,7 @@ namespace Bimwright.Dwg.Plugin.Cad
         private static readonly byte[] SigningKey = CreateSigningKey();
 
         internal static string ComputeFilterDigest(string entityType, string layer, int? colorIndex,
-            bool includeGeometry, double? minX, double? minY, double? maxX, double? maxY)
+            bool includeGeometry, double? minX, double? minY, double? maxX, double? maxY, string layout = null)
         {
             bool hasBounds = minX.HasValue || minY.HasValue || maxX.HasValue || maxY.HasValue;
             if (hasBounds && !(minX.HasValue && minY.HasValue && maxX.HasValue && maxY.HasValue))
@@ -48,6 +48,7 @@ namespace Bimwright.Dwg.Plugin.Cad
                     }
             };
 
+            if(layout!=null)filter["layout"]=NormalizeFilter(layout);
             byte[] input = Encoding.UTF8.GetBytes(filter.ToString(Formatting.None));
             using (var sha = SHA256.Create())
                 return ToHex(sha.ComputeHash(input));

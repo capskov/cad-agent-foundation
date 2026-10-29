@@ -8,7 +8,7 @@ namespace Bimwright.Dwg.Plugin.Handlers
     public class CountEntitiesHandler : IAcadCommand
     {
         public string Name => "count_entities";
-        public string Description => "Count model-space entities by optional type, layer, and color filters.";
+        public string Description => "Count top-level entities in model space or an explicit layout by optional type, layer, and color filters.";
         public CommandSchema Schema => CommandSchemas.CountEntities;
 
         public CommandResult Execute(Document doc, JToken parameters)
@@ -26,7 +26,7 @@ namespace Bimwright.Dwg.Plugin.Handlers
             try
             {
                 var count = CadQueryService.CountEntities(doc.Database, options);
-                return CommandResult.Success(new { count });
+                return CommandResult.Success(new { count, scope=options.Layout==null?"model_space":"explicit_layout_top_level", layout=options.Layout??"Model" });
             }
             catch (Exception ex)
             {

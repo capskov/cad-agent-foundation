@@ -46,7 +46,7 @@ namespace Bimwright.Dwg.Plugin
    string outcome="rejected_before_write";
    using(doc.LockDocument())try
    {
-    int units=Convert.ToInt32(Autodesk.AutoCAD.ApplicationServices.Core.Application.GetSystemVariable("INSUNITS"));if(units!=0&&units!=6)throw new InvalidOperationException("file_output_requires_metres_or_explicit_unitless_metres");
+    if(!FoundationDrawingPlan.UnitMetadataMatches(plan,Convert.ToInt32(doc.Database.Insunits)))throw new InvalidOperationException("drawing_unit_metadata_mismatch");
     if(doc.IsReadOnly||PlotFactory.ProcessPlotState!=ProcessPlotState.NotPlotting)throw new InvalidOperationException("plot_requires_owned_writable_idle_document");
     using var tx=doc.Database.TransactionManager.StartTransaction();var db=doc.Database;layers=LayerFacts(db,tx);symbols=SymbolFacts(db,tx);layouts=LayoutFacts(db,tx);model=Handles(db,tx);
     string name=s.Value<string>("layout");var layout=FindLayout(db,tx,name,OpenMode.ForRead);

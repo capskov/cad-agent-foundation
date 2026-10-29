@@ -7,7 +7,7 @@ namespace Bimwright.Dwg.Shared.Execution
 {
  public static partial class FoundationDrawingPlan
  {
-  public static string[] Phase2Operations=>new[]{"point","arc","ellipse","rectangle","set_properties","set_open_polyline","set_text_format","set_text_metrics","set_dimension_text","table","set_table_cell","set_line","set_circle","set_hatch_pattern","set_raster_path"};
+  public static string[] Phase2Operations=>new[]{"point","arc","ellipse","rectangle","set_properties","set_open_polyline","set_text_format","set_text_metrics","set_dimension_text","table","set_table_cell","set_line","set_circle","set_arc","set_ellipse","set_hatch_pattern","set_raster_path"};
   static bool ValidatePhase2(JObject s,ref int count)
   {
    string op=s.Value<string>("op");
@@ -43,6 +43,15 @@ namespace Bimwright.Dwg.Shared.Execution
     case "set_hatch_pattern":
      Keys(s,"id","op","targets","hatch_handle","pattern","scale","angle");ValidateTargets(s,ref count);Text(s,"hatch_handle",16);Text(s,"pattern",128);Positive(s,"scale");Number(s["angle"]);
      if(((JArray)s["targets"]).Count!=2||!((JArray)s["targets"]).Cast<JObject>().Any(t=>t.Value<string>("handle")==s.Value<string>("hatch_handle")))throw new ArgumentException("hatch and its single boundary required");break;
+    case "set_arc":case "set_ellipse":
+     if(op=="set_arc"){
+      Keys(s,"id","op","targets","center","radius","start_angle","sweep_angle");Point(s["center"]);Positive(s,"radius");Number(s["start_angle"]);
+      double editSweep=Number(s["sweep_angle"]);if(editSweep<=0||editSweep>=360)throw new ArgumentException("arc sweep must be >0 and <360 degrees");
+     }else{
+      Keys(s,"id","op","targets","center","major_axis","radius_ratio");Point(s["center"]);Point(s["major_axis"]);
+      if(Distance(s["major_axis"],new JArray(0,0))<=1e-9||Number(s["radius_ratio"])<=0||Number(s["radius_ratio"])>1)throw new ArgumentException("nonzero major axis and ratio (0,1] required");
+     }
+     ValidateTargets(s,ref count);if(((JArray)s["targets"]).Count!=1)throw new ArgumentException("one standalone curve required");break;
     case "set_line":case "set_circle":
      if(op=="set_line"){Keys(s,"id","op","targets","start","end");Point(s["start"]);Point(s["end"]);if(Distance(s["start"],s["end"])<=1e-9)throw new ArgumentException("nonzero line required");}
      else{Keys(s,"id","op","targets","center","radius");Point(s["center"]);Positive(s,"radius");}
@@ -104,6 +113,19 @@ namespace Bimwright.Dwg.Shared.Execution
     {if(old.Value<string>("type")!="Line"||!PointMatches(current["start"],(JArray)s["start"])||!PointMatches(current["end"],(JArray)s["end"])||!Near(current["length"],Distance(s["start"],s["end"])))return false;mutable=new[]{"start","end","length","extents"};}
     else if(op=="set_circle")
     {double r=Number(s["radius"]);if(old.Value<string>("type")!="Circle"||!PointMatches(current["center"],(JArray)s["center"])||!Near(current["radius"],r)||!Near(current["diameter"],2*r)||!Near(current["circumference"],2*Math.PI*r)||!Near(current["area"],Math.PI*r*r))return false;mutable=new[]{"center","radius","diameter","circumference","area","extents"};}
+    else if(op=="set_arc")
+    {
+     double radius=Number(s["radius"]),sweep=Number(s["sweep_angle"])*Math.PI/180;
+     if(old.Value<string>("type")!="Arc"||current.Value<string>("type")!="Arc"||!PointMatches(current["center"],(JArray)s["center"])||!Near(current["radius"],radius)||!Near(current["start_angle"],NormalizeAngle(Number(s["start_angle"])*Math.PI/180),1e-9)||!Near(current["included_angle"],sweep,1e-9)||!Near(current["length"],radius*sweep))return false;
+     mutable=new[]{"center","radius","start_angle","end_angle","included_angle","length","extents"};
+    }
+    else if(op=="set_ellipse")
+    {
+     if(old.Value<string>("type")!="Ellipse"||current.Value<string>("type")!="Ellipse"||!Near(old["start_angle"],0,1e-9)||!Near(old["end_angle"],2*Math.PI,1e-9)||!PointMatches(current["center"],(JArray)s["center"])||!PointMatches(current["major_axis"],(JArray)s["major_axis"])||!Near(current["radius_ratio"],Number(s["radius_ratio"]),1e-10)||!Near(current["start_angle"],0,1e-9)||!Near(current["end_angle"],2*Math.PI,1e-9))return false;
+     // Native full-ellipse endpoints may normalize by one ULP after Set().
+     // Both old and new endpoints were independently checked as a full ellipse.
+     mutable=new[]{"center","major_axis","radius_ratio","start_angle","end_angle","length","extents"};
+    }
     else if(op=="set_table_cell")
     {
      if(old.Value<string>("type")!="Table"||old.Value<bool?>("cells_complete")!=true)return false;

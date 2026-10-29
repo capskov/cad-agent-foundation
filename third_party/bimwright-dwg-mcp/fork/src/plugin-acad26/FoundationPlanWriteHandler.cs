@@ -43,7 +43,7 @@ namespace Bimwright.Dwg.Plugin
                 case "committed_verified":return PluginWriteJobResult.Committed(json,PluginVerificationState.Passed,json);
                 case "committed_readback_failed":return PluginWriteJobResult.Committed(json,PluginVerificationState.Failed,json,"foundation_plan_readback_failed","Inspect existing handles; never repeat creation.");
                 case "committed_readback_unknown":return PluginWriteJobResult.Committed(json,PluginVerificationState.Unknown,null,"foundation_plan_readback_unknown","Commit returned; query the original request.");
-                default:return PluginWriteJobResult.OutcomeUnknown("foundation_plan_outcome_unknown","Retain the fence and query the original request; never replay.");
+                default:return PluginWriteJobResult.OutcomeUnknown("foundation_plan_outcome_unknown","Retain the fence and query the original request; never replay. Native diagnostic: "+(receipt.Value<string>("error")??"unavailable")+"; pending output: "+(receipt.Value<string>("pending_output_path")??"none"),json);
             }
         }
         static JObject Facts(Entity e,Transaction tx)=>(JObject)JObject.FromObject(CadEntityProperties.Describe(e,tx,true));
@@ -292,7 +292,13 @@ namespace Bimwright.Dwg.Plugin
                 failureStage="precommit_verification";activeStep=null;activeOperation=null;
                 if(!FoundationDrawingPlan.VerifyReceipt(Receipt(),canonicalPlan)||!IdentitySetMatches(modelBefore,modelAfter,modelCreated))
                 {
+                    var diagnosticReceipt=Receipt();
+                    string summary="; checks: layout="+FoundationDrawingPlan.VerifyLayoutChanges(diagnosticReceipt,(JArray)plan["steps"])+", layers="+FoundationDrawingPlan.VerifyLayerChanges(allLayersBefore,allLayersAfter,(JArray)plan["steps"])+", symbols="+FoundationDrawingPlan.VerifySymbols(diagnosticReceipt,(JArray)plan["steps"]);
                     string detail="";
+                    foreach(JObject diagnosticStep in (JArray)plan["steps"]){
+                        bool ok=FoundationDrawingPlan.VerifyExtension(diagnosticStep,diagnosticReceipt,out bool handled);
+                        if(handled&&!ok){detail+="; failed_step="+diagnosticStep.Value<string>("id")+" op="+diagnosticStep.Value<string>("op");foreach(JObject target in diagnosticStep["targets"] as JArray??new JArray()){string handle=target.Value<string>("handle");detail+="; actual="+after[handle]?.ToString(Formatting.None);}break;}
+                    }
                     foreach(JObject transform in ((JArray)plan["steps"]).Where(s=>s.Value<string>("op") is "rotate" or "scale"))
                     foreach(JObject target in (JArray)transform["targets"])
                     {
@@ -306,6 +312,7 @@ namespace Bimwright.Dwg.Plugin
                         }
                         if(detail.Length>0)break;
                     }
+                    detail=summary+detail;if(detail.Length>2500)detail=detail.Substring(0,2500)+" [truncated]";
                     throw new InvalidOperationException("plan_precommit_verification_failed"+detail+"; review_supported_operation_limits_and_fresh_inputs");
                 }
                 failureStage="commit";invoked=true;tx.Commit();committed=true;tx.Dispose();tx=null;checkpoint?.Invoke("after_commit");

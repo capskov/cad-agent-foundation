@@ -15,7 +15,8 @@ namespace Bimwright.Dwg.Plugin.Cad
             int? limit,
             bool includeGeometry,
             CadQueryBounds bounds = null,
-            int offset = 0)
+            int offset = 0,
+            string layout = null)
         {
             EntityType = Normalize(entityType);
             Layer = Normalize(layer);
@@ -24,6 +25,7 @@ namespace Bimwright.Dwg.Plugin.Cad
             IncludeGeometry = includeGeometry;
             Bounds = bounds;
             Offset = offset;
+            Layout = layout;
         }
 
         internal string EntityType { get; }
@@ -33,6 +35,7 @@ namespace Bimwright.Dwg.Plugin.Cad
         internal bool IncludeGeometry { get; }
         internal CadQueryBounds Bounds { get; }
         internal int Offset { get; }
+        internal string Layout { get; }
 
         private static string Normalize(string value)
             => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
@@ -89,7 +92,7 @@ namespace Bimwright.Dwg.Plugin.Cad
 
             using (var tx = db.TransactionManager.StartTransaction())
             {
-                var modelSpace = OpenModelSpace(db, tx);
+                var modelSpace = OpenQuerySpace(db, tx, options.Layout);
                 foreach (ObjectId objectId in modelSpace)
                 {
                     var entity = tx.GetObject(objectId, OpenMode.ForRead) as Entity;
@@ -140,7 +143,7 @@ namespace Bimwright.Dwg.Plugin.Cad
 
             using (var tx = db.TransactionManager.StartTransaction())
             {
-                var modelSpace = OpenModelSpace(db, tx);
+                var modelSpace = OpenQuerySpace(db, tx, options.Layout);
                 foreach (ObjectId objectId in modelSpace)
                 {
                     var entity = tx.GetObject(objectId, OpenMode.ForRead) as Entity;
@@ -169,7 +172,7 @@ namespace Bimwright.Dwg.Plugin.Cad
 
             using (var tx = db.TransactionManager.StartTransaction())
             {
-                var modelSpace = OpenModelSpace(db, tx);
+                var modelSpace = OpenQuerySpace(db, tx, options.Layout);
                 foreach (ObjectId objectId in modelSpace)
                 {
                     if (handles.Count >= limit)
@@ -210,6 +213,15 @@ namespace Bimwright.Dwg.Plugin.Cad
             }
 
             return limit.Value;
+        }
+
+        private static BlockTableRecord OpenQuerySpace(Database db, Transaction tx, string layout)
+        {
+            if(layout==null)return OpenModelSpace(db,tx);
+            var layouts=(DBDictionary)tx.GetObject(db.LayoutDictionaryId,OpenMode.ForRead);
+            if(!layouts.Contains(layout))throw new InvalidOperationException("query_layout_missing:"+layout);
+            var page=(Layout)tx.GetObject(layouts.GetAt(layout),OpenMode.ForRead);
+            return (BlockTableRecord)tx.GetObject(page.BlockTableRecordId,OpenMode.ForRead);
         }
 
         private static BlockTableRecord OpenModelSpace(Database db, Transaction tx)

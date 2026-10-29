@@ -253,7 +253,7 @@ class Gateway:
 
 def main():
     p=argparse.ArgumentParser(description='CAD foundation first release; all drawings are owned copies')
-    p.add_argument('action',choices=['install','start','doctor','read','query','apply','save','stop','status','mcp','view','plot-style'])
+    p.add_argument('action',choices=['install','start','doctor','read','query','apply','save','stop','status','mcp','view','plot-style','plot-batch'])
     p.add_argument('--workspace',type=Path,required=True);p.add_argument('--cad',default=r'C:\Program Files\Autodesk\AutoCAD 2026')
     p.add_argument('--source');p.add_argument('--write',action='store_true');p.add_argument('--headless',action='store_true')
     p.add_argument('--handles');p.add_argument('--plan',type=Path);p.add_argument('--request-id');p.add_argument('--arguments',type=Path)
@@ -272,7 +272,10 @@ def main():
                 if proc.poll() is None:proc.terminate();proc.wait(timeout=10)
         else:
             with Gateway(args.workspace) as g:
-                if args.action=='doctor':result=g.bound
+                if args.action=='plot-batch':
+                    import plot_batch
+                    result=plot_batch.run(g,args.workspace,read(args.arguments))
+                elif args.action=='doctor':result=g.bound
                 elif args.action=='read':result=g.submit_read('dwg_get_entity_properties',{'handles':json.dumps(E.parse_handles(args.handles)),'include_geometry':True})
                 elif args.action=='view':result=g.submit_read('dwg_view',{'request_json':json.dumps(read(args.arguments),ensure_ascii=False)})
                 elif args.action=='query':result=g.submit_read('dwg_query_entities',read(args.arguments))

@@ -1,5 +1,13 @@
 # Capability status
 
+## Current scope (2026-10-29)
+
+The supported public release is [beta.3.18](RELEASE-v1.2.0-beta.3.18.md). Native window PDF output, local CTB configuration, paper entity enumeration, controlled paper viewport/text/frame edits, xref basename repair and rectangular wipeouts supersede the older table below. CTB configuration is a client file operation, not MCP/native DWG editing. Legacy professional object overlaps are recorded for manual editing; they are not universal proxy-edit support.
+
+[Ongoing capability batches](CAPABILITY-PROGRESS-20261029.zh-CN.md) distinguish development from native acceptance. Batch1 adds explicit arc/full-ellipse modification, raw-unit file outputs and resumable client PDF sequencing; these additions remain candidate until their recorded native acceptance. Native atomic batch plotting and physical-printer monitoring remain separate unimplemented capabilities. Model view navigation/capture does not imply paper-space support. AutoCAD2026 is the verified host; other hosts/clients are not blanket-certified.
+
+## Historical baseline
+
 Public runtime preview: v1.2.0-local.4; the historical table baseline remains v1.1.0-rc.1. The local unit-closeout profile is 1.2.0-local.4. It makes the raw-mode INSUNITS consistency check optional and retains local.3 font primitives and prior bounded operations. See [phase-two implementation and limits](PHASE2-DEVELOPMENT-20261015.zh-CN.md) and the versioned local acceptance records. This is not a public release or blanket A–P completion. The historical table below describes the public v1.1 baseline unless explicitly superseded by those local records. Each new native branch is scoped by its acceptance evidence and versioned catalog.
 
 | Capability | Current state | Boundary |

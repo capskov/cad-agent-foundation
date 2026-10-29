@@ -26,6 +26,7 @@ def main():
     for source,name in [(ROOT/'AGENTS.md','AGENTS.md'),(ROOT/'client/foundation.py','client/foundation.py'),(ROOT/'scripts/readonly-entry.py','support/readonly-entry.py'),(ROOT/'foundation.cmd','foundation.cmd'),(ROOT/'LICENSE','LICENSE'),(ROOT/'NOTICE.md','NOTICE.md'),(ROOT/'THIRD_PARTY_NOTICES.md','THIRD_PARTY_NOTICES.md')]:
         dest=output/name;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(source,dest)
     shutil.copy2(ROOT/'client/plot_style.py',output/'client/plot_style.py')
+    shutil.copy2(ROOT/'client/plot_batch.py',output/'client/plot_batch.py')
     (output/'docs').mkdir()
     for f in (ROOT/'docs').glob('*.md'):shutil.copy2(f,output/'docs'/f.name)
     # Runtime ZIP is not a source checkout. Link missing source/example assets

@@ -8,7 +8,7 @@ namespace Bimwright.Dwg.Plugin.Handlers
     public class SelectByTypeHandler : IAcadCommand
     {
         public string Name => "select_by_type";
-        public string Description => "Return handles for model-space entities of a type without changing pickfirst selection.";
+        public string Description => "Return handles for top-level entities in model space or an explicit layout of a type without changing pickfirst selection.";
         public CommandSchema Schema => CommandSchemas.SelectByType;
 
         public CommandResult Execute(Document doc, JToken parameters)
@@ -29,17 +29,19 @@ namespace Bimwright.Dwg.Plugin.Handlers
                 return CommandResult.Fail(limitError);
             }
 
+            if(!QueryHandlerInput.TryReadOptionalLayout(parameters,out string layout,out string layoutError))return CommandResult.Fail(layoutError);
             var options = new CadEntityQueryOptions(
                 entityType,
                 QueryHandlerInput.ReadOptionalString(parameters, "layer"),
                 colorIndex,
                 limit,
-                includeGeometry: false);
+                includeGeometry: false,
+                layout: layout);
 
             try
             {
                 var handles = CadQueryService.QueryHandles(doc.Database, options);
-                return CommandResult.Success(new { count = handles.Count, handles });
+                return CommandResult.Success(new { count = handles.Count, handles, scope=options.Layout==null?"model_space":"explicit_layout_top_level", layout=options.Layout??"Model" });
             }
             catch (Exception ex)
             {

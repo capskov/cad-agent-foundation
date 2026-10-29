@@ -66,7 +66,7 @@ namespace Bimwright.Dwg.Server.Tools
         }
 
         [McpServerTool(Name = "dwg_query_entities", ReadOnly = true, Idempotent = true), Description(
-            "Query top-level model-space AutoCAD entities. At least one filter is required: entity_type, layer, color_index, or all four WCS XY bounds. " +
+            "Query top-level AutoCAD entities in model space by default, or in an explicit named layout without activating it. At least one type/layer/color/bounds filter or explicit layout is required. " +
             "A rectangle matches entity geometric extents that overlap it, including touching edges; this is a coarse candidate filter, not exact geometry intersection. " +
             "Returns count, has_more, truncated, entity records, and a next_cursor when another page exists; it does not provide total_count. " +
             "Pass next_cursor as page_token with the same filters to continue. The cursor is bound to the current drawing session and revision and becomes stale after drawing-object changes. " +
@@ -81,9 +81,11 @@ namespace Bimwright.Dwg.Server.Tools
             [Description("Optional WCS XY upper Y bound in drawing units. Supply all four bounds together.")] double? max_y = null,
             [Description("Optional maximum number of returned entities. Defaults to 500; a supplied value must be an integer from 1 through 5000.")] int? limit = null,
             [Description("Optional continuation token returned as next_cursor. It is valid only for the same bound drawing session, revision, and query filters.")] string page_token = null,
-            [Description("When true, include lightweight geometry such as extents, points, lengths, and text positions where available.")] bool include_geometry = false)
+            [Description("When true, include lightweight geometry such as extents, points, lengths, and text positions where available.")] bool include_geometry = false,
+            [Description("Optional exact layout name. Omit for model-space default. Returns only top-level entities owned by that layout; no layout activation or nested block expansion.")] string layout = null)
         {
             var request = BuildEntityQueryRequest(entity_type, layer, color_index, limit);
+            if(layout!=null)request["layout"]=layout;
             if (min_x.HasValue) request["min_x"] = min_x.Value;
             if (min_y.HasValue) request["min_y"] = min_y.Value;
             if (max_x.HasValue) request["max_x"] = max_x.Value;
@@ -94,39 +96,45 @@ namespace Bimwright.Dwg.Server.Tools
         }
 
         [McpServerTool(Name = "dwg_count_entities", ReadOnly = true, Idempotent = true), Description(
-            "Count model-space AutoCAD entities matching optional entity type, layer, and ACI color index filters.")]
+            "Count top-level AutoCAD entities in model space or an explicit layout matching optional entity type, layer, and ACI color index filters.")]
         public static Task<string> CountEntities(
             [Description("Optional entity type filter such as Line, Circle, Polyline, DBText, MText, BlockReference, Hatch, Arc, or Ellipse. Case-insensitive.")] string entity_type = null,
             [Description("Optional layer name filter. Case-insensitive.")] string layer = null,
-            [Description("Optional ACI color index filter. Valid range: 1-256.")] int? color_index = null)
+            [Description("Optional ACI color index filter. Valid range: 1-256.")] int? color_index = null,
+            [Description("Optional explicit layout name. Omit for model space; never activates a layout.")] string layout = null)
         {
             var request = BuildEntityQueryRequest(entity_type, layer, color_index, limit: null);
+            if(layout!=null)request["layout"]=layout;
             return ToolGateway.LoggedCall("count_entities", request, request);
         }
 
         [McpServerTool(Name = "dwg_select_by_layer", ReadOnly = true, Idempotent = true), Description(
-            "Return handles for model-space entities on a required layer, with optional type/color filters. " +
+            "Return handles for top-level entities in model space or an explicit layout on a required layer, with optional type/color filters. " +
             "This does not change AutoCAD pickfirst selection.")]
         public static Task<string> SelectByLayer(
             [Description("Required layer name filter. Case-insensitive.")] string layer,
             [Description("Optional entity type filter. Case-insensitive.")] string entity_type = null,
             [Description("Optional ACI color index filter. Valid range: 1-256.")] int? color_index = null,
-            [Description("Optional maximum number of returned handles. The plugin clamps this to 1-5000.")] int? limit = null)
+            [Description("Optional maximum number of returned handles. The plugin clamps this to 1-5000.")] int? limit = null,
+            [Description("Optional explicit layout name. Omit for model space; never activates a layout.")] string layout = null)
         {
             var request = BuildEntityQueryRequest(entity_type, layer, color_index, limit);
+            if(layout!=null)request["layout"]=layout;
             return ToolGateway.LoggedCall("select_by_layer", request, request);
         }
 
         [McpServerTool(Name = "dwg_select_by_type", ReadOnly = true, Idempotent = true), Description(
-            "Return handles for model-space entities of a required type, with optional layer/color filters. " +
+            "Return handles for top-level entities in model space or an explicit layout of a required type, with optional layer/color filters. " +
             "This does not change AutoCAD pickfirst selection.")]
         public static Task<string> SelectByType(
             [Description("Required entity type filter such as Line, Circle, Polyline, DBText, MText, BlockReference, Hatch, Arc, or Ellipse. Case-insensitive.")] string entity_type,
             [Description("Optional layer name filter. Case-insensitive.")] string layer = null,
             [Description("Optional ACI color index filter. Valid range: 1-256.")] int? color_index = null,
-            [Description("Optional maximum number of returned handles. The plugin clamps this to 1-5000.")] int? limit = null)
+            [Description("Optional maximum number of returned handles. The plugin clamps this to 1-5000.")] int? limit = null,
+            [Description("Optional explicit layout name. Omit for model space; never activates a layout.")] string layout = null)
         {
             var request = BuildEntityQueryRequest(entity_type, layer, color_index, limit);
+            if(layout!=null)request["layout"]=layout;
             return ToolGateway.LoggedCall("select_by_type", request, request);
         }
 

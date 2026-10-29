@@ -89,8 +89,8 @@ public sealed class PluginWriteJobResult
         new(PluginWriteJobOutcome.Committed, resultJson, verification, readbackJson,
             verificationErrorCode, verificationErrorMessage);
 
-    public static PluginWriteJobResult OutcomeUnknown(string errorCode, string errorMessage) =>
-        new(PluginWriteJobOutcome.OutcomeUnknown, null, PluginVerificationState.Unknown,
+    public static PluginWriteJobResult OutcomeUnknown(string errorCode, string errorMessage, string? diagnosticJson = null) =>
+        new(PluginWriteJobOutcome.OutcomeUnknown, diagnosticJson, PluginVerificationState.Unknown,
             null, RequiredError(errorCode, nameof(errorCode)), RequiredError(errorMessage, nameof(errorMessage)));
 
     private static PluginWriteJobResult NoEffect(PluginWriteJobOutcome outcome, string errorCode, string errorMessage) =>
@@ -448,7 +448,7 @@ public sealed class PluginExecutionQueue
                     handlerResult.ErrorCode!, handlerResult.ErrorMessage!, nowUtc);
             case PluginWriteJobOutcome.OutcomeUnknown:
                 return RecordUnknownWrite(job, handlerResult.ErrorCode ?? WriteOutcomeUnknownErrorCode,
-                    handlerResult.ErrorMessage ?? "The write handler reported an unknown outcome.", nowUtc);
+                    handlerResult.ErrorMessage ?? "The write handler reported an unknown outcome.", nowUtc, handlerResult.ResultJson);
             case PluginWriteJobOutcome.Committed:
                 return RecordCommittedWrite(job, handlerResult, nowUtc);
             default:
@@ -493,13 +493,13 @@ public sealed class PluginExecutionQueue
     }
 
     private PluginExecutionQueuePumpResult RecordUnknownWrite(
-        PluginJobSnapshot job, string errorCode, string errorMessage, DateTimeOffset nowUtc)
+        PluginJobSnapshot job, string errorCode, string errorMessage, DateTimeOffset nowUtc, string? diagnosticJson = null)
     {
         PluginTransitionResult transition;
         try
         {
             transition = _journal.RecordTerminal(job.RequestId, PluginJobPhase.Unknown,
-                PluginEffectState.Unknown, null, errorCode, errorMessage, nowUtc);
+                PluginEffectState.Unknown, diagnosticJson is not null && IsJson(diagnosticJson) ? diagnosticJson : null, errorCode, errorMessage, nowUtc);
         }
         catch
         {

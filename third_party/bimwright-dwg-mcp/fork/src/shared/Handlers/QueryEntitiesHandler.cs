@@ -10,7 +10,7 @@ namespace Bimwright.Dwg.Plugin.Handlers
     public class QueryEntitiesHandler : IAcadCommand
     {
         public string Name => "query_entities";
-        public string Description => "Query model-space entities with at least one type, layer, or color filter and a bounded optional limit.";
+        public string Description => "Query bounded top-level entities in model space or an explicit layout, with revision-bound pagination.";
         public CommandSchema Schema => CommandSchemas.QueryEntities;
 
         public CommandResult Execute(Document doc, JToken parameters)
@@ -45,7 +45,8 @@ namespace Bimwright.Dwg.Plugin.Handlers
                     bounds?.MinX,
                     bounds?.MinY,
                     bounds?.MaxX,
-                    bounds?.MaxY);
+                    bounds?.MaxY,
+                    options.Layout);
                 string pageToken = QueryHandlerInput.ReadOptionalString(parameters, "page_token");
                 int offset = 0;
                 if (!string.IsNullOrWhiteSpace(pageToken)
@@ -66,7 +67,8 @@ namespace Bimwright.Dwg.Plugin.Handlers
                     options.Limit,
                     options.IncludeGeometry,
                     options.Bounds,
-                    offset);
+                    offset,
+                    options.Layout);
                 var result = CadQueryService.QueryEntities(doc.Database, options);
                 if (drawingRevision.Revision != revision)
                 {
@@ -89,6 +91,8 @@ namespace Bimwright.Dwg.Plugin.Handlers
                     has_more = result.HasMore,
                     truncated = result.HasMore,
                     next_cursor = nextCursor,
+                    scope = options.Layout==null ? "model_space" : "explicit_layout_top_level",
+                    layout = options.Layout??"Model",
                     entities = result.Entities
                 });
             }
@@ -108,6 +112,13 @@ namespace Bimwright.Dwg.Plugin.Handlers
             }
 
             bool hasFilter = false;
+            JToken layout=query["layout"];
+            if(layout!=null&&layout.Type!=JTokenType.Null){
+                if(layout.Type!=JTokenType.String||string.IsNullOrWhiteSpace(layout.Value<string>())||layout.Value<string>().Length>255||System.Linq.Enumerable.Any(layout.Value<string>(),char.IsControl)){
+                    error="layout must be an explicit nonempty name up to 255 characters";return false;
+                }
+                hasFilter=true;
+            }
             foreach (string propertyName in new[] { "entity_type", "layer" })
             {
                 JToken value = query[propertyName];
@@ -181,6 +192,8 @@ namespace Bimwright.Dwg.Plugin.Handlers
             options = null;
             error = null;
 
+            if(!TryReadOptionalLayout(parameters,out string layout,out error))return false;
+
             if (!TryReadOptionalColorIndex(parameters, out var colorIndex, out error) ||
                 !TryReadOptionalLimit(parameters, readLimit, out var limit, out error) ||
                 !TryReadOptionalBounds(parameters, out var bounds, out error))
@@ -194,8 +207,19 @@ namespace Bimwright.Dwg.Plugin.Handlers
                 colorIndex,
                 limit,
                 includeGeometry,
-                bounds);
+                bounds,
+                layout: layout);
             return true;
+        }
+
+        internal static bool TryReadOptionalLayout(JToken parameters,out string layout,out string error)
+        {
+            layout=null;error=null;var token=parameters?["layout"];
+            if(token==null||token.Type==JTokenType.Null)return true;
+            if(token.Type!=JTokenType.String||string.IsNullOrWhiteSpace(token.Value<string>())||token.Value<string>().Length>255||System.Linq.Enumerable.Any(token.Value<string>(),char.IsControl)){
+                error="layout must be an explicit nonempty name up to 255 characters";return false;
+            }
+            layout=token.Value<string>();return true;
         }
 
         internal static string ReadOptionalString(JToken parameters, string fieldName)

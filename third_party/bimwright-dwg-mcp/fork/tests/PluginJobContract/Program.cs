@@ -1780,6 +1780,26 @@ try
         }
     });
 
+    Run("Unknown diagnostic JSON is preserved without releasing or verifying the write", () =>
+    {
+        foreach(string diagnostic in new[]{"{\"pending_output_path\":\"pending.dxf\",\"disk_entities\":{}}","invalid-json"})
+        {
+            string db=Db("unknown-diagnostics-"+Guid.NewGuid().ToString("N"));
+            var liveness=new FakeLivenessProvider();using var journal=Open(db,Owner(),liveness);
+            var write=Write("unknown-diagnostics");journal.Submit(write,Now);
+            var queue=new PluginExecutionQueue(journal,[],["drawing_write"],(_,_)=>true,
+                _=>PluginReadOnlyJobResult.Success("{}"),_=>PluginWriteJobResult.OutcomeUnknown("native_unknown","keep original request",diagnostic));
+            var result=queue.Pump(Now);Equal(PluginExecutionQueuePumpDisposition.Halted,result.Disposition);
+            var saved=journal.GetSnapshot(write.RequestId)!;
+            Equal(diagnostic=="invalid-json"?null:diagnostic,saved.ResultJson);
+            Equal(PluginJobPhase.Unknown,saved.Phase);Equal(PluginEffectState.Unknown,saved.Effects);
+            Equal(PluginVerificationState.NotChecked,saved.Verification);Equal(false,saved.WriteFenceReleased);
+            Equal(null,saved.CommittedResultDigest);True(saved.HeldRiskKeys.Count>0);
+            using var contender=Open(db,Owner(),liveness);
+            Equal(PluginSubmitDisposition.FenceConflict,contender.Submit(Write("diagnostics-still-fenced"),Now).Disposition);
+        }
+    });
+
     Run("D1 malformed committed result JSON is Unknown and never gets a no-effect release", () =>
     {
         string db = Db("d1-malformed-commit-result");

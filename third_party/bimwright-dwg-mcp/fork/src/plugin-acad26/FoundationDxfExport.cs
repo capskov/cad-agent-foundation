@@ -14,7 +14,7 @@ namespace Bimwright.Dwg.Plugin
    var s=(JObject)plan["steps"][0];var before=new JObject();var after=new JObject();JObject layers=null,symbols=null,layouts=null,diskEntities=null;JArray model=null;var map=new JObject();bool invoked=false,published=false;string error=null,outcome="rejected_before_write",pending=null;JObject artifact=null;
    using(doc.LockDocument())try
    {
-    int units=Convert.ToInt32(Autodesk.AutoCAD.ApplicationServices.Core.Application.GetSystemVariable("INSUNITS"));if(units!=0&&units!=6)throw new InvalidOperationException("file_output_requires_metres_or_explicit_unitless_metres");
+    if(!FoundationDrawingPlan.UnitMetadataMatches(plan,Convert.ToInt32(doc.Database.Insunits)))throw new InvalidOperationException("drawing_unit_metadata_mismatch");
     if(doc.IsReadOnly)throw new InvalidOperationException("owned_writable_document_required");var db=doc.Database;string[] hs=((JArray)s["expected"]).Cast<JObject>().Select(t=>t.Value<string>("handle")).ToArray();
     using(var tx=db.TransactionManager.StartTransaction())
     {
@@ -26,7 +26,7 @@ namespace Bimwright.Dwg.Plugin
     string output=Path.Combine(folder,s.Value<string>("file_name"));if(File.Exists(output))throw new InvalidOperationException("output_exists_no_overwrite");pending=Path.Combine(folder,"pending-"+Guid.NewGuid().ToString("N")+".dxf");
     invoked=true;Directory.CreateDirectory(folder);db.DxfOut(pending,16,DwgVersion.Current);
     using(var disk=new Database(false,true)){disk.DxfIn(pending,null);using var tx=disk.TransactionManager.StartTransaction();diskEntities=ReadEntities(disk,tx,hs);tx.Abort();}
-    foreach(string h in hs)if(!FoundationDrawingPlan.Equivalent(before[h],diskEntities[h]))throw new InvalidOperationException("DXF_disk_readback_mismatch:"+h);
+    foreach(string h in hs)if(!FoundationDrawingPlan.EquivalentDxfEntity(before[h],diskEntities[h]))throw new InvalidOperationException("DXF_disk_readback_mismatch:"+h);
     using(var tx=db.TransactionManager.StartTransaction())
     {after=ReadEntities(db,tx,hs);if(!JToken.DeepEquals(before,after)||!JToken.DeepEquals(layers,LayerFacts(db,tx))||!JToken.DeepEquals(symbols,SymbolFacts(db,tx))||!JToken.DeepEquals(layouts,LayoutFacts(db,tx))||!JToken.DeepEquals(model,Handles(db,tx)))throw new InvalidOperationException("DXF_export_source_changed");tx.Abort();}
     string digest;using(var sha=System.Security.Cryptography.SHA256.Create())using(var file=File.OpenRead(pending))digest=BitConverter.ToString(sha.ComputeHash(file)).Replace("-","");

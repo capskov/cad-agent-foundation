@@ -161,6 +161,7 @@ namespace Bimwright.Dwg.Plugin
         public static readonly CommandSchema ListLayers = CommandSchema.Empty;
 
         public static readonly CommandSchema QueryEntities = CommandSchema.Object(
+            SchemaProperty.Optional("layout", JTokenType.String),
             SchemaProperty.Optional("entity_type", JTokenType.String),
             SchemaProperty.Optional("layer", JTokenType.String),
             SchemaProperty.Optional("color_index", JTokenType.Integer),
@@ -173,17 +174,20 @@ namespace Bimwright.Dwg.Plugin
             SchemaProperty.Optional("include_geometry", JTokenType.Boolean));
 
         public static readonly CommandSchema CountEntities = CommandSchema.Object(
+            SchemaProperty.Optional("layout", JTokenType.String),
             SchemaProperty.Optional("entity_type", JTokenType.String),
             SchemaProperty.Optional("layer", JTokenType.String),
             SchemaProperty.Optional("color_index", JTokenType.Integer));
 
         public static readonly CommandSchema SelectByLayer = CommandSchema.Object(
+            SchemaProperty.Optional("layout", JTokenType.String),
             SchemaProperty.RequiredNonEmptyString("layer"),
             SchemaProperty.Optional("entity_type", JTokenType.String),
             SchemaProperty.Optional("color_index", JTokenType.Integer),
             SchemaProperty.Optional("limit", JTokenType.Integer));
 
         public static readonly CommandSchema SelectByType = CommandSchema.Object(
+            SchemaProperty.Optional("layout", JTokenType.String),
             SchemaProperty.RequiredNonEmptyString("entity_type"),
             SchemaProperty.Optional("layer", JTokenType.String),
             SchemaProperty.Optional("color_index", JTokenType.Integer),

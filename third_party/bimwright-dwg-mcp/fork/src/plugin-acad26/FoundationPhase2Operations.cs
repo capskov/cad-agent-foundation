@@ -45,7 +45,7 @@ namespace Bimwright.Dwg.Plugin
      var definition=(RasterImageDef)tx.GetObject(ri.ImageDefId,OpenMode.ForWrite);definition.DisableUndoRecording(false);definition.SourceFileName=path;definition.Load();
      if(!definition.IsLoaded)throw new InvalidOperationException("native_image_load_failed");
      map[rh]=rh;break;
-    case "set_properties":case "set_open_polyline":case "set_text_format":case "set_text_metrics":case "set_dimension_text":case "set_table_cell":case "set_line":case "set_circle":
+    case "set_properties":case "set_open_polyline":case "set_text_format":case "set_text_metrics":case "set_dimension_text":case "set_table_cell":case "set_line":case "set_circle":case "set_arc":case "set_ellipse":
      foreach(JObject target in (JArray)s["targets"])
      {
       string handle=target.Value<string>("handle");var e=(Entity)tx.GetObject(Resolve(db,handle),OpenMode.ForWrite);e.DisableUndoRecording(false);
@@ -53,6 +53,17 @@ namespace Bimwright.Dwg.Plugin
       {if(e is not Line l||l.StartPoint.Z!=0||l.EndPoint.Z!=0||l.Thickness!=0||l.GetPersistentReactorIds().Count!=0)throw new InvalidOperationException("standalone_zero_thickness_WCS_Line_required");l.StartPoint=Point(s["start"]);l.EndPoint=Point(s["end"]);}
       else if(op=="set_circle")
       {if(e is not Circle c||c.Center.Z!=0||c.Normal!=Vector3d.ZAxis||c.Thickness!=0||c.GetPersistentReactorIds().Count!=0)throw new InvalidOperationException("standalone_zero_thickness_WCS_Circle_required");c.Center=Point(s["center"]);c.Radius=s.Value<double>("radius");}
+      else if(op=="set_arc")
+      {
+       if(e is not Arc a||a.Center.Z!=0||a.Normal!=Vector3d.ZAxis||a.Thickness!=0||a.GetPersistentReactorIds().Count!=0)throw new InvalidOperationException("standalone_zero_thickness_WCS_Arc_required");
+       double angle=FoundationDrawingPlan.NormalizeAngle(s.Value<double>("start_angle")*Math.PI/180);
+       a.Center=Point(s["center"]);a.Radius=s.Value<double>("radius");a.StartAngle=angle;a.EndAngle=angle+s.Value<double>("sweep_angle")*Math.PI/180;
+      }
+      else if(op=="set_ellipse")
+      {
+       if(e is not Ellipse ellipse||ellipse.Center.Z!=0||ellipse.Normal!=Vector3d.ZAxis||Math.Abs(ellipse.StartAngle)>1e-9||Math.Abs(ellipse.EndAngle-2*Math.PI)>1e-9||ellipse.GetPersistentReactorIds().Count!=0)throw new InvalidOperationException("standalone_full_WCS_Ellipse_required");
+       ellipse.Set(Point(s["center"]),Vector3d.ZAxis,Point(s["major_axis"])-Point3d.Origin,s.Value<double>("radius_ratio"),0,2*Math.PI);
+      }
       else if(op=="set_table_cell")
       {
        if(e is not Table t||t.Rows.Count>16||t.Columns.Count>16||t.Rows.Count*t.Columns.Count>128||s.Value<int>("row")>=t.Rows.Count||s.Value<int>("column")>=t.Columns.Count)throw new InvalidOperationException("bounded_table_and_existing_cell_required");
