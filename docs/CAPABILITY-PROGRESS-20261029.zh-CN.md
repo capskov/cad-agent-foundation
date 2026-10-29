@@ -6,8 +6,8 @@
 |---|---|---|
 |1 能力真实性和常用原语|同步过时能力描述；圆弧/完整椭圆明确参数修改；原坐标PDF/DXF单位一致性；可续查的客户端逐幅PDF批处理|实现及离线检查完成，原生验收进行中|
 |2 查询、布局与外参|从已实现纸空间清点接入明确布局查询；补具体布局、视口与外参生命周期缺口|指定布局分页查询已实现，原生服务级检查通过；完整协议验收及其他缺口继续推进|
-|3 常规编辑与图层|按明确目标补独立对象删除/曲线编辑、线型/图层缺口，复用现有端点和顶点修改|待推进|
-|4 文件与复杂对象|另存及跨图操作身份；表格及专业对象相关能力按实际依赖分块|待推进|
+|3 常规编辑与图层|按明确目标补独立对象删除/曲线编辑、线型/图层缺口，复用现有端点和顶点修改|图层线宽和已有线型实现及原生基础检查通过，其他缺口继续推进|
+|4 文件与复杂对象|另存及跨图操作身份；表格及专业对象相关能力按实际依赖分块|save_copy原生计划检查通过，完整网关/围栏验收及跨图操作继续推进|
 |5 兼容与交付|声明实际已验收宿主、单位和客户端；未验收不冒称；整理发布文档及签名包|随各批推进|
 
 范围不是一次性实现所有AutoCAD命令。每批记录已实现、已原生验收、仍受限、未开发；真实执行故障优先修复后继续。物理打印机监控依赖实际设备，跨CAD重启接管涉及任务身份，不能为了“完成清单”取消保护。管立得放在后面：先由管立得运行后提供它自己的专业对象编辑能力，再评估底座协作挪移文字，不直接修改代理。
@@ -75,3 +75,10 @@ AutoCAD2026原生服务级临时Database检查：纸空间3个DBText，第一页
 `set_layer` 新增可选 `lineweight`（0.01毫米为单位的原生枚举，15表示0.15mm，-3表示Default）及 `linetype`（图中已有具体线型名，不自动加载LIN文件）。图层不接受ByLayer/ByBlock线型或线宽，仍保留图层摘要、外参从属层拒绝、当前/0图层隐藏保护。省略属性时不得改变原属性。
 LayerFacts增加lineweight和linetype名称，旧摘要必须重新读取，不能复用先前版本的摘要。Agent应从当前资源目录选择已有线型，不推测缺失线型已安装。
 175项FoundationExtensionContract通过。AutoCAD2026原生临时Database中测试图层成功改为0.15mm和既有TEST-DASH，提交后读回验证及其余图层不变检查通过，证据 `artifacts/batch1-native/layer-style-native.json`。尚未完整网关/保存验收；正式入口仍beta3.18，原DXF unknown保护未动。此能力与PM.ctb覆盖规则分开，CTB指定线宽可能覆盖图层线宽。
+
+## 第四批：另存DWG副本，不切换当前绑定
+新增 `save_copy` 独立单步计划：`file_name` 为简单ASCII `.dwg` 文件名，`expected` 提供1～64个指定对象及新鲜摘要。副本写在当前工作DWG同目录，保持已有相对外参/图片路径基准；禁止覆盖已有文件、路径穿越及重解析路径。只针对当前精确活动的已保存工作文档，复制包括当前未保存内容；不把副本自动纳入当前绑定，后续编辑副本必须显式重新绑定。
+实现使用 `Database.SaveAs(path,false,DwgVersion.Current,SecurityParameters)`，不采用会重分配句柄的整库Wblock。原生试验确认原图名称/数据库路径、源文件哈希、DBMOD保持，未保存圆进入副本且句柄保留。回执独立保留副本对象、模型句柄、图层、符号和布局的磁盘读回，并验证源状态未变。先写唯一pending DWG，核验后以禁止覆盖方式改名；失败仍保留pending与完整诊断，不删除或重放。
+证据 `artifacts/batch1-native/save-copy-plan-native/foundation-receipt.json` 与同目录 `result.json`：底座原生ExecutePlan路径返回committed_verified；源DBMOD为1且保存副本后仍1，源文件未变化、副本含未保存圆。181项基础契约检查通过；实际原生回执及9项反例共10项检查通过。未完成完整MCP/CLI持久请求、围栏及重开工作流验收，暂不发布、不改正式入口。
+准备阶段证据保留：`copy-probe`显示Wblock重分配句柄，因此未采用；`copy-direct-probe`显示SaveAs(false)可保留句柄与布局；`copy-document-r3`确认活动文档DBMOD/原文件。首个活动文档测试因测试读取文件未声明共享访问而失败，异常弹窗导致CoreConsole退出，已在测试组件捕获异常并修正共享读取；这些失败不冒充通过、不涉及受保护工程会话。
+官方API依据：[SaveAs不改名参数](https://help.autodesk.com/cloudhelp/2024/ENU/OARX-ManagedRefGuide/files/OARX-ManagedRefGuide-Autodesk_AutoCAD_DatabaseServices_Database_SaveAs_string__MarshalAsUnmanagedType_U1__bool_DwgVersion_Autodesk_AutoCAD_DatabaseServices_SecurityParameters.html)。

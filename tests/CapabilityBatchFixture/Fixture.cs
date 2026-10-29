@@ -5,6 +5,51 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using Newtonsoft.Json.Linq;
 public class CapabilityBatchFixture {
+ [CommandMethod("CAFDOCUMENTCOPYPROBE")]
+ public void DocumentCopyProbe(){
+  try{DocumentCopyProbeCore();}catch(System.Exception ex){File.WriteAllText(Path.Combine(Environment.GetEnvironmentVariable("CAF_COPY_PROBE_FOLDER"),"error.txt"),ex.ToString());}
+ }
+ void DocumentCopyProbeCore(){
+  string folder=Environment.GetEnvironmentVariable("CAF_COPY_PROBE_FOLDER");if(string.IsNullOrEmpty(folder)||!Directory.Exists(folder))throw new InvalidOperationException("explicit existing probe folder required");
+  string output=Path.Combine(folder,"copy.dwg"),evidence=Path.Combine(folder,"result.json");if(File.Exists(output)||File.Exists(evidence))throw new InvalidOperationException("unused probe paths required");
+  var doc=Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;var db=doc.Database;string name=doc.Name,filename=db.Filename;
+  string Hash(string path){using var stream=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.ReadWrite|FileShare.Delete);return Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(stream));}
+  string sourceHash=Hash(name),handle;
+  using(doc.LockDocument()){
+   using(var tx=db.TransactionManager.StartTransaction()){var model=(BlockTableRecord)tx.GetObject(SymbolUtilityServices.GetBlockModelSpaceId(db),OpenMode.ForWrite);var circle=new Circle(new Point3d(20,30,0),Vector3d.ZAxis,5);model.AppendEntity(circle);tx.AddNewlyCreatedDBObject(circle,true);handle=circle.Handle.ToString();tx.Commit();}
+   int before=Convert.ToInt32(Autodesk.AutoCAD.ApplicationServices.Core.Application.GetSystemVariable("DBMOD"));
+   if(Environment.GetEnvironmentVariable("CAF_COPY_PROBE_FOUNDATION")=="1"){
+    var assembly=System.Reflection.Assembly.LoadFrom(Environment.GetEnvironmentVariable("CAF_DIAGNOSTIC_PLUGIN"));var flags=System.Reflection.BindingFlags.Static|System.Reflection.BindingFlags.NonPublic;
+    var handler=assembly.GetType("Bimwright.Dwg.Plugin.FoundationPlanWriteHandler",true);var contract=assembly.GetType("Bimwright.Dwg.Shared.Execution.FoundationDrawingPlan",true);JObject facts;
+    using(var factsRead=db.TransactionManager.StartTransaction()){facts=(JObject)handler.GetMethod("ReadEntities",flags).Invoke(null,new object[]{db,factsRead,new[]{handle}});factsRead.Abort();}
+    string digest=(string)contract.GetMethod("Hash",System.Reflection.BindingFlags.Static|System.Reflection.BindingFlags.Public).Invoke(null,new object[]{facts[handle]});
+    var plan=new JObject{["schema"]="foundation-drawing-plan-v1",["source_role"]="test",["units"]="raw_drawing_units",["steps"]=new JArray(new JObject{["id"]="copy",["op"]="save_copy",["file_name"]="copy.dwg",["expected"]=new JArray(new JObject{["handle"]=handle,["expected_sha256"]=digest})})};
+    var receipt=(JObject)handler.GetMethod("ExecutePlan",flags).Invoke(null,new object[]{doc,plan.ToString(),null});File.WriteAllText(Path.Combine(folder,"foundation-receipt.json"),receipt.ToString());
+    if(receipt.Value<string>("outcome")!="committed_verified")throw new InvalidOperationException("save-copy plan did not verify; preserve pending artifact and receipt");
+   }else db.SaveAs(output,false,DwgVersion.Current,db.SecurityParameters);
+   int after=Convert.ToInt32(Autodesk.AutoCAD.ApplicationServices.Core.Application.GetSystemVariable("DBMOD"));
+   using var disk=new Database(false,true);disk.ReadDwgFile(output,FileOpenMode.OpenForReadAndAllShare,true,null);disk.CloseInput(true);using var read=disk.TransactionManager.StartTransaction();var circleOnDisk=read.GetObject(disk.GetObjectId(false,new Handle(Convert.ToInt64(handle,16)),0),OpenMode.ForRead) as Circle;bool copied=circleOnDisk!=null&&circleOnDisk.Radius==5;read.Abort();
+   bool identity=doc.Name==name&&db.Filename==filename,sourceUnchanged=Hash(name)==sourceHash;
+   File.WriteAllText(evidence,new JObject{["dbmod_before"]=before,["dbmod_after"]=after,["identity_stable"]=identity,["source_file_unchanged"]=sourceUnchanged,["unsaved_circle_in_copy"]=copied,["handle"]=handle}.ToString());
+   if(!identity||!sourceUnchanged||!copied||before!=after)throw new InvalidOperationException("document save-copy invariants differ; inspect evidence");
+  }
+ }
+ [CommandMethod("CAFWHOLECOPYPROBE")]
+ public void WholeCopyProbe(){
+  string folder=Environment.GetEnvironmentVariable("CAF_COPY_PROBE_FOLDER");if(string.IsNullOrEmpty(folder)||!Directory.Exists(folder))throw new InvalidOperationException("explicit existing probe folder required");
+  string source=Path.Combine(folder,"source.dwg"),copy=Path.Combine(folder,"copy.dwg"),evidence=Path.Combine(folder,"result.json");if(File.Exists(source)||File.Exists(copy)||File.Exists(evidence))throw new InvalidOperationException("unused probe paths required");
+  using var db=new Database(true,true);db.Insunits=UnitsValue.Millimeters;
+  using(var tx=db.TransactionManager.StartTransaction()){
+   foreach(DBDictionaryEntry entry in (DBDictionary)tx.GetObject(db.LayoutDictionaryId,OpenMode.ForRead)){var layout=(Layout)tx.GetObject(entry.Value,OpenMode.ForRead);if(layout.ModelType)continue;var paper=(BlockTableRecord)tx.GetObject(layout.BlockTableRecordId,OpenMode.ForWrite);var text=new DBText{TextString="COPY PAPER",Position=new Point3d(10,20,0),Height=3};paper.AppendEntity(text);tx.AddNewlyCreatedDBObject(text,true);break;}tx.Commit();
+  }db.SaveAs(source,DwgVersion.Current);string sourceName=db.Filename;string handle;
+  using(var tx=db.TransactionManager.StartTransaction()){var model=(BlockTableRecord)tx.GetObject(SymbolUtilityServices.GetBlockModelSpaceId(db),OpenMode.ForWrite);var circle=new Circle(new Point3d(20,30,0),Vector3d.ZAxis,5);model.AppendEntity(circle);tx.AddNewlyCreatedDBObject(circle,true);handle=circle.Handle.ToString();tx.Commit();}
+  if(Environment.GetEnvironmentVariable("CAF_COPY_PROBE_DIRECT")=="1")db.SaveAs(copy,false,DwgVersion.Current,db.SecurityParameters);else using(var cloned=db.Wblock()){cloned.SaveAs(copy,DwgVersion.Current);}
+  JObject Summary(Database data){using var tx=data.TransactionManager.StartTransaction();var spaces=new JObject();foreach(DBDictionaryEntry entry in (DBDictionary)tx.GetObject(data.LayoutDictionaryId,OpenMode.ForRead)){var page=(Layout)tx.GetObject(entry.Value,OpenMode.ForRead);var rows=new JArray();foreach(ObjectId id in (BlockTableRecord)tx.GetObject(page.BlockTableRecordId,OpenMode.ForRead)){var entity=(Entity)tx.GetObject(id,OpenMode.ForRead);rows.Add(new JObject{["handle"]=id.Handle.ToString(),["type"]=entity.GetType().Name});}spaces[page.LayoutName]=rows;}tx.Abort();return new JObject{["spaces"]=spaces,["insunits"]=(int)data.Insunits};}
+  using var disk=new Database(false,true);disk.ReadDwgFile(copy,FileOpenMode.OpenForReadAndAllShare,true,null);disk.CloseInput(true);
+  var a=Summary(db);var b=Summary(disk);bool same=JToken.DeepEquals(a,b),nameStable=db.Filename==sourceName;
+  File.WriteAllText(evidence,new JObject{["same_handles_types_layouts_units"]=same,["source_name_stable"]=nameStable,["unsaved_circle_handle"]=handle,["source"]=a,["copy"]=b}.ToString());
+  if(!same||!nameStable)throw new InvalidOperationException("whole copy identity or contents differ; inspect evidence");
+ }
  [CommandMethod("CAFLAYERSTYLECHECK")]
  public void LayerStyleCheck(){
   string plugin=Environment.GetEnvironmentVariable("CAF_DIAGNOSTIC_PLUGIN"),output=Environment.GetEnvironmentVariable("CAF_DIAGNOSTIC_JSON");

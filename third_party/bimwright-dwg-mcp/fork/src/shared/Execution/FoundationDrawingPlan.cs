@@ -87,7 +87,7 @@ namespace Bimwright.Dwg.Shared.Execution
                 }
             }
             if(steps.Cast<JObject>().Any(s=>s.Value<string>("op")=="set_raster_path")&&steps.Count!=1)throw new ArgumentException("raster path repair requires separate single-step plan");
-            if(steps.Cast<JObject>().Any(s=>(PrintOperations.Contains(s.Value<string>("op"))||s.Value<string>("op")=="export_dxf"))&&steps.Count!=1)throw new ArgumentException("page setup and PDF plotting require separate single-step plans");
+            if(steps.Cast<JObject>().Any(s=>(PrintOperations.Contains(s.Value<string>("op"))||s.Value<string>("op") is "export_dxf" or "save_copy"))&&steps.Count!=1)throw new ArgumentException("page setup and PDF plotting require separate single-step plans");
             if(vertices>1024||estimatedHandles>MaxHandles||Encoding.UTF8.GetByteCount(Canonical(p))>131072)throw new ArgumentException("plan exceeds 1024 vertices, 64 entity outcomes or semantic 128 KiB");
             return p;
         }

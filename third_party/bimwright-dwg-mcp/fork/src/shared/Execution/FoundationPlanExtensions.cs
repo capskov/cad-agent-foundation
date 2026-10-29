@@ -8,7 +8,7 @@ namespace Bimwright.Dwg.Shared.Execution
 {
  public static partial class FoundationDrawingPlan
  {
-  public static readonly string[] Operations=new[]{"layer","line","circle","polyline","text","mtext","callout","hatch","set_text","set_polyline","set_callout","set_callout_format","move","rotate","scale","copy","archive","save","text_style","set_text_style_font","dimension_style","set_layer","linear_dimension","aligned_dimension","radial_dimension","diameter_dimension"}.Concat(Phase2Operations).Concat(PrintOperations).Concat(CurveOperations).Concat(BlockOperations).Concat(new[]{"export_dxf","angular_dimension","set_xref_path","set_paper_viewport","set_paper_text","copy_paper_frame","wipeout_rectangle"}).ToArray();
+  public static readonly string[] Operations=new[]{"layer","line","circle","polyline","text","mtext","callout","hatch","set_text","set_polyline","set_callout","set_callout_format","move","rotate","scale","copy","archive","save","text_style","set_text_style_font","dimension_style","set_layer","linear_dimension","aligned_dimension","radial_dimension","diameter_dimension"}.Concat(Phase2Operations).Concat(PrintOperations).Concat(CurveOperations).Concat(BlockOperations).Concat(new[]{"export_dxf","save_copy","angular_dimension","set_xref_path","set_paper_viewport","set_paper_text","copy_paper_frame","wipeout_rectangle"}).ToArray();
   public static void ValidateAttachment(JObject s)
   {if(s["attachment"]!=null&&!new[]{"TopLeft","TopCenter","TopRight","MiddleLeft","MiddleCenter","MiddleRight","BottomLeft","BottomCenter","BottomRight"}.Contains(Text(s,"attachment",32)))throw new ArgumentException("known MTEXT attachment required");}
   public static void KeysWithOptional(JObject s,string[] required,params string[] optional)
@@ -55,7 +55,7 @@ namespace Bimwright.Dwg.Shared.Execution
      var ids=new HashSet<string>();foreach(JObject t in ts){Keys(t,"handle","expected_sha256");Expected(t);if(!ids.Add(t.Value<string>("handle")))throw new ArgumentException("duplicate target");}
      if(op=="copy")Point(s["delta"]);else{Point(s["base"]);if(op=="scale"){Positive(s,"factor");if(Number(s["factor"])<1e-6||Number(s["factor"])>1e6)throw new ArgumentException("scale factor outside 1e-6..1e6");}else Number(s["angle"]);}
      count+=ts.Count*(op=="copy"?2:1);break;
-    default:if(s.Value<string>("op")=="copy_paper_frame")count++;return ValidatePaperViewport(s)||ValidateXrefPath(s)||ValidateBlock(s,ref count)||ValidateAngular(s,ref count)||ValidateDxf(s,ref count)||ValidatePhase2(s,ref count)||ValidateCurve(s,ref count)||ValidatePrint(s);
+    default:if(s.Value<string>("op")=="copy_paper_frame")count++;return ValidatePaperViewport(s)||ValidateXrefPath(s)||ValidateBlock(s,ref count)||ValidateAngular(s,ref count)||ValidateDxf(s,ref count)||ValidateSaveCopy(s,ref count)||ValidatePhase2(s,ref count)||ValidateCurve(s,ref count)||ValidatePrint(s);
    }
    return true;
   }
@@ -136,7 +136,7 @@ namespace Bimwright.Dwg.Shared.Execution
    if(CurveOperations.Contains(step.Value<string>("op")))return VerifyCurve(step,receipt,out handled);
    if(PrintOperations.Contains(step.Value<string>("op")))return VerifyPrint(step,receipt,out handled);
    if(Phase2Operations.Contains(step.Value<string>("op")))return VerifyPhase2(step,receipt,out handled);
-   handled=true;if(step.Value<string>("op")=="angular_dimension")return VerifyAngular(step,receipt);if(step.Value<string>("op")=="export_dxf")return VerifyDxf(step,receipt);var op=step.Value<string>("op");var before=(JObject)receipt["before"];var after=(JObject)receipt["after"];var map=receipt["objects"]?[step.Value<string>("id")] as JObject;
+   handled=true;if(step.Value<string>("op")=="angular_dimension")return VerifyAngular(step,receipt);if(step.Value<string>("op")=="export_dxf")return VerifyDxf(step,receipt);if(step.Value<string>("op")=="save_copy")return VerifySaveCopy(step,receipt);var op=step.Value<string>("op");var before=(JObject)receipt["before"];var after=(JObject)receipt["after"];var map=receipt["objects"]?[step.Value<string>("id")] as JObject;
    if(map==null)return false;
    if(op=="set_text_style_font")return map.Value<string>("name")==step.Value<string>("name")&&VerifyFontChange(receipt["symbols_before"]?["text_styles"]?[step.Value<string>("name")],receipt["symbols_after"]?["text_styles"]?[step.Value<string>("name")],step);
    if(op is "text_style" or "dimension_style")

@@ -1,6 +1,18 @@
 using Newtonsoft.Json.Linq;
 using Bimwright.Dwg.Shared.Execution;
 
+if(args.Length==2&&args[0]=="--save-copy-contract"){
+ var receipt=JObject.Parse(File.ReadAllText(args[1]));var expected=new JArray(((JObject)receipt["before"]).Properties().Select(p=>new JObject{["handle"]=p.Name,["expected_sha256"]=FoundationDrawingPlan.Hash(p.Value)}));
+ var plan=new JObject{["schema"]="foundation-drawing-plan-v1",["source_role"]="test",["units"]="raw_drawing_units",["steps"]=new JArray(new JObject{["id"]="copy",["op"]="save_copy",["file_name"]=receipt["output_file"]["file_name"],["expected"]=expected})};
+ bool VerifyCopy(JObject value)=>FoundationDrawingPlan.VerifyReceipt(value,plan.ToString());
+ if(!VerifyCopy(receipt))throw new Exception("native save-copy receipt rejected");int checks=1;
+ foreach(string field in new[]{"source_name_after","source_dbmod_after","source_file_sha256_after","copy_disk_model_handles","copy_disk_entities","copy_disk_layers","copy_requires_new_explicit_binding","output_file","copy_insunits"}){
+  var bad=(JObject)receipt.DeepClone();switch(field){case "source_dbmod_after":bad[field]=999;break;case "copy_disk_model_handles":((JArray)bad[field]).Add("BAD");break;case "copy_disk_entities":((JObject)bad[field]).Properties().First().Value["radius"]=999;break;case "copy_disk_layers":((JObject)bad[field]).Properties().First().Value["color_index"]=999;break;case "copy_requires_new_explicit_binding":bad[field]=false;break;case "output_file":bad[field]["published_without_overwrite"]=false;break;case "copy_insunits":bad.Remove(field);break;default:bad[field]="changed";break;}
+  if(VerifyCopy(bad))throw new Exception("accepted changed save-copy proof "+field);checks++;
+ }
+ Console.WriteLine("Native save-copy receipt and negative checks: "+checks+" passed");return;
+}
+
 if(args.Length==1&&args[0]=="--paper-frame-contract"){
  var source=JObject.Parse("{\"handle\":\"ABC\",\"type\":\"BlockReference\",\"layout_name\":\"Paper\",\"owner_handle\":\"99\",\"position\":{\"x\":0.0,\"y\":0.0,\"z\":0.0},\"attribute_count\":0,\"name\":\"HCTK\",\"visible\":true}");
  var step=new JObject{["id"]="frame",["op"]="copy_paper_frame",["source_handle"]="ABC",["expected_sha256"]=FoundationDrawingPlan.Hash(source),["layout"]="Paper",["delta"]=new JArray(420,0)};var plan=new JObject{["schema"]="foundation-drawing-plan-v1",["source_role"]="annotation",["units"]="raw_drawing_units",["steps"]=new JArray(step)};FoundationDrawingPlan.Parse(plan.ToString());
@@ -325,3 +337,9 @@ foreach(int badWeight in new[]{-2,-1,14}){var bad=(JObject)weightedStep.DeepClon
 var inherited=(JObject)weightedStep.DeepClone();inherited["linetype"]="ByLayer";Check(!Valid(inherited),"layer rejects recursive ByLayer linetype");
 var unrequested=(JObject)weightedStep.DeepClone();unrequested.Remove("lineweight");unrequested.Remove("linetype");Check(!FoundationDrawingPlan.VerifyLayerChanges(new JObject{["T"]=weightedOld},new JObject{["T"]=weightedNext},new JArray(unrequested)),"layer never accepts unrequested style mutation");
 Console.WriteLine($"Including layer plotting properties: {passed} passed");
+var copyStep=new JObject{["id"]="copy",["op"]="save_copy",["file_name"]="delivery.dwg",["expected"]=new JArray(new JObject{["handle"]="A",["expected_sha256"]=new string('A',64)})};
+Check(Valid(copyStep),"save-copy requires explicit DWG name and selected readback");
+foreach(string path in new[]{"../delivery.dwg","folder/file.dwg","delivery.dxf"}){var bad=(JObject)copyStep.DeepClone();bad["file_name"]=path;Check(!Valid(bad),"save-copy refuses invalid path "+path);}
+var emptyCopy=(JObject)copyStep.DeepClone();emptyCopy["expected"]=new JArray();Check(!Valid(emptyCopy),"save-copy cannot skip selected disk verification");
+var mixedCopy=Plan(copyStep);((JArray)mixedCopy["steps"]).Add(wideStep.DeepClone());bool copyMixedRejected=false;try{FoundationDrawingPlan.Parse(mixedCopy.ToString());}catch{copyMixedRejected=true;}Check(copyMixedRejected,"save-copy is a separate file-effect request");
+Console.WriteLine($"Including save-copy plan boundaries: {passed} passed");

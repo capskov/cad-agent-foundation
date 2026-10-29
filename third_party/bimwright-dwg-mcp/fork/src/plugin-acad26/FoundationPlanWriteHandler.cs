@@ -190,6 +190,7 @@ namespace Bimwright.Dwg.Plugin
             if(((JArray)plan["steps"]).Count==1&&plan["steps"][0].Value<string>("op")=="save")return SaveDocument(doc,plan,canonicalPlan);
             if(((JArray)plan["steps"]).Count==1&&plan["steps"][0].Value<string>("op")=="plot_pdf")return PlotPdf(doc,plan,canonicalPlan);
             if(((JArray)plan["steps"]).Count==1&&plan["steps"][0].Value<string>("op")=="export_dxf")return ExportDxf(doc,plan,canonicalPlan);
+            if(((JArray)plan["steps"]).Count==1&&plan["steps"][0].Value<string>("op")=="save_copy")return SaveDocumentCopy(doc,plan,canonicalPlan);
             JObject before=new JObject(),after=new JObject(),objects=new JObject(),layers=new JObject(),allLayersBefore=null,allLayersAfter=null,symbolsBefore=null,symbolsAfter=null,layoutsBefore=null,layoutsAfter=null;JArray modelBefore=null,modelAfter=null;
             string activeStep=null,activeOperation=null,failureStage="preflight";var completedSteps=new JArray();
             Transaction tx=null;bool opened=false,invoked=false,committed=false;string outcome="unknown",error=null;var created=new List<string>();
