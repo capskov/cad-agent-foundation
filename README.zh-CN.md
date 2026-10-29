@@ -1,10 +1,10 @@
 # CAD Agent Foundation — AutoCAD MCP／CLI 智能体操作接口
 
-当前实战发布准备：**1.2.0-beta.3.18**，新增本地CTB配置及原生窗口PDF，完善保存、标注、图框和视口可靠性。见[验收范围与限制](docs/RELEASE-v1.2.0-beta.3.18.md)。下方旧本地里程碑保留为历史记录。
+当前实战版本：**1.2.0-beta.3.18**，新增本地CTB配置、原生窗口PDF及实战可靠性修复。[验收范围与限制](docs/RELEASE-v1.2.0-beta.3.18.md)。下方旧版本记录保留为历史。
 
-当前本地迭代 **1.2.0-beta.2**：[实战基础操作修复](docs/FEEDBACK-BETA2-20261023.zh-CN.md)。新增受控视图读回/窗口与中心定位/PNG截图、原生光栅引用读取及明确路径修复，修正参数拒绝误报未知、基础读取缺摘要，并读取代理临时普通文字。保留原有proxy/local.5改动；已完成合成图CAD2026打包MCP抽测，不代表所有专业对象兼容。卫星图识别与道路描绘属于Skill，本地版本未自动发布GitHub。
+**当前公开运行预览 v1.2.0-beta.3。** 包含代理几何/文字读取、受控放缩平移与截图、光栅路径修复、拒绝分类与常宽事实修正。复用已实测二进制；[范围、已知截图限制及升级方法](docs/RELEASE-v1.2.0-beta.3.md)。
 
-本地开发版 `1.2.0-beta.1` 新增[代理及复合图形只读几何读取](docs/PROXY-GEOMETRY-READ.zh-CN.md)：AutoCAD2026原生内存分解、WCS坐标、样条参数、几何分页和失败原因；实际支持范围见专项验证说明。本轮尚未发布到GitHub。
+**可选道路判读技能：** [Agentic Map Tracing](https://github.com/capskov/agentic-map-tracing) v0.1.0-beta.1。Agent负责道路判断，底座负责CAD执行，分别安装，不作为基础操作的强制依赖。
 
 ## 首要任务：为智能 Agent 提供可靠操作，而非编程替代判断
 
@@ -24,7 +24,7 @@
 **专业规则由 Skill 提供，CAD 操作与执行反馈由底座承担。** 自行开发或第三方专业 Skill 可以复用底座开放的操作接口，组合实现不同工程任务。这不仅是一组 CAD 命令，更是一套面向 AI Agent 协作的执行基础设施。
 
 
-**运行预览v1.2.0-local.4。** [新版说明与升级方法](docs/RELEASE-v1.2.0-local.4.md)。 本次提供源码、文档与带清单Windows运行ZIP，前置软件仍须独立安装。[构建前置条件与限制](docs/BUILD.zh-CN.md)。已验收本地运行版 v1.0.0-local 为独立基线；两个独立Skill已公开：引线v0.3.0-rc.1、病害v0.1.0-rc.1。
+**运行预览v1.2.0-beta.3。** [新版说明与升级方法](docs/RELEASE-v1.2.0-beta.3.md)。 本次提供源码、文档与带清单Windows运行ZIP，前置软件仍须独立安装。[构建前置条件与限制](docs/BUILD.zh-CN.md)。已验收本地运行版 v1.0.0-local 为独立基线；两个独立Skill已公开：引线v0.3.0-rc.1、病害v0.1.0-rc.1。
 
 [English](README.md) · [安装与快速入门](docs/QUICKSTART.zh-CN.md) · [能力与限制](docs/CAPABILITIES.md)
 
@@ -36,7 +36,7 @@
 
 让智能体明确绑定图纸，持久记录请求归属与执行状态，在回应不明确时查询原请求，并在写入和保存后核对指定对象。当前实现集成在经过修改、固定来源版本的 [Bimwright DWG MCP](https://github.com/bimwright/dwg-mcp) 宿主中。
 
-维护者：**capskov**。当前预览为**v1.2.0-local.4**，附独立构建运行ZIP和局部实机证据；已验收v1.0.0-local基线保留，不承诺所有AutoCAD2026补丁兼容。
+维护者：**capskov**。当前预览为**v1.2.0-beta.3**，附独立构建运行ZIP和局部实机证据；已验收v1.0.0-local基线保留，不承诺所有AutoCAD2026补丁兼容。
 
 ## 为什么开发
 

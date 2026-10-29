@@ -1,10 +1,10 @@
 # CAD Agent Foundation — AutoCAD MCP & CLI for AI Agents
 
-Current field release preparation: **1.2.0-beta.3.18**, with local CTB configuration, native window PDF printing and save/annotation reliability fixes. See [validation and limits](docs/RELEASE-v1.2.0-beta.3.18.md). Earlier local milestones below remain historical evidence.
+Current field release: **1.2.0-beta.3.18** adds local CTB controls, transient window PDF output and field reliability fixes. [Validation and limits](docs/RELEASE-v1.2.0-beta.3.18.md). Earlier milestones below remain historical.
 
-Local **1.2.0-beta.2** adds a bound native view/readback/PNG endpoint, guarded native raster-reference path repair, explicit pre-submission rejection classification, digests independent of geometry output, and transient ordinary text reads. Existing proxy/local.5 work is preserved. Scoped packaged-MCP checks passed on a synthetic AutoCAD 2026 drawing; satellite interpretation and road tracing remain Agent/Skill work. See [scope and evidence](docs/FEEDBACK-BETA2-20261023.zh-CN.md). Not automatically published to GitHub.
+**Public runtime preview v1.2.0-beta.3.** Proxy/compound geometry and text reads, bounded native views/captures, raster-path repair, rejection classification and polyline-width fixes. Reuses the accepted beta.3 binaries; [scope, known capture limitations and upgrade notes](docs/RELEASE-v1.2.0-beta.3.md).
 
-Local development `1.2.0-beta.1` adds [read-only proxy/compound geometry](docs/PROXY-GEOMETRY-READ.zh-CN.md): native transient decomposition, WCS primitives, NURBS data, geometry paging and explicit limitations on AutoCAD 2026. This local upgrade has not been published to GitHub.
+**Optional road interpretation:** [Agentic Map Tracing](https://github.com/capskov/agentic-map-tracing) v0.1.0-beta.1. The Agent reasons about boundaries; Foundation supplies CAD execution. Install separately.
 
 ## First priority: reliable operations for increasingly capable agents
 
@@ -19,7 +19,7 @@ Local unit closeout: `1.2.0-local.4` carries prior bounded primitives, makes INS
 While CAD integrations connect AI to drawing commands and data, Foundation focuses on the **agent workflow around each operation**: knowing what was requested, what actually happened, and whether the next step is safe.
 
 
-**Public runtime preview v1.2.0-local.4.** [Release and upgrade notes](docs/RELEASE-v1.2.0-local.4.md). Source, documentation and a manifest-bearing Windows runtime ZIP are provided in this preview. [Build prerequisites and limits](docs/BUILD.md). The accepted local runtime v1.0.0-local is a separate baseline. Companion Skill previews are published independently: callout v0.3.0-rc.1 and distress v0.1.0-rc.1.
+**Public runtime preview v1.2.0-beta.3.** [Release and upgrade notes](docs/RELEASE-v1.2.0-beta.3.md). Source, documentation and a manifest-bearing Windows runtime ZIP are provided in this preview. [Build prerequisites and limits](docs/BUILD.md). The accepted local runtime v1.0.0-local is a separate baseline. Companion Skill previews are published independently: callout v0.3.0-rc.1 and distress v0.1.0-rc.1.
 
 [简体中文](README.zh-CN.md) · [Quick start](docs/QUICKSTART.md) · [Capabilities](docs/CAPABILITIES.md) · [Compatibility](docs/COMPATIBILITY.md)
 
@@ -31,7 +31,7 @@ AI agents can inspect and operate a live AutoCAD drawing through structured nati
 
 CAD Agent Foundation gives CAD agents a bounded execution contract: explicitly bind a drawing, persist request ownership and execution state, inspect the original request after an uncertain reply, and verify tracked object facts after writes and saves. The current implementation integrates these mechanisms into a modified, pinned [Bimwright DWG MCP](https://github.com/bimwright/dwg-mcp) host.
 
-This Windows/AutoCAD bridge is maintained by **capskov**. The current preview is **v1.2.0-local.4**, with an independently built runtime ZIP and scoped native evidence. The accepted **v1.0.0-local** baseline is retained; compatibility with every AutoCAD update is not claimed.
+This Windows/AutoCAD bridge is maintained by **capskov**. The current preview is **v1.2.0-beta.3**, with an independently built runtime ZIP and scoped native evidence. The accepted **v1.0.0-local** baseline is retained; compatibility with every AutoCAD update is not claimed.
 
 ## Why this project exists
 
@@ -41,7 +41,7 @@ The design focuses on those decisions. Durable records, drawing identity and nat
 
 ## Native operations and installation
 
-Download [v1.1.0-rc.1 runtime](https://github.com/capskov/cad-agent-foundation/releases/tag/v1.1.0-rc.1), verify SHA256SUMS.txt and extract the complete folder. Requires licensed compatible Windows x64 AutoCAD 2026, .NET 8 Desktop Runtime and Python 3.11+. No Autodesk assemblies or SHX fonts are redistributed. [Installation](docs/QUICKSTART.md) · [25-operation catalog](docs/COMMAND-CATALOG-v1.1.0-rc.1.md) · [New validation](docs/VALIDATION-v1.1.0-rc.1.md).
+Download [v1.2.0-beta.3 runtime](https://github.com/capskov/cad-agent-foundation/releases/tag/v1.2.0-beta.3), verify SHA256SUMS.txt and extract the complete folder. Requires licensed compatible Windows x64 AutoCAD 2026, .NET 8 Desktop Runtime and Python 3.11+. No Autodesk assemblies or SHX fonts are redistributed. [Installation](docs/QUICKSTART.md) · [25-operation catalog](docs/COMMAND-CATALOG-v1.1.0-rc.1.md) · [New validation](docs/VALIDATION-v1.1.0-rc.1.md).
 
 New in this preview: installed-font text styles, dimension styles, native linear/aligned/radius/diameter DIMENSION, layer state management, guarded closed-boundary/hatch continuation, linked callout geometry/format, and same-drawing rotate/scale/copy of supported complete groups. It preserves original-request reconciliation and drawing/object protection.
 
