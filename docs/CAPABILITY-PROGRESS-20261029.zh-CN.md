@@ -70,3 +70,8 @@ AutoCAD2026原生服务级临时Database检查：纸空间3个DBText，第一页
 - 后续 unknown 写入可在原账本 ResultJson 保留合法JSON诊断回执，包含pending文件、原始前后事实及错误；非法JSON不保存。效果仍unknown、verification未核验、围栏保留且队列停止，不能将诊断回执当成已提交或通过证据。68项PluginJobContract通过，包含新增诊断保留及非法输入仍有围栏检查。此变更不修改历史DXF请求、不提供强制释放或重放。
 - `set_paper_viewport` 新增可选2D `center_paper`，原始纸面Z值保留；与可选纸面尺寸同时使用，模型view_center/view_height仍由原有明确参数指定，未提供的字段受原有事实核验保护。仍只支持既有正交无扭转浮动视口，排除布局总体视口。
 - 167项FoundationExtensionContract通过，新增纸面中心及尺寸组合、错误中心和模型视域/锁定变化拒绝检查。AutoCAD2026原生临时Database中已实际移动视口中心(100,80)至(200,180)、宽120至140，提交后读回模型视域及比例未漂移，专用回执比较通过。证据 `artifacts/batch1-native/viewport-placement-native.json`。这属于原生基础操作检查，不冒充完整网关及保存交付验收，未操作原protected工作区或工程图。
+
+## 第三批：图层打印属性
+`set_layer` 新增可选 `lineweight`（0.01毫米为单位的原生枚举，15表示0.15mm，-3表示Default）及 `linetype`（图中已有具体线型名，不自动加载LIN文件）。图层不接受ByLayer/ByBlock线型或线宽，仍保留图层摘要、外参从属层拒绝、当前/0图层隐藏保护。省略属性时不得改变原属性。
+LayerFacts增加lineweight和linetype名称，旧摘要必须重新读取，不能复用先前版本的摘要。Agent应从当前资源目录选择已有线型，不推测缺失线型已安装。
+175项FoundationExtensionContract通过。AutoCAD2026原生临时Database中测试图层成功改为0.15mm和既有TEST-DASH，提交后读回验证及其余图层不变检查通过，证据 `artifacts/batch1-native/layer-style-native.json`。尚未完整网关/保存验收；正式入口仍beta3.18，原DXF unknown保护未动。此能力与PM.ctb覆盖规则分开，CTB指定线宽可能覆盖图层线宽。

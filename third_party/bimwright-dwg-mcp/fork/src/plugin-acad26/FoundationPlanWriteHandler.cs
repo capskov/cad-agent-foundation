@@ -59,7 +59,7 @@ namespace Bimwright.Dwg.Plugin
         {var result=new JObject();foreach(string h in handles.Distinct().OrderBy(v=>v,StringComparer.Ordinal)){var e=tx.GetObject(Resolve(db,h),OpenMode.ForRead) as Entity;if(e==null)throw new InvalidOperationException("not_entity:"+h);result[h]=Facts(e,tx);}return result;}
         static JObject LayerFacts(Database db,Transaction tx)
         {
-            var result=new JObject();var table=(LayerTable)tx.GetObject(db.LayerTableId,OpenMode.ForRead);foreach(ObjectId id in table){var layer=(LayerTableRecord)tx.GetObject(id,OpenMode.ForRead);result[layer.Name]=new JObject{["handle"]=id.Handle.ToString(),["color_index"]=(int)layer.Color.ColorIndex,["is_off"]=layer.IsOff,["is_frozen"]=layer.IsFrozen,["is_locked"]=layer.IsLocked,["is_plottable"]=layer.IsPlottable,["linetype_handle"]=layer.LinetypeObjectId.Handle.ToString()};}return result;
+            var result=new JObject();var table=(LayerTable)tx.GetObject(db.LayerTableId,OpenMode.ForRead);foreach(ObjectId id in table){var layer=(LayerTableRecord)tx.GetObject(id,OpenMode.ForRead);result[layer.Name]=new JObject{["handle"]=id.Handle.ToString(),["color_index"]=(int)layer.Color.ColorIndex,["is_off"]=layer.IsOff,["is_frozen"]=layer.IsFrozen,["is_locked"]=layer.IsLocked,["is_plottable"]=layer.IsPlottable,["lineweight"]=(int)layer.LineWeight,["linetype"]=((LinetypeTableRecord)tx.GetObject(layer.LinetypeObjectId,OpenMode.ForRead)).Name,["linetype_handle"]=layer.LinetypeObjectId.Handle.ToString()};}return result;
         }
         static ObjectId Layer(Database db,Transaction tx,string name,int color,bool archive=false)
         {

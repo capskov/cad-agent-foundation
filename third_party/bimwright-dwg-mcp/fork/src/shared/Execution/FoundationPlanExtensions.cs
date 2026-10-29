@@ -37,7 +37,9 @@ namespace Bimwright.Dwg.Shared.Execution
      foreach(string f in new[]{"dimension_color","extension_color","text_color"})Color(s,f);
      if(s["decimal_places"]?.Type!=JTokenType.Integer||s.Value<int>("decimal_places")<0||s.Value<int>("decimal_places")>8)throw new ArgumentException("decimal_places 0..8 required");break;
     case "set_layer":
-     Keys(s,"id","op","name","expected_sha256","color","is_off","is_frozen","is_locked","is_plottable");Text(s,"name",255);Digest(s,"expected_sha256");Color(s,"color");foreach(string f in new[]{"is_off","is_frozen","is_locked","is_plottable"})Bool(s,f);break;
+     KeysWithOptional(s,new[]{"id","op","name","expected_sha256","color","is_off","is_frozen","is_locked","is_plottable"},"lineweight","linetype");Text(s,"name",255);Digest(s,"expected_sha256");Color(s,"color");foreach(string f in new[]{"is_off","is_frozen","is_locked","is_plottable"})Bool(s,f);
+     if(s["lineweight"]!=null&&(s["lineweight"].Type!=JTokenType.Integer||!new[]{-3,0,5,9,13,15,18,20,25,30,35,40,50,53,60,70,80,90,100,106,120,140,158,200,211}.Contains(s.Value<int>("lineweight"))))throw new ArgumentException("layer lineweight requires Default(-3) or native hundredths-mm value");
+     if(s["linetype"]!=null){string kind=Text(s,"linetype",255);if(string.Equals(kind,"ByLayer",StringComparison.OrdinalIgnoreCase)||string.Equals(kind,"ByBlock",StringComparison.OrdinalIgnoreCase))throw new ArgumentException("layer linetype requires an existing concrete linetype");}break;
     case "set_callout_format":
      KeysWithOptional(s,new[]{"id","op","handle","expected_sha256","text_handle","text_expected_sha256","text_style","dimension_style","height","width","gap","text_color","leader_color"},"attachment");Expected(s);Expected(new JObject{["handle"]=s["text_handle"],["expected_sha256"]=s["text_expected_sha256"]});Text(s,"text_style",255);Text(s,"dimension_style",255);Positive(s,"height");Positive(s,"width");Number(s["gap"]);Color(s,"text_color");Color(s,"leader_color");ValidateAttachment(s);count+=2;break;
     case "linear_dimension":case "aligned_dimension":
@@ -69,6 +71,8 @@ namespace Bimwright.Dwg.Shared.Execution
     if(s==null){if(!JToken.DeepEquals(row.Value,actual))return false;continue;}
     if(actual==null||Hash(row.Value)!=s.Value<string>("expected_sha256")||actual.Value<int?>("color_index")!=s.Value<int>("color"))return false;
     var old=(JObject)row.Value.DeepClone();var next=(JObject)actual.DeepClone();
+    if(s["lineweight"]!=null){if(actual.Value<int?>("lineweight")!=s.Value<int>("lineweight"))return false;old.Remove("lineweight");next.Remove("lineweight");}
+    if(s["linetype"]!=null){if(!string.Equals(actual.Value<string>("linetype"),s.Value<string>("linetype"),StringComparison.OrdinalIgnoreCase)||string.IsNullOrEmpty(actual.Value<string>("linetype_handle")))return false;foreach(string f in new[]{"linetype","linetype_handle"}){old.Remove(f);next.Remove(f);}}
     foreach(var f in new[]{"is_off","is_frozen","is_locked","is_plottable"}){if(actual.Value<bool?>(f)!=s.Value<bool>(f))return false;old.Remove(f);next.Remove(f);}
     old.Remove("color_index");next.Remove("color_index");if(!JToken.DeepEquals(old,next))return false;
    }

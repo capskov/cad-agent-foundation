@@ -315,3 +315,13 @@ foreach(string field in new[]{"center_paper","view_center","locked"}){var bad=(J
 moveViewport["width_paper"]=140.0;viewportNext["width_paper"]=140.0;viewportNext["extents"]["min"]["x"]=130.0;viewportNext["extents"]["max"]["x"]=270.0;
 Check(ViewportMatches(viewportNext),"paper center move and resize compose without changing model center");
 Console.WriteLine($"Including paper viewport placement: {passed} passed");
+var weightedOld=(JObject)oldLayer.DeepClone();weightedOld["lineweight"]=-3;weightedOld["linetype"]="Continuous";
+var weightedStep=(JObject)layer.DeepClone();weightedStep["expected_sha256"]=FoundationDrawingPlan.Hash(weightedOld);weightedStep["lineweight"]=15;weightedStep["linetype"]="DASHED";
+var weightedNext=(JObject)newLayer.DeepClone();weightedNext["lineweight"]=15;weightedNext["linetype"]="DASHED";weightedNext["linetype_handle"]="E";
+Check(Valid(weightedStep),"layer concrete linetype and 0.15mm lineweight accepted");
+Check(FoundationDrawingPlan.VerifyLayerChanges(new JObject{["T"]=weightedOld},new JObject{["T"]=weightedNext},new JArray(weightedStep)),"layer style readback verifies intended change");
+var unintended=(JObject)weightedNext.DeepClone();unintended["lineweight"]=18;Check(!FoundationDrawingPlan.VerifyLayerChanges(new JObject{["T"]=weightedOld},new JObject{["T"]=unintended},new JArray(weightedStep)),"layer rejects wrong weight");
+foreach(int badWeight in new[]{-2,-1,14}){var bad=(JObject)weightedStep.DeepClone();bad["lineweight"]=badWeight;Check(!Valid(bad),"layer rejects invalid weight "+badWeight);}
+var inherited=(JObject)weightedStep.DeepClone();inherited["linetype"]="ByLayer";Check(!Valid(inherited),"layer rejects recursive ByLayer linetype");
+var unrequested=(JObject)weightedStep.DeepClone();unrequested.Remove("lineweight");unrequested.Remove("linetype");Check(!FoundationDrawingPlan.VerifyLayerChanges(new JObject{["T"]=weightedOld},new JObject{["T"]=weightedNext},new JArray(unrequested)),"layer never accepts unrequested style mutation");
+Console.WriteLine($"Including layer plotting properties: {passed} passed");

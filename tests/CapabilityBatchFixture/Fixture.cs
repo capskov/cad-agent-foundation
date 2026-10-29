@@ -5,6 +5,29 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using Newtonsoft.Json.Linq;
 public class CapabilityBatchFixture {
+ [CommandMethod("CAFLAYERSTYLECHECK")]
+ public void LayerStyleCheck(){
+  string plugin=Environment.GetEnvironmentVariable("CAF_DIAGNOSTIC_PLUGIN"),output=Environment.GetEnvironmentVariable("CAF_DIAGNOSTIC_JSON");
+  if(string.IsNullOrEmpty(plugin)||!File.Exists(plugin)||string.IsNullOrEmpty(output)||File.Exists(output))throw new InvalidOperationException("explicit plugin and unused evidence path required");
+  var assembly=System.Reflection.Assembly.LoadFrom(plugin);var flags=System.Reflection.BindingFlags.Static|System.Reflection.BindingFlags.NonPublic;
+  var handler=assembly.GetType("Bimwright.Dwg.Plugin.FoundationPlanWriteHandler",true);var contract=assembly.GetType("Bimwright.Dwg.Shared.Execution.FoundationDrawingPlan",true);
+  using var db=new Database(true,true);
+  using(var tx=db.TransactionManager.StartTransaction()){
+   var layers=(LayerTable)tx.GetObject(db.LayerTableId,OpenMode.ForWrite);var layer=new LayerTableRecord{Name="LAYER-STYLE-TEST"};layers.Add(layer);tx.AddNewlyCreatedDBObject(layer,true);
+   var kinds=(LinetypeTable)tx.GetObject(db.LinetypeTableId,OpenMode.ForWrite);var kind=new LinetypeTableRecord{Name="TEST-DASH",NumDashes=2,PatternLength=10};kind.SetDashLengthAt(0,5);kind.SetDashLengthAt(1,-5);kinds.Add(kind);tx.AddNewlyCreatedDBObject(kind,true);tx.Commit();
+  }
+  JObject before,after,step;
+  using(var tx=db.TransactionManager.StartTransaction()){
+   before=(JObject)handler.GetMethod("LayerFacts",flags).Invoke(null,new object[]{db,tx});
+   string digest=(string)contract.GetMethod("Hash",System.Reflection.BindingFlags.Public|System.Reflection.BindingFlags.Static).Invoke(null,new object[]{before["LAYER-STYLE-TEST"]});
+   step=new JObject{["id"]="style",["op"]="set_layer",["name"]="LAYER-STYLE-TEST",["expected_sha256"]=digest,["color"]=2,["is_off"]=false,["is_frozen"]=false,["is_locked"]=false,["is_plottable"]=true,["lineweight"]=15,["linetype"]="TEST-DASH"};
+   handler.GetMethod("ExecuteExtendedStep",flags).Invoke(null,new object[]{db,tx,step,new JObject(),new System.Collections.Generic.Dictionary<string,ObjectId>(),new System.Collections.Generic.List<string>(),new JObject()});tx.Commit();
+  }
+  using(var tx=db.TransactionManager.StartTransaction()){after=(JObject)handler.GetMethod("LayerFacts",flags).Invoke(null,new object[]{db,tx});tx.Abort();}
+  bool verified=(bool)contract.GetMethod("VerifyLayerChanges",System.Reflection.BindingFlags.Public|System.Reflection.BindingFlags.Static).Invoke(null,new object[]{before,after,new JArray(step)});
+  if(!verified)throw new InvalidOperationException("layer plotting properties readback mismatch: "+after);
+  File.WriteAllText(output,new JObject{["passed"]=true,["scope"]="native_primitive_transient_database_no_project_or_journal_write",["before"]=before,["after"]=after,["step"]=step}.ToString());
+ }
  [CommandMethod("CAFVIEWPORTPLACEMENTCHECK")]
  public void ViewportPlacementCheck(){
   string plugin=Environment.GetEnvironmentVariable("CAF_DIAGNOSTIC_PLUGIN"),output=Environment.GetEnvironmentVariable("CAF_DIAGNOSTIC_JSON");
