@@ -3,7 +3,7 @@
   "name": "io.github.capskov/cad-agent-foundation",
   "title": "CAD Agent Foundation",
   "description": "AutoCAD MCP/CLI for agents: native CAD, views, proxy reads, verified writes and saves.",
-  "version": "1.2.0-beta.3",
+  "version": "1.2.0-beta.3.18",
   "websiteUrl": "https://github.com/capskov/cad-agent-foundation",
   "repository": {
     "url": "https://github.com/capskov/cad-agent-foundation",
@@ -12,8 +12,8 @@
   "packages": [
     {
       "registryType": "mcpb",
-      "identifier": "https://github.com/capskov/cad-agent-foundation/releases/download/v1.2.0-beta.3/cad-agent-foundation-v1.2.0-beta.3-win-x64.mcpb",
-      "fileSha256": "95fc65bd9f2b9da654154673c4602be38f0fcb9704cf2c2906f0057068165aad",
+      "identifier": "https://github.com/capskov/cad-agent-foundation/releases/download/v1.2.0-beta.3.18/cad-agent-foundation-v1.2.0-beta.3.18-win-x64.mcpb",
+      "fileSha256": "7bc2377bae20dabb76c597903859e085b164db692046c61451c85e70b895f22b",
       "transport": {
         "type": "stdio"
       }

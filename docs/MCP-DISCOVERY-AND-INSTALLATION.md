@@ -4,7 +4,11 @@ CAD Agent Foundation is an **agent-first AutoCAD MCP and CLI execution foundatio
 
 **中文速览：面向 AI Agent 的 CAD 执行底座，提供图纸绑定、执行反馈、结果核验与安全续作；支持与第三方专业 Skill 协同。**
 
-## GitHub preview v1.2.0-beta.3
+## GitHub preview v1.2.0-beta.3.18
+
+[Current scoped release](RELEASE-v1.2.0-beta.3.18.md): [runtime ZIP](https://github.com/capskov/cad-agent-foundation/releases/download/v1.2.0-beta.3.18/cad-agent-foundation-v1.2.0-beta.3.18-win-x64.zip), [MCPB](https://github.com/capskov/cad-agent-foundation/releases/download/v1.2.0-beta.3.18/cad-agent-foundation-v1.2.0-beta.3.18-win-x64.mcpb). Check SHA256SUMS.txt from the release. The source server.json now targets this GitHub bundle; the official MCP Registry remains at beta.3 until separately updated.
+
+## Previous GitHub preview v1.2.0-beta.3
 
 [Current release and upgrade notes](RELEASE-v1.2.0-beta.3.md). Download the [Windows runtime ZIP](https://github.com/capskov/cad-agent-foundation/releases/download/v1.2.0-beta.3/cad-agent-foundation-v1.2.0-beta.3-win-x64.zip) or [matching MCPB](https://github.com/capskov/cad-agent-foundation/releases/download/v1.2.0-beta.3/cad-agent-foundation-v1.2.0-beta.3-win-x64.mcpb), and verify SHA256SUMS.txt from that release. Upgrade into a fresh owned workspace with the matching plugin; close or preserve previous sessions through their original versioned entry. The source server.json describes the current GitHub bundle; the official MCP Registry also publishes version 1.2.0-beta.3. Earlier 1.1.0-rc.1 evidence below is retained as history.
 
