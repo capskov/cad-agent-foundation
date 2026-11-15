@@ -1,0 +1,253 @@
+{
+ "schema": "foundation-drawing-plan-v1",
+ "source_role": "annotation",
+ "units": "raw_drawing_units",
+ "steps": [
+  {
+   "id": "ground-line",
+   "op": "line",
+   "start": [
+    2.45,
+    0.6
+   ],
+   "end": [
+    4.55,
+    0.6
+   ],
+   "layer": "地面",
+   "color": 7
+  },
+  {
+   "id": "earth-left",
+   "op": "polyline",
+   "vertices": [
+    [
+     2.45,
+     0.6
+    ],
+    [
+     3.2,
+     0.6
+    ],
+    [
+     3.2,
+     0.3
+    ],
+    [
+     2.45,
+     0.3
+    ]
+   ],
+   "closed": true,
+   "layer": "地面",
+   "color": 8
+  },
+  {
+   "id": "earth-right",
+   "op": "polyline",
+   "vertices": [
+    [
+     4.0,
+     0.6
+    ],
+    [
+     4.55,
+     0.6
+    ],
+    [
+     4.55,
+     0.3
+    ],
+    [
+     4.0,
+     0.3
+    ]
+   ],
+   "closed": true,
+   "layer": "地面",
+   "color": 8
+  },
+  {
+   "id": "ground-tick-0",
+   "op": "line",
+   "start": [
+    2.62,
+    0.56
+   ],
+   "end": [
+    2.67,
+    0.63
+   ],
+   "layer": "地面",
+   "color": 7
+  },
+  {
+   "id": "ground-tick-1",
+   "op": "line",
+   "start": [
+    2.74,
+    0.56
+   ],
+   "end": [
+    2.79,
+    0.63
+   ],
+   "layer": "地面",
+   "color": 7
+  },
+  {
+   "id": "ground-tick-2",
+   "op": "line",
+   "start": [
+    2.86,
+    0.56
+   ],
+   "end": [
+    2.91,
+    0.63
+   ],
+   "layer": "地面",
+   "color": 7
+  },
+  {
+   "id": "hatch-earth-left",
+   "op": "hatch",
+   "boundary": "earth-left",
+   "pattern": "EARTH",
+   "scale": 0.1,
+   "angle": 0.0,
+   "layer": "填充",
+   "color": 8
+  },
+  {
+   "id": "hatch-earth-right",
+   "op": "hatch",
+   "boundary": "earth-right",
+   "pattern": "EARTH",
+   "scale": 0.1,
+   "angle": 0.0,
+   "layer": "填充",
+   "color": 8
+  },
+  {
+   "id": "dim-wall-height",
+   "op": "linear_dimension",
+   "start": [
+    3.76,
+    1.0
+   ],
+   "end": [
+    3.76,
+    3.0
+   ],
+   "position": [
+    3.98,
+    2.0
+   ],
+   "dimension_style": "WALL_DIM",
+   "layer": "尺寸",
+   "color": 3,
+   "rotation": 90
+  },
+  {
+   "id": "dim-wall-thick",
+   "op": "linear_dimension",
+   "start": [
+    3.5,
+    2.78
+   ],
+   "end": [
+    3.74,
+    2.78
+   ],
+   "position": [
+    3.62,
+    2.9
+   ],
+   "dimension_style": "WALL_DIM",
+   "layer": "尺寸",
+   "color": 3,
+   "rotation": 0
+  },
+  {
+   "id": "dim-found-width",
+   "op": "linear_dimension",
+   "start": [
+    3.2,
+    0.36
+   ],
+   "end": [
+    4.0,
+    0.36
+   ],
+   "position": [
+    3.6,
+    0.25
+   ],
+   "dimension_style": "WALL_DIM",
+   "layer": "尺寸",
+   "color": 3,
+   "rotation": 0
+  },
+  {
+   "id": "dim-footing-width",
+   "op": "linear_dimension",
+   "start": [
+    3.435,
+    0.8
+   ],
+   "end": [
+    3.805,
+    0.8
+   ],
+   "position": [
+    3.62,
+    0.7
+   ],
+   "dimension_style": "WALL_DIM",
+   "layer": "尺寸",
+   "color": 3,
+   "rotation": 0
+  },
+  {
+   "id": "dim-footing-height",
+   "op": "linear_dimension",
+   "start": [
+    3.83,
+    0.6
+   ],
+   "end": [
+    3.83,
+    1.0
+   ],
+   "position": [
+    3.94,
+    0.8
+   ],
+   "dimension_style": "WALL_DIM",
+   "layer": "尺寸",
+   "color": 3,
+   "rotation": 90
+  },
+  {
+   "id": "dim-coping-height",
+   "op": "linear_dimension",
+   "start": [
+    3.83,
+    3.0
+   ],
+   "end": [
+    3.83,
+    3.06
+   ],
+   "position": [
+    3.93,
+    3.03
+   ],
+   "dimension_style": "WALL_DIM",
+   "layer": "尺寸",
+   "color": 3,
+   "rotation": 90
+  }
+ ]
+}
