@@ -1,0 +1,27 @@
+# 本次实战出现的原始错误文本（按时间顺序）
+
+1. 计划校验（第一批）：
+   {"status":"rejected_before_submission","error":"step IDs must be unique identifiers"}
+
+2. 计划校验（首批 39 步整体）：
+   {"status":"rejected_before_submission","error":"1..16 steps required"}
+
+3. 首次 15 步提交结果：
+   {"status":"verification_pending","verification":"passed","next_action":"verified_not_persisted: rerun with --save-to <absolute.dwg> (client save route) to persist and release the fence"}
+
+4. 重新用同计划补 --save-to：
+   {"error":"Unknown request record; pass a request ID that this workspace submitted"}
+
+5. 在同一会话尝试 save 子命令：
+   {"error":"['drawing_path_mismatch']"}
+
+6. 保存成功后在同一会话继续第二批：
+   {"error":"['drawing_path_mismatch']"}
+
+7. 第二批 apply --save-to（跨新会话，批次已提交）：
+   {"error":"Unknown request record; pass a request ID that this workspace submitted"}
+   （但 s2.dwg 已生成，大小 32021 B，说明保存作业实际已执行）
+
+8. 第三批（地面+土体+尺寸）：
+   apply 返回 verification_pending / verification=passed；随后补保存时 CAD 进程已退出，
+   {"error":"Owned CAD process has exited"}；s3.dwg 未生成，第三批几何只在内存中，随进程丢失。
