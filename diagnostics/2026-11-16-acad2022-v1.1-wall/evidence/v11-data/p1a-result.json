@@ -1,0 +1,12 @@
+{
+ "apply_status": "verification_pending",
+ "apply_error": null,
+ "verification": "passed",
+ "reactor": true,
+ "annotation_handle": "1EF70",
+ "offset": {
+  "x": -0.375,
+  "y": -0.375,
+  "z": 0.0
+ }
+}

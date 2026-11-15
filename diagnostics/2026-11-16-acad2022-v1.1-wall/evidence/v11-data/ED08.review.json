@@ -1,0 +1,18 @@
+{
+  "schema": "callout-review-result-v1",
+  "callout_count": 15,
+  "status": "no_conflicts_in_supplied_geometry",
+  "geometry_conflicts": [],
+  "warnings": [],
+  "not_checked": [
+    "CAD_association_and_style",
+    "native_recompute_and_actual_display",
+    "target_identity_and_input_provenance",
+    "unprovided_background",
+    "dot_and_line_weight",
+    "viewport_clipping"
+  ],
+  "inner_frame_evidence": "visual_checked",
+  "scale_record": {},
+  "cad_effects": "none"
+}

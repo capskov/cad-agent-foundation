@@ -1,0 +1,11 @@
+C814068EE193772DBC4CD1EB0F95689817D30BA3D65AC3CF076578A6351CE628  F:\AI\cad-agent-foundation-acad2022\src\cad-agent-foundation-main\third_party\bimwright-dwg-mcp\fork\src\plugin-acad26\FoundationPlanWriteHandler.cs
+FEC3D62BECF5A13698580F848AD203BE7B524E51E9DB68DA2B23A056A1E14875  F:\AI\cad-agent-foundation-acad2022\src\cad-agent-foundation-main\third_party\bimwright-dwg-mcp\fork\src\shared\Execution\FoundationDrawingPlan.cs
+86A05718F82149CD32D09E5ABA19B6F9019EB6D55CB02AC8F6866031E56CAFAB  F:\AI\cad-agent-foundation-acad2022\src\cad-agent-foundation-main\third_party\bimwright-dwg-mcp\fork\src\shared\Handlers\Drawing\DrawingHandlers.cs
+D9C0282F9239210A9930EC42B14A7ABB9F387B0D7C0FF3E0F800328BB907ED0E  F:\AI\cad-agent-foundation-acad2022\src\cad-agent-foundation-main\third_party\bimwright-dwg-mcp\fork\src\plugin-journal-net8\SqlitePluginIntentJournal.cs
+C4A807D143B0EAEC38331A83E6F67191880C2C1363DD73B64E6FAA6D8CC4DFF1  F:\AI\cad-agent-foundation-acad2022\src\cad-agent-foundation-main\client\foundation.py
+4030366378BF401AEE6B50768AB9F82294B6C8105F36AB90F466E7A7B1B953DE  F:\AI\cad-agent-foundation-acad2022\deliverables\ACAD2022-V1.1\before.dwg
+9AE985A25E7E230A22143ABD059B03C518C6416DF664D8C48A708A7A7684253D  F:\AI\cad-agent-foundation-acad2022\deliverables\ACAD2022-V1.1\cleared.dwg
+C2807F4CD482FB3C4E6C91B8FDEC7B49F61471F8354EB2A5E5AA24D7304AEA13  F:\AI\cad-agent-foundation-acad2022\deliverables\ACAD2022-V1.1\after.dwg
+B2E8044BDA5F048668AA9D9A8D46F88890575D47047AD17BA89E6714E97C9F06  F:\AI\cad-agent-foundation-acad2022\src\cad-agent-foundation-main\docs\ACAD2022-V1.1-REPORT.md
+26AD8630ABCDC89BDC9B659F809B527FE01C92CB69DF0BC8A34EDE7AC6B5FA98  F:\AI\cad-agent-foundation-acad2022\src\cad-agent-foundation-main\docs\ACAD2022-V1.1-BUGLOG.md
+PACKAGE_SHA256  05F89D6BDEC59220BDB58CEA612A2FC4EDE22C5FB6B3ADCCF6395F366027CE33  artifacts\packages\20261115-172431.zip

@@ -1,0 +1,2262 @@
+{
+ "areas": {
+  "A1": {
+   "frames": [
+    "ED08"
+   ],
+   "count": 15,
+   "groups": [
+    {
+     "area": "A1",
+     "frame": "ED08",
+     "label": "S05 旧步道砖6cm+基层17cm拆除 A=16.106m²",
+     "leader": "1D4A1",
+     "text": "1D4A0",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 492566.5208064545,
+      "y": 328408.1415,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 492566.5208064545,
+       "y": 328408.1415,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 492561.89514688565,
+       "y": 328414.9877023496,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 492535.6813340672,
+       "y": 328414.9877023496,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 492534.1813340672,
+       "y": 328415.3627023496,
+       "z": 0.0
+      },
+      "max": {
+       "x": 492561.89514688565,
+       "y": 328417.06986567756,
+       "z": 0.0
+      }
+     },
+     "actual_width": 27.713812818434445,
+     "actual_height": 1.7071633279295955,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A1",
+     "frame": "ED08",
+     "label": "S06 旧步道砖6cm+基层17cm拆除 A=22.870m²",
+     "leader": "1D4A3",
+     "text": "1D4A2",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 492584.95961793046,
+      "y": 328409.4555,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 492584.95961793046,
+       "y": 328409.4555,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 492577.72354995296,
+       "y": 328423.927635955,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 492551.7597371345,
+       "y": 328423.927635955,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 492549.5097371345,
+       "y": 328424.302635955,
+       "z": 0.0
+      },
+      "max": {
+       "x": 492577.72354995296,
+       "y": 328426.00979928294,
+       "z": 0.0
+      }
+     },
+     "actual_width": 28.21381281843444,
+     "actual_height": 1.7071633279295957,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A1",
+     "frame": "ED08",
+     "label": "S16 旧步道砖6cm+基层17cm拆除 A=183.1m²",
+     "leader": "1D563",
+     "text": "1D562",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 492681.46191934386,
+      "y": 328407.15,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 492681.46191934386,
+       "y": 328407.15,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 492676.46191934386,
+       "y": 328397.15,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 492649.8731065254,
+       "y": 328397.15,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 492649.8731065254,
+       "y": 328397.525,
+       "z": 0.0
+      },
+      "max": {
+       "x": 492676.46191934386,
+       "y": 328399.232163328,
+       "z": 0.0
+      }
+     },
+     "actual_width": 26.588812818434445,
+     "actual_height": 1.707163327929596,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A1",
+     "frame": "ED08",
+     "label": "S17 旧步道砖6cm+基层17cm拆除 A=213.9m²",
+     "leader": "1D565",
+     "text": "1D564",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 492612.7558719686,
+      "y": 328404.038,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 492612.7558719686,
+       "y": 328404.038,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 492617.7558719686,
+       "y": 328394.038,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 492644.59905270016,
+       "y": 328394.038,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 492617.7558719686,
+       "y": 328394.413,
+       "z": 0.0
+      },
+      "max": {
+       "x": 492644.59905270016,
+       "y": 328396.1207675267,
+       "z": 0.0
+      }
+     },
+     "actual_width": 26.843180731552284,
+     "actual_height": 1.7077675267042098,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A1",
+     "frame": "ED08",
+     "label": "S18 旧步道砖6cm+基层17cm拆除 A=128.2m²",
+     "leader": "1D567",
+     "text": "1D566",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 492628.17298065894,
+      "y": 328417.2665,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 492628.17298065894,
+       "y": 328417.2665,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 492623.17298065894,
+       "y": 328427.2665,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 492596.18352257233,
+       "y": 328427.30127493467,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": -26.989458086609375,
+      "y": -0.34022506535984576,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 492596.3341678405,
+       "y": 328427.6415,
+       "z": 0.0
+      },
+      "max": {
+       "x": 492623.17298065894,
+       "y": 328429.348663328,
+       "z": 0.0
+      }
+     },
+     "actual_width": 26.838812818434455,
+     "actual_height": 1.707163327929596,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A1",
+     "frame": "ED08",
+     "label": "1 K098 沥青6+水泥20拆除 A=53.870m²",
+     "leader": "1D569",
+     "text": "1D568",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 492657.66977318167,
+      "y": 328409.47400395275,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 492657.66977318167,
+       "y": 328409.47400395275,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 492652.66977318167,
+       "y": 328399.47400395275,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 492627.9911738535,
+       "y": 328399.47400395275,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 492627.9911738535,
+       "y": 328399.84900395275,
+       "z": 0.0
+      },
+      "max": {
+       "x": 492652.66977318167,
+       "y": 328401.5561672807,
+       "z": 0.0
+      }
+     },
+     "actual_width": 24.67859932812478,
+     "actual_height": 1.707163327929596,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A1",
+     "frame": "ED08",
+     "label": "2 K101 沥青6+水泥20拆除 A=28.870m²",
+     "leader": "1D56B",
+     "text": "1D56A",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 492662.43087585294,
+      "y": 328421.36770080327,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 492662.43087585294,
+       "y": 328421.36770080327,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 492667.43087585294,
+       "y": 328431.36770080327,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 492691.88684939395,
+       "y": 328431.36770080327,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 492667.43087585294,
+       "y": 328431.74270080327,
+       "z": 0.0
+      },
+      "max": {
+       "x": 492691.88684939395,
+       "y": 328433.4498641312,
+       "z": 0.0
+      }
+     },
+     "actual_width": 24.45597354099118,
+     "actual_height": 1.7071633279295957,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A1",
+     "frame": "ED08",
+     "label": "M01-01 旧沥青6cm+水泥20cm拆除 A=766.8m²",
+     "leader": "1D7C1",
+     "text": "1D7C0",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 492589.0405686317,
+      "y": 328404.8036363132,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 492589.0405686317,
+       "y": 328404.8036363132,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 492596.1053604696,
+       "y": 328390.2284323831,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 492624.8071215624,
+       "y": 328390.6034323831,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 492596.1097283827,
+       "y": 328390.6034323831,
+       "z": 0.0
+      },
+      "max": {
+       "x": 492624.8071215624,
+       "y": 328392.31059571105,
+       "z": 0.0
+      }
+     },
+     "actual_width": 28.69739317971279,
+     "actual_height": 1.7071633279295952,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A1",
+     "frame": "ED08",
+     "label": "Rg06 旧步道砖6cm+基层17cm拆除 A=141.95m²",
+     "leader": "1D7E4",
+     "text": "1D7E3",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 492642.01733,
+      "y": 328421.661,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 492642.01733,
+       "y": 328421.661,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 492637.01733,
+       "y": 328431.661,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 492604.7356573381,
+       "y": 328431.8197310986,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": -32.28167266189121,
+      "y": -0.21626890142215416,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 492608.3486571425,
+       "y": 328432.036,
+       "z": 0.0
+      },
+      "max": {
+       "x": 492637.01733,
+       "y": 328434.0023074292,
+       "z": 0.0
+      }
+     },
+     "actual_width": 28.668672857536535,
+     "actual_height": 1.9663074292064124,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A1",
+     "frame": "ED08",
+     "label": "新增2 K032 沥青6+水泥20拆除 A=19.480m²",
+     "leader": "1D7E8",
+     "text": "1D7E7",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 492591.8135366702,
+      "y": 328411.32241585106,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 492591.8135366702,
+       "y": 328411.32241585106,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 492584.6566525782,
+       "y": 328427.09692636185,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 492557.58099442656,
+       "y": 328427.09692636185,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 492557.58099442656,
+       "y": 328427.47192636185,
+       "z": 0.0
+      },
+      "max": {
+       "x": 492584.6566525782,
+       "y": 328429.1796938885,
+       "z": 0.0
+      }
+     },
+     "actual_width": 27.075658151654178,
+     "actual_height": 1.7077675267042094,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A1",
+     "frame": "ED08",
+     "label": "A18F1D 旧步道砖6cm+基层17cm拆除 A=2.9m²",
+     "leader": "1D7EA",
+     "text": "1D7E9",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 492570.13021,
+      "y": 328396.56306,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 492570.13021,
+       "y": 328396.56306,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 492575.13021,
+       "y": 328386.56306,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 492603.0488828575,
+       "y": 328386.56306,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 492575.13021,
+       "y": 328386.93806,
+       "z": 0.0
+      },
+      "max": {
+       "x": 492603.0488828575,
+       "y": 328388.6458275267,
+       "z": 0.0
+      }
+     },
+     "actual_width": 27.91867285753654,
+     "actual_height": 1.7077675267042096,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A1",
+     "frame": "ED08",
+     "label": "新增1 K010 沥青6+水泥20拆除 A=24.120m²",
+     "leader": "1D7EE",
+     "text": "1D7ED",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 492572.2179,
+      "y": 328407.11209,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 492572.2179,
+       "y": 328407.11209,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 492566.70579296217,
+       "y": 328418.00759499706,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 492540.13450272364,
+       "y": 328418.00759499706,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 492540.13450272364,
+       "y": 328418.38259499706,
+       "z": 0.0
+      },
+      "max": {
+       "x": 492566.70579296217,
+       "y": 328420.089758325,
+       "z": 0.0
+      }
+     },
+     "actual_width": 26.571290238536353,
+     "actual_height": 1.7071633279295952,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A1",
+     "frame": "ED08",
+     "label": "Rg01 旧沥青6cm+水泥20cm拆除 A=9.1m²",
+     "leader": "1E96F",
+     "text": "1E96D",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 492568.0403539829,
+      "y": 328395.40962920286,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 492568.0403539829,
+       "y": 328395.40962920286,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 492574.4583838625,
+       "y": 328382.5735694436,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 492603.1601449553,
+       "y": 328382.9485694436,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 492578.0833838625,
+       "y": 328382.9485694436,
+       "z": 0.0
+      },
+      "max": {
+       "x": 492603.1601449553,
+       "y": 328384.9148768728,
+       "z": 0.0
+      }
+     },
+     "actual_width": 25.07676109283066,
+     "actual_height": 1.966307429206412,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A1",
+     "frame": "ED08",
+     "label": "Rg02 旧沥青6cm+水泥20cm拆除 A=5.5m²",
+     "leader": "1E972",
+     "text": "1E970",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 492564.5525240853,
+      "y": 328406.0546941771,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 492564.5525240853,
+       "y": 328406.0546941771,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 492561.6518474675,
+       "y": 328411.9005636371,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 492535.7044542878,
+       "y": 328411.9005636371,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": -25.94739317971282,
+      "y": -0.375,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 492536.0794542878,
+       "y": 328412.2755636371,
+       "z": 0.0
+      },
+      "max": {
+       "x": 492561.6518474675,
+       "y": 328414.2412668675,
+       "z": 0.0
+      }
+     },
+     "actual_width": 25.57239317971282,
+     "actual_height": 1.965703230431798,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A1",
+     "frame": "ED08",
+     "label": "Rg05 旧步道砖6cm+基层17cm拆除 A=34.14m²",
+     "leader": "1EDBC",
+     "text": "1EDBA",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 492577.7461102886,
+      "y": 328410.3452445989,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 492577.7461102886,
+       "y": 328410.3452445989,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 492573.0326901078,
+       "y": 328421.1251437573,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 492545.4181558061,
+       "y": 328421.2931225522,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": -27.614534301741514,
+      "y": -0.20702120510395616,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 492544.8683851634,
+       "y": 328421.5001437573,
+       "z": 0.0
+      },
+      "max": {
+       "x": 492573.0326901078,
+       "y": 328423.46584698773,
+       "z": 0.0
+      }
+     },
+     "actual_width": 28.164304944418703,
+     "actual_height": 1.9657032304317992,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    }
+   ]
+  },
+  "A2": {
+   "frames": [
+    "ED04",
+    "ED02"
+   ],
+   "count": 20,
+   "groups": [
+    {
+     "area": "A2",
+     "frame": "ED04",
+     "label": "S07 旧步道砖6cm+基层17cm拆除 A=169.2m²",
+     "leader": "1D4A5",
+     "text": "1D4A4",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 493249.8693901859,
+      "y": 328378.766,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 493249.8693901859,
+       "y": 328378.766,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 493257.4149175888,
+       "y": 328372.131112187,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 493284.5080983204,
+       "y": 328372.131112187,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 493257.4149175888,
+       "y": 328372.506112187,
+       "z": 0.0
+      },
+      "max": {
+       "x": 493284.5080983204,
+       "y": 328374.2138797137,
+       "z": 0.0
+      }
+     },
+     "actual_width": 27.093180731552295,
+     "actual_height": 1.7077675267042092,
+     "text_height": 1.5,
+     "attachment": "BottomLeft",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A2",
+     "frame": "ED04",
+     "label": "S08 旧步道砖6cm+基层17cm拆除 A=109.0m²",
+     "leader": "1D4A7",
+     "text": "1D4A6",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 493270.464140795,
+      "y": 328404.538,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 493270.464140795,
+       "y": 328404.538,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 493276.56161962065,
+       "y": 328392.3430423487,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 493303.65480035223,
+       "y": 328392.3430423487,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 493276.56161962065,
+       "y": 328392.7180423487,
+       "z": 0.0
+      },
+      "max": {
+       "x": 493303.65480035223,
+       "y": 328394.42580987536,
+       "z": 0.0
+      }
+     },
+     "actual_width": 27.09318073155229,
+     "actual_height": 1.7077675267042094,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A2",
+     "frame": "ED04",
+     "label": "13 K605 沥青6+水泥20拆除 A=28.87m²",
+     "leader": "1D582",
+     "text": "1D581",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 493163.0869053103,
+      "y": 328386.91278287256,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 493163.0869053103,
+       "y": 328386.91278287256,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 493158.0869053103,
+       "y": 328376.91278287256,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 493133.41267389525,
+       "y": 328376.91278287256,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 493133.41267389525,
+       "y": 328377.28778287256,
+       "z": 0.0
+      },
+      "max": {
+       "x": 493158.0869053103,
+       "y": 328378.9949462005,
+       "z": 0.0
+      }
+     },
+     "actual_width": 24.674231415006936,
+     "actual_height": 1.7071633279295957,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A2",
+     "frame": "ED04",
+     "label": "15 K702 沥青6+水泥20拆除 A=43.87m²",
+     "leader": "1D584",
+     "text": "1D583",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 493265.5563433404,
+      "y": 328392.4810889708,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 493265.5563433404,
+       "y": 328392.4810889708,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 493270.5563433404,
+       "y": 328382.4810889708,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 493295.3555747554,
+       "y": 328382.4810889708,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 493270.5563433404,
+       "y": 328382.8560889708,
+       "z": 0.0
+      },
+      "max": {
+       "x": 493295.3555747554,
+       "y": 328384.56325229874,
+       "z": 0.0
+      }
+     },
+     "actual_width": 24.799231415006936,
+     "actual_height": 1.707163327929596,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A2",
+     "frame": "ED02",
+     "label": "16 K810 沥青6+水泥20拆除 A=18.870m²",
+     "leader": "1D586",
+     "text": "1D585",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 493349.8988319782,
+      "y": 328414.1387823125,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 493349.8988319782,
+       "y": 328414.1387823125,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 493354.8988319782,
+       "y": 328404.1387823125,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 493379.94806339324,
+       "y": 328404.1387823125,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 493354.8988319782,
+       "y": 328404.5137823125,
+       "z": 0.0
+      },
+      "max": {
+       "x": 493379.94806339324,
+       "y": 328406.22094564047,
+       "z": 0.0
+      }
+     },
+     "actual_width": 25.049231415006926,
+     "actual_height": 1.7071633279295957,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A2",
+     "frame": "ED02",
+     "label": "17 K878 沥青6+水泥20拆除 A=58.87m²",
+     "leader": "1D588",
+     "text": "1D587",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 493417.25332473323,
+      "y": 328428.8791765482,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 493417.25332473323,
+       "y": 328428.8791765482,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 493412.25332473323,
+       "y": 328438.8791765482,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 493387.5790933182,
+       "y": 328438.8791765482,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 493387.5790933182,
+       "y": 328439.2541765482,
+       "z": 0.0
+      },
+      "max": {
+       "x": 493412.25332473323,
+       "y": 328440.9613398762,
+       "z": 0.0
+      }
+     },
+     "actual_width": 24.674231415006936,
+     "actual_height": 1.7071633279295957,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A2",
+     "frame": "ED04",
+     "label": "14 K680旧沥青6cm+水泥20cm拆除 A=454.3m²",
+     "leader": "1D7BB",
+     "text": "1D7BA",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 493240.6153910847,
+      "y": 328378.91458809876,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 493240.6153910847,
+       "y": 328378.91458809876,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 493230.98908980814,
+       "y": 328359.6619855456,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 493202.1143702563,
+       "y": 328359.2951022964,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": -0.06288475735345855,
+      "y": -0.6949434102862142,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 493202.17725501367,
+       "y": 328359.9900457067,
+       "z": 0.0
+      },
+      "max": {
+       "x": 493231.3808981934,
+       "y": 328361.69720903464,
+       "z": 0.0
+      }
+     },
+     "actual_width": 29.203643179712813,
+     "actual_height": 1.707163327929595,
+     "text_height": 1.5,
+     "attachment": "BottomLeft",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A2",
+     "frame": "ED04",
+     "label": "M04-01 旧沥青6cm+水泥20cm拆除 A=1357.5m²",
+     "leader": "1D7CC",
+     "text": "1D7CA",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 493263.6424198813,
+      "y": 328405.08108556544,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 493263.6424198813,
+       "y": 328405.08108556544,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 493251.2636932804,
+       "y": 328423.1182025634,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 493221.6913001007,
+       "y": 328423.1182025634,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": -0.375,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 493221.6913001007,
+       "y": 328423.4932025634,
+       "z": 0.0
+      },
+      "max": {
+       "x": 493251.3886932804,
+       "y": 328425.20036589133,
+       "z": 0.0
+      }
+     },
+     "actual_width": 29.6973931797128,
+     "actual_height": 1.7071633279295957,
+     "text_height": 1.5,
+     "attachment": "BottomLeft",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A2",
+     "frame": "ED04",
+     "label": "M05 旧沥青6cm+水泥20cm拆除 A=120.0m²",
+     "leader": "1D7DA",
+     "text": "1D7D9",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 493277.0799781119,
+      "y": 328418.371681163,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 493277.0799781119,
+       "y": 328418.371681163,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 493267.38868071395,
+       "y": 328437.4384273695,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 493241.06628753425,
+       "y": 328437.4384273695,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 493241.06628753425,
+       "y": 328437.8134273695,
+       "z": 0.0
+      },
+      "max": {
+       "x": 493267.38868071395,
+       "y": 328439.5205906975,
+       "z": 0.0
+      }
+     },
+     "actual_width": 26.32239317971282,
+     "actual_height": 1.7071633279295952,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A2",
+     "frame": "ED02",
+     "label": "M07 旧沥青6cm+水泥20cm拆除 A=423.0m²",
+     "leader": "1D7E2",
+     "text": "1D7E1",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 493388.95732,
+      "y": 328422.3859,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 493388.95732,
+       "y": 328422.3859,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 493379.55077867006,
+       "y": 328441.3039627912,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 493352.85338549037,
+       "y": 328441.3039627912,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 493352.85338549037,
+       "y": 328441.6789627912,
+       "z": 0.0
+      },
+      "max": {
+       "x": 493379.55077867006,
+       "y": 328443.3861261192,
+       "z": 0.0
+      }
+     },
+     "actual_width": 26.69739317971282,
+     "actual_height": 1.7071633279295957,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A2",
+     "frame": "ED04",
+     "label": "A193CA 旧步道砖6cm+基层17cm拆除 A=5.2m²",
+     "leader": "1D802",
+     "text": "1D801",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 493272.02778,
+      "y": 328398.11048,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 493272.02778,
+       "y": 328398.11048,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 493277.02778,
+       "y": 328388.11048,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 493305.3214528575,
+       "y": 328388.11048,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 493277.02778,
+       "y": 328388.48548,
+       "z": 0.0
+      },
+      "max": {
+       "x": 493305.3214528575,
+       "y": 328390.19264332793,
+       "z": 0.0
+      }
+     },
+     "actual_width": 28.29367285753654,
+     "actual_height": 1.7071633279295957,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A2",
+     "frame": "ED04",
+     "label": "A1942F 旧步道砖6cm+基层17cm拆除 A=2.5m²",
+     "leader": "1D804",
+     "text": "1D803",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 493255.01725,
+      "y": 328379.5135,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 493255.01725,
+       "y": 328379.5135,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 493258.90745889145,
+       "y": 328376.00928189897,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 493287.07613174897,
+       "y": 328376.00928189897,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 493258.90745889145,
+       "y": 328376.38428189897,
+       "z": 0.0
+      },
+      "max": {
+       "x": 493287.07613174897,
+       "y": 328378.0914452269,
+       "z": 0.0
+      }
+     },
+     "actual_width": 28.168672857536546,
+     "actual_height": 1.7071633279295955,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A2",
+     "frame": "ED04",
+     "label": "A19432 旧步道砖6cm+基层17cm拆除 A=14.2m²",
+     "leader": "1D806",
+     "text": "1D805",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 493272.47867,
+      "y": 328413.22274,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 493272.47867,
+       "y": 328413.22274,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 493277.47867,
+       "y": 328403.22274,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 493306.3973428575,
+       "y": 328403.22274,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 493277.47867,
+       "y": 328403.59774,
+       "z": 0.0
+      },
+      "max": {
+       "x": 493306.3973428575,
+       "y": 328405.30490332795,
+       "z": 0.0
+      }
+     },
+     "actual_width": 28.918672857536535,
+     "actual_height": 1.7071633279295961,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A2",
+     "frame": "ED02",
+     "label": "新增9 K873 沥青6+水泥20拆除 A=10.567m²",
+     "leader": "1D80B",
+     "text": "1D80A",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 493414.10026,
+      "y": 328419.365,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 493414.10026,
+       "y": 328419.365,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 493419.10026,
+       "y": 328409.365,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 493446.0509181516,
+       "y": 328409.365,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 493419.10026,
+       "y": 328409.74,
+       "z": 0.0
+      },
+      "max": {
+       "x": 493446.0509181516,
+       "y": 328411.44716332795,
+       "z": 0.0
+      }
+     },
+     "actual_width": 26.95065815165419,
+     "actual_height": 1.707163327929596,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A2",
+     "frame": "ED02",
+     "label": "新增8 K820 沥青6+水泥20拆除 A=4.723m²",
+     "leader": "1D80D",
+     "text": "1D80C",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 493360.76476,
+      "y": 328424.90429,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 493360.76476,
+       "y": 328424.90429,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 493355.76476,
+       "y": 328434.90429,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 493329.31846976146,
+       "y": 328434.90429,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 493329.31846976146,
+       "y": 328435.27929,
+       "z": 0.0
+      },
+      "max": {
+       "x": 493355.76476,
+       "y": 328436.98645332793,
+       "z": 0.0
+      }
+     },
+     "actual_width": 26.44629023853634,
+     "actual_height": 1.7071633279295957,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A2",
+     "frame": "ED04",
+     "label": "新增6 K729 沥青6+水泥20拆除 A=16.550m²",
+     "leader": "1D80F",
+     "text": "1D80E",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 493270.39154,
+      "y": 328420.823,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 493270.39154,
+       "y": 328420.823,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 493265.39154,
+       "y": 328430.823,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 493238.44088184834,
+       "y": 328430.823,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 493238.44088184834,
+       "y": 328431.198,
+       "z": 0.0
+      },
+      "max": {
+       "x": 493265.39154,
+       "y": 328432.90516332793,
+       "z": 0.0
+      }
+     },
+     "actual_width": 26.950658151654185,
+     "actual_height": 1.7071633279295964,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A2",
+     "frame": "ED04",
+     "label": "新增7 K775 沥青6+水泥20拆除 A=2.461m²",
+     "leader": "1D811",
+     "text": "1D810",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测文字",
+     "anchor": {
+      "index": 0,
+      "x": 493315.7101,
+      "y": 328422.6555,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 493315.7101,
+       "y": 328422.6555,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 493308.90624191746,
+       "y": 328443.67396984395,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 493282.70995167893,
+       "y": 328443.67396984395,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 493282.70995167893,
+       "y": 328444.04896984395,
+       "z": 0.0
+      },
+      "max": {
+       "x": 493308.90624191746,
+       "y": 328445.7561331719,
+       "z": 0.0
+      }
+     },
+     "actual_width": 26.196290238536356,
+     "actual_height": 1.7071633279295952,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "_KCYD_DIM",
+     "text_color": 7,
+     "rotation": 6.283185307179519,
+     "dot_circle": null,
+     "dot_radius": null,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A2",
+     "frame": "ED04",
+     "label": "{\\C7;M06-N 旧沥青6cm+水泥20cm拆除 A=212.884m\\S2^;}",
+     "leader": "1EB26",
+     "text": "1EB25",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测引线",
+     "anchor": {
+      "index": 0,
+      "x": 493305.0,
+      "y": 328420.8,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 493305.0,
+       "y": 328420.8,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 493299.77356236,
+       "y": 328439.82641970605,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 493272.17356236,
+       "y": 328439.82641970605,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": -27.599999999976717,
+      "y": -0.375,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 493199.77356236,
+       "y": 328440.20141970605,
+       "z": 0.0
+      },
+      "max": {
+       "x": 493299.77356236,
+       "y": 328441.82641970605,
+       "z": 0.0
+      }
+     },
+     "actual_width": 27.224999999999984,
+     "actual_height": 1.625,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "HyStandard",
+     "text_color": 2,
+     "rotation": 0.0,
+     "dot_circle": "1EB15",
+     "dot_radius": 0.1875,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A2",
+     "frame": "ED02",
+     "label": "{\\C7;M06-S 旧沥青6cm+水泥20cm拆除 A=207.536m\\S2^;}",
+     "leader": "1EB2A",
+     "text": "1EB29",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测引线",
+     "anchor": {
+      "index": 0,
+      "x": 493329.0,
+      "y": 328416.0,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 493329.0,
+       "y": 328416.0,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 493335.0,
+       "y": 328398.0,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 493362.525,
+       "y": 328398.0,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 27.525000000023283,
+      "y": -0.375,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 493335.0,
+       "y": 328398.375,
+       "z": 0.0
+      },
+      "max": {
+       "x": 493435.0,
+       "y": 328400.0,
+       "z": 0.0
+      }
+     },
+     "actual_width": 27.149999999999995,
+     "actual_height": 1.625,
+     "text_height": 1.5,
+     "attachment": "BottomLeft",
+     "text_style": "HyStandard",
+     "text_color": 2,
+     "rotation": 0.0,
+     "dot_circle": "1EB1B",
+     "dot_radius": 0.1875,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    },
+    {
+     "area": "A2",
+     "frame": "ED04",
+     "label": "{\\C7;XF-M06 消防开口 旧沥青6cm+水泥20cm拆除 A=7.900m\\S2^;}",
+     "leader": "1EB2E",
+     "text": "1EB2D",
+     "leader_layer": "拆除-实测引线",
+     "text_layer": "拆除-实测引线",
+     "anchor": {
+      "index": 0,
+      "x": 493314.0,
+      "y": 328418.1,
+      "z": 0.0
+     },
+     "vertices": [
+      {
+       "index": 0,
+       "x": 493314.0,
+       "y": 328418.1,
+       "z": 0.0
+      },
+      {
+       "index": 1,
+       "x": 493324.2942586235,
+       "y": 328392.9950446707,
+       "z": 0.0
+      },
+      {
+       "index": 2,
+       "x": 493355.6442586235,
+       "y": 328392.9950446707,
+       "z": 0.0
+      }
+     ],
+     "offset": {
+      "x": 0.375,
+      "y": -0.375,
+      "z": 0.0
+     },
+     "style": "HyDim",
+     "text_extents": {
+      "min": {
+       "x": 493255.2692586235,
+       "y": 328393.3700446707,
+       "z": 0.0
+      },
+      "max": {
+       "x": 493355.2692586235,
+       "y": 328394.9950446707,
+       "z": 0.0
+      }
+     },
+     "actual_width": 30.974999999999998,
+     "actual_height": 1.625,
+     "text_height": 1.5,
+     "attachment": "BottomRight",
+     "text_style": "HyStandard",
+     "text_color": 2,
+     "rotation": 0.0,
+     "dot_circle": "1EB21",
+     "dot_radius": 0.1875,
+     "dot_fill": null,
+     "dot_fill_layer": null
+    }
+   ]
+  }
+ },
+ "notes": []
+}
