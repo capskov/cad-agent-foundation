@@ -1,0 +1,78 @@
+{
+  "package": "F:\\AI\\cad-agent-foundation-acad2022\\src\\cad-agent-foundation-main\\artifacts\\packages\\20261115-151649",
+  "workspace": "F:\\AI\\cad-agent-foundation-acad2022\\cad2022-test\\regress",
+  "generated_utc": "2026-11-15T15:21:49Z",
+  "checks": [
+    {
+      "check": "install",
+      "status": "pass",
+      "detail": "FBC7C09F326F43116AA135C638C9BF438\",\n  \"package\": \"F:\\\\AI\\\\cad-agent-foundation-acad2022\\\\src\\\\cad-agent-foundation-main\\\\artifacts\\\\packages\\\\20261115-151649\"\n}"
+    },
+    {
+      "check": "start(discovery)",
+      "status": "pass",
+      "detail": "\\\\src\\\\cad-agent-foundation-main\\\\artifacts\\\\packages\\\\20261115-151649\"\n  },\n  \"created_at_utc\": \"2026-11-15T15:19:36.736872+00:00\",\n  \"startup\": \"discovered\"\n}"
+    },
+    {
+      "check": "context-bound",
+      "status": "pass",
+      "detail": "3c9ad4295ed74339a811bc6061eb0a14"
+    },
+    {
+      "check": "read-only.list_layers",
+      "status": "pass",
+      "detail": "layers=1"
+    },
+    {
+      "check": "write.verified-not-persisted",
+      "status": "pass",
+      "detail": "committed_verification_pending/inspect_existing_handles/False"
+    },
+    {
+      "check": "fence.rejected-second-write",
+      "status": "pass",
+      "detail": "fence_held_by_earlier_unpersisted_write :: the D1 request or drawing risk fence conflicts with an existing operation"
+    },
+    {
+      "check": "fence.no-ghost-job",
+      "status": "pass",
+      "detail": "False"
+    },
+    {
+      "check": "save.persisted",
+      "status": "pass",
+      "detail": "F:\\AI\\cad-agent-foundation-acad2022\\cad2022-test\\regress\\drawings\\reg-line.dwg"
+    },
+    {
+      "check": "save.finalized",
+      "status": "pass",
+      "detail": "committed_verified/True"
+    },
+    {
+      "check": "idempotent.requery",
+      "status": "pass",
+      "detail": "committed_verified"
+    },
+    {
+      "check": "callout.write+save",
+      "status": "pass",
+      "detail": "committed_verified handles=4"
+    },
+    {
+      "check": "cancel.already-terminal",
+      "status": "pass",
+      "detail": "already_terminal"
+    },
+    {
+      "check": "callout.four-entities",
+      "status": "pass",
+      "detail": "[{\"handle\": \"23D\", \"type\": \"MText\", \"layer\": \"0\", \"color\": 7}, {\"handle\": \"23E\", \"type\": \"Leader\", \"layer\": \"0\", \"color\": 7}, {\"handle\": \"240\", \"type\": \"Circle\", \"layer\": \"0\", \"color\": 2}, {\"handle\": \"241\", \"type\": \"Hatch\", \"layer\": \"0\", \"color\": 2}]"
+    }
+  ],
+  "manual_not_automated": [
+    "图形观感（图层/颜色/文字位置）需人工看图",
+    "PDF/CTB 出图流程未纳入自动回归"
+  ],
+  "passed": 13,
+  "failed": 0
+}
