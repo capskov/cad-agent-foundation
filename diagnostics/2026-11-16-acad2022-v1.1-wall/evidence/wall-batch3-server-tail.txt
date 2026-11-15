@@ -1,0 +1,80 @@
+info: ModelContextProtocol.Server.McpServer[1867955179]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler completed in 60.481ms.
+info: ModelContextProtocol.Server.McpServer[570385771]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler called.
+info: ModelContextProtocol.Server.McpServer[2065726448]
+      "dwg_job_get" completed. IsError = False.
+info: ModelContextProtocol.Server.McpServer[1867955179]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler completed in 55.0134ms.
+info: ModelContextProtocol.Server.McpServer[570385771]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler called.
+info: ModelContextProtocol.Server.McpServer[2065726448]
+      "dwg_job_get" completed. IsError = False.
+info: ModelContextProtocol.Server.McpServer[1867955179]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler completed in 64.3522ms.
+info: ModelContextProtocol.Server.McpServer[570385771]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler called.
+info: ModelContextProtocol.Server.McpServer[2065726448]
+      "dwg_job_get" completed. IsError = False.
+info: ModelContextProtocol.Server.McpServer[1867955179]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler completed in 62.4206ms.
+info: ModelContextProtocol.Server.McpServer[570385771]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler called.
+info: ModelContextProtocol.Server.McpServer[2065726448]
+      "dwg_job_get" completed. IsError = False.
+info: ModelContextProtocol.Server.McpServer[1867955179]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler completed in 59.7953ms.
+info: ModelContextProtocol.Server.McpServer[570385771]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler called.
+info: ModelContextProtocol.Server.McpServer[2065726448]
+      "dwg_job_get" completed. IsError = False.
+info: ModelContextProtocol.Server.McpServer[1867955179]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler completed in 57.9742ms.
+info: ModelContextProtocol.Server.McpServer[570385771]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler called.
+info: ModelContextProtocol.Server.McpServer[2065726448]
+      "dwg_job_get" completed. IsError = False.
+info: ModelContextProtocol.Server.McpServer[1867955179]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler completed in 60.3935ms.
+info: ModelContextProtocol.Server.McpServer[570385771]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler called.
+info: ModelContextProtocol.Server.McpServer[2065726448]
+      "dwg_job_get" completed. IsError = False.
+info: ModelContextProtocol.Server.McpServer[1867955179]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler completed in 57.2499ms.
+info: ModelContextProtocol.Server.McpServer[570385771]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler called.
+info: ModelContextProtocol.Server.McpServer[2065726448]
+      "dwg_job_get" completed. IsError = False.
+info: ModelContextProtocol.Server.McpServer[1867955179]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler completed in 56.9774ms.
+info: ModelContextProtocol.Server.McpServer[570385771]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler called.
+info: ModelContextProtocol.Server.McpServer[2065726448]
+      "dwg_job_get" completed. IsError = False.
+info: ModelContextProtocol.Server.McpServer[1867955179]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler completed in 57.9232ms.
+info: ModelContextProtocol.Server.McpServer[570385771]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler called.
+info: ModelContextProtocol.Server.McpServer[2065726448]
+      "dwg_job_get" completed. IsError = False.
+info: ModelContextProtocol.Server.McpServer[1867955179]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler completed in 57.9687ms.
+info: ModelContextProtocol.Server.McpServer[570385771]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler called.
+info: ModelContextProtocol.Server.McpServer[2065726448]
+      "dwg_job_get" completed. IsError = False.
+info: ModelContextProtocol.Server.McpServer[1867955179]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler completed in 59.8176ms.
+info: ModelContextProtocol.Server.McpServer[570385771]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler called.
+info: ModelContextProtocol.Server.McpServer[2065726448]
+      "dwg_job_get" completed. IsError = False.
+info: ModelContextProtocol.Server.McpServer[1867955179]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler completed in 57.499ms.
+info: ModelContextProtocol.Server.McpServer[570385771]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler called.
+info: ModelContextProtocol.Server.McpServer[2065726448]
+      "dwg_job_get" completed. IsError = False.
+info: ModelContextProtocol.Server.McpServer[1867955179]
+      Server (dwg-mcp 2.0.1), Client (bimwright-readonly-entry 1) method 'tools/call' request handler completed in 61.9875ms.
