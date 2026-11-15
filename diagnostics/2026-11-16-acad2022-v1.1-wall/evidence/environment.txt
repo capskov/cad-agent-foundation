@@ -1,0 +1,10 @@
+# 环境与基线快照
+
+- 采集时间：2026-11-16T07:16:29
+- 工程根：F:\AI\cad-agent-foundation-acad2022
+- 运行时包：F:\AI\cad-agent-foundation-acad2022\src\cad-agent-foundation-main\artifacts\packages\20261115-172431
+- 插件 mvid：98dd1cf8-f606-4a4c-9464-171bae6ee014
+- 插件 DLL sha256：12689F5202469BFB2C8B0E86BD0725349C651164F4F33B22F6F393E9B122FF20
+- AutoCAD：2022（R24.1），安装目录 F:\Program Files\Autodesk\AutoCAD 2022
+- 空白模板：C:\Users\cg524\AppData\Local\Autodesk\AutoCAD 2022\R24.1\chs\Template\acad.dwt（INSUNITS=0 unitless）
+- 生产实例：PID 12948（未触碰）；测试实例按批次创建并结束
