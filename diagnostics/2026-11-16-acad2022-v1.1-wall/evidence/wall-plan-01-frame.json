@@ -1,0 +1,190 @@
+{
+ "schema": "foundation-drawing-plan-v1",
+ "source_role": "annotation",
+ "units": "raw_drawing_units",
+ "steps": [
+  {
+   "id": "layer-01",
+   "op": "layer",
+   "name": "图框",
+   "color": 7
+  },
+  {
+   "id": "layer-02",
+   "op": "layer",
+   "name": "墙体",
+   "color": 7
+  },
+  {
+   "id": "layer-03",
+   "op": "layer",
+   "name": "填充",
+   "color": 8
+  },
+  {
+   "id": "layer-04",
+   "op": "layer",
+   "name": "标注-引线",
+   "color": 2
+  },
+  {
+   "id": "layer-05",
+   "op": "layer",
+   "name": "标注-文字",
+   "color": 7
+  },
+  {
+   "id": "layer-06",
+   "op": "layer",
+   "name": "尺寸",
+   "color": 3
+  },
+  {
+   "id": "layer-07",
+   "op": "layer",
+   "name": "地面",
+   "color": 9
+  },
+  {
+   "id": "style-text",
+   "op": "text_style",
+   "name": "WALL_TXT",
+   "font_file": "txt.shx",
+   "big_font_file": "hztxt.shx",
+   "width_factor": 1.0
+  },
+  {
+   "id": "style-dim",
+   "op": "dimension_style",
+   "name": "WALL_DIM",
+   "text_style": "WALL_TXT",
+   "text_height": 0.045,
+   "arrow_size": 0.04,
+   "overall_scale": 1.0,
+   "gap": 0.015,
+   "decimal_places": 0,
+   "dimension_color": 3,
+   "extension_color": 3,
+   "text_color": 3,
+   "extension_beyond": 0.03,
+   "extension_origin_offset": 0.02
+  },
+  {
+   "id": "frame-outer",
+   "op": "polyline",
+   "vertices": [
+    [
+     0,
+     0
+    ],
+    [
+     8.4,
+     0
+    ],
+    [
+     8.4,
+     5.94
+    ],
+    [
+     0,
+     5.94
+    ]
+   ],
+   "closed": true,
+   "layer": "图框",
+   "color": 7
+  },
+  {
+   "id": "frame-inner",
+   "op": "polyline",
+   "vertices": [
+    [
+     0.2,
+     0.2
+    ],
+    [
+     8.2,
+     0.2
+    ],
+    [
+     8.2,
+     5.74
+    ],
+    [
+     0.2,
+     5.74
+    ]
+   ],
+   "closed": true,
+   "layer": "图框",
+   "color": 7
+  },
+  {
+   "id": "title-box",
+   "op": "polyline",
+   "vertices": [
+    [
+     5.0,
+     0.22
+    ],
+    [
+     8.18,
+     0.22
+    ],
+    [
+     8.18,
+     0.98
+    ],
+    [
+     5.0,
+     0.98
+    ]
+   ],
+   "closed": true,
+   "layer": "图框",
+   "color": 7
+  },
+  {
+   "id": "title-main",
+   "op": "text",
+   "text": "砖砌围墙截面图",
+   "position": [
+    6.6,
+    0.62
+   ],
+   "height": 0.13,
+   "rotation": 0,
+   "layer": "图框",
+   "color": 7,
+   "text_style": "WALL_TXT"
+  },
+  {
+   "id": "title-scale",
+   "op": "text",
+   "text": "比例 1:20",
+   "position": [
+    6.6,
+    0.44
+   ],
+   "height": 0.065,
+   "rotation": 0,
+   "layer": "图框",
+   "color": 7,
+   "text_style": "WALL_TXT"
+  },
+  {
+   "id": "title-a3",
+   "op": "text",
+   "text": "A3  420×297",
+   "position": [
+    6.6,
+    0.31
+   ],
+   "height": 0.055,
+   "rotation": 0,
+   "layer": "图框",
+   "color": 7,
+   "text_style": "WALL_TXT"
+  }
+ ]
+}
