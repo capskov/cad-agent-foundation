@@ -1,0 +1,2 @@
+# Review bundle: store bytes exactly so source/MANIFEST.sha256 verifies after clone.
+* -text
