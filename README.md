@@ -7,12 +7,14 @@
 
 | 顺序 | 文件 | 作用 |
 | --- | --- | --- |
+| 0 | `source/` | **完整源码快照**（410 个文件，`source/BUILD.md` 是审查入口，`source/MANIFEST.sha256` 可逐文件校验） |
 | 1 | `docs/ACAD2022-MIGRATION-STATUS.md` | 权威进度（第 1–13 节，含 RC1/RC2/RC3/RC4/RC5 与 V1.0 判定） |
 | 2 | `docs/ACAD2022-DEPLOY.md` | 构建/打包/安装/启动/状态语义/故障恢复/卸载回退 |
 | 3 | `docs/ACAD2022-AUTONOMOUS-RUN.md` | 接续状态文件（下一任接手者从这里开始） |
 | 4 | `docs/ACAD2022-RC1/RC2/RC3-TEST-LOG.md` | 三个节点的实测原始日志 |
 | 5 | `artifacts/regression-report.json` | 自动化回归结果（13 项，全通过） |
 | 6 | `checkpoints/manifest.tsv` | 409 个源码文件的 SHA256 清单（无 Git 环境时的等价检查点） |
+| 7 | `tests-manual/` | RC3/RC4 的人工/半自动验证脚本与 plan 文件（崩溃窗口、状态矩阵、保存失败、真实图副本） |
 
 ## 2. 交付物
 

@@ -1,0 +1,9 @@
+{
+  "schema": "foundation-drawing-plan-v1",
+  "source_role": "test",
+  "units": "raw_drawing_units",
+  "steps": [
+    {"id": "l1", "op": "line", "start": [0, 0], "end": [100, 0], "layer": "0", "color": 7},
+    {"id": "c1", "op": "circle", "center": [50, 60], "radius": 20, "layer": "0", "color": 7}
+  ]
+}

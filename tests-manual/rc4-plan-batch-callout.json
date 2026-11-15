@@ -1,0 +1,49 @@
+{
+  "schema": "foundation-drawing-plan-v1",
+  "source_role": "test",
+  "units": "raw_drawing_units",
+  "steps": [
+    {
+      "op": "callout",
+      "id": "co1",
+      "layer": "0",
+      "color": 7,
+      "text": "交通安全设施\\P批量标注 01",
+      "position": [206, 108],
+      "height": 3.5,
+      "width": 70,
+      "vertices": [[50, 80], [140, 112], [200, 112]],
+      "dot_radius": 0.8,
+      "text_color": 7,
+      "gap": 0
+    },
+    {
+      "op": "callout",
+      "id": "co2",
+      "layer": "0",
+      "color": 7,
+      "text": "交通安全设施\\P批量标注 02",
+      "position": [306, 108],
+      "height": 3.5,
+      "width": 70,
+      "vertices": [[150, 60], [240, 92], [300, 92]],
+      "dot_radius": 0.8,
+      "text_color": 7,
+      "gap": 0
+    },
+    {
+      "op": "callout",
+      "id": "co3",
+      "layer": "0",
+      "color": 7,
+      "text": "交通安全设施\\P批量标注 03",
+      "position": [406, 108],
+      "height": 3.5,
+      "width": 70,
+      "vertices": [[250, 40], [340, 72], [400, 72]],
+      "dot_radius": 0.8,
+      "text_color": 7,
+      "gap": 0
+    }
+  ]
+}

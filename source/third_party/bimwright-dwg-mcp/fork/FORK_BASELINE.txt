@@ -1,0 +1,7 @@
+Selective modified source export from Bimwright DWG MCP.
+Pinned upstream commit: 4d0f75646631186612af926944d7e33affc4757d
+Pinned upstream tree: ed511c641d97e02f34116af00ae04b805205f075
+This is NOT the full upstream tree or a byte-identical snapshot.
+Sources retained for current server/AutoCAD 2026 plugin builds; legacy sources may remain as implementation history, not supported public tools.
+Private receipts, engineering fixtures, SHX binaries, upstream installer scripts and all build outputs are omitted.
+See repository-root NOTICE.md and docs/PUBLICATION-SCOPE.md.

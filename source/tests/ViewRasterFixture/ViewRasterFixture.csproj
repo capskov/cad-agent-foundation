@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup><TargetFramework>net8.0-windows</TargetFramework><PlatformTarget>x64</PlatformTarget><UseWindowsForms>true</UseWindowsForms></PropertyGroup>
+ <ItemGroup>
+  <Reference Include="acdbmgd"><HintPath>C:/Program Files/Autodesk/AutoCAD 2026/acdbmgd.dll</HintPath><Private>false</Private></Reference>
+  <Reference Include="accoremgd"><HintPath>C:/Program Files/Autodesk/AutoCAD 2026/accoremgd.dll</HintPath><Private>false</Private></Reference>
+  <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+ </ItemGroup>
+</Project>

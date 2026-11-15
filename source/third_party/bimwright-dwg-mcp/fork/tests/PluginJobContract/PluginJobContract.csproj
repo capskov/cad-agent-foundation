@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/plugin-journal-net8/Bimwright.Dwg.Plugin.Journal.csproj" />
+    <Compile Include="../../src/shared/Transport/PipeListenerLifecycle.cs" Link="Transport/PipeListenerLifecycle.cs" />
+    <Compile Include="../../src/shared/Transport/PipeControlFrameProtocol.cs" Link="Transport/PipeControlFrameProtocol.cs" />
+    <Compile Include="../../src/shared/Transport/DiscoveryFileMutex.cs" Link="Transport/DiscoveryFileMutex.cs" />
+  </ItemGroup>
+</Project>

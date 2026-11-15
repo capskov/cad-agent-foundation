@@ -1,0 +1,21 @@
+{
+  "schema": "foundation-drawing-plan-v1",
+  "source_role": "annotation",
+  "units": "raw_drawing_units",
+  "steps": [
+    {
+      "id": "k1",
+      "op": "callout",
+      "text": "交通安全设施\\P测试标注 01",
+      "position": [206, 108],
+      "height": 3.5,
+      "width": 70,
+      "vertices": [[50, 80], [140, 112], [200, 112]],
+      "dot_radius": 0.8,
+      "layer": "0",
+      "color": 7,
+      "text_color": 7,
+      "gap": 0
+    }
+  ]
+}
