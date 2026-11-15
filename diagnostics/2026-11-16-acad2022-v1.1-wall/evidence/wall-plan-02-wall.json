@@ -1,0 +1,187 @@
+{
+ "schema": "foundation-drawing-plan-v1",
+ "source_role": "annotation",
+ "units": "raw_drawing_units",
+ "steps": [
+  {
+   "id": "found-concrete",
+   "op": "polyline",
+   "vertices": [
+    [
+     3.2,
+     0.3
+    ],
+    [
+     4.0,
+     0.3
+    ],
+    [
+     4.0,
+     0.6
+    ],
+    [
+     3.2,
+     0.6
+    ]
+   ],
+   "closed": true,
+   "layer": "墙体",
+   "color": 7
+  },
+  {
+   "id": "found-brick",
+   "op": "polyline",
+   "vertices": [
+    [
+     3.435,
+     0.6
+    ],
+    [
+     3.805,
+     0.6
+    ],
+    [
+     3.805,
+     1.0
+    ],
+    [
+     3.435,
+     1.0
+    ]
+   ],
+   "closed": true,
+   "layer": "墙体",
+   "color": 7
+  },
+  {
+   "id": "wall-body",
+   "op": "polyline",
+   "vertices": [
+    [
+     3.5,
+     1.0
+    ],
+    [
+     3.74,
+     1.0
+    ],
+    [
+     3.74,
+     3.0
+    ],
+    [
+     3.5,
+     3.0
+    ]
+   ],
+   "closed": true,
+   "layer": "墙体",
+   "color": 7
+  },
+  {
+   "id": "plaster-left",
+   "op": "polyline",
+   "vertices": [
+    [
+     3.46,
+     1.0
+    ],
+    [
+     3.5,
+     1.0
+    ],
+    [
+     3.5,
+     3.0
+    ],
+    [
+     3.46,
+     3.0
+    ]
+   ],
+   "closed": true,
+   "layer": "墙体",
+   "color": 9
+  },
+  {
+   "id": "plaster-right",
+   "op": "polyline",
+   "vertices": [
+    [
+     3.74,
+     1.0
+    ],
+    [
+     3.78,
+     1.0
+    ],
+    [
+     3.78,
+     3.0
+    ],
+    [
+     3.74,
+     3.0
+    ]
+   ],
+   "closed": true,
+   "layer": "墙体",
+   "color": 9
+  },
+  {
+   "id": "coping",
+   "op": "polyline",
+   "vertices": [
+    [
+     3.44,
+     3.0
+    ],
+    [
+     3.8,
+     3.0
+    ],
+    [
+     3.8,
+     3.06
+    ],
+    [
+     3.44,
+     3.06
+    ]
+   ],
+   "closed": true,
+   "layer": "墙体",
+   "color": 7
+  },
+  {
+   "id": "hatch-wall",
+   "op": "hatch",
+   "boundary": "wall-body",
+   "pattern": "BRICK",
+   "scale": 0.09,
+   "angle": 0.0,
+   "layer": "填充",
+   "color": 8
+  },
+  {
+   "id": "hatch-found-brick",
+   "op": "hatch",
+   "boundary": "found-brick",
+   "pattern": "BRICK",
+   "scale": 0.09,
+   "angle": 0.0,
+   "layer": "填充",
+   "color": 8
+  },
+  {
+   "id": "hatch-concrete",
+   "op": "hatch",
+   "boundary": "found-concrete",
+   "pattern": "ANSI31",
+   "scale": 0.12,
+   "angle": 0.7854,
+   "layer": "填充",
+   "color": 8
+  }
+ ]
+}
