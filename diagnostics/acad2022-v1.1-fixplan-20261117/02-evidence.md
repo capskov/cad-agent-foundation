@@ -1,0 +1,65 @@
+# 02 执行时间线（22 个工作区，一次真实出图）
+
+时间基准：2026-11-16 23:40 → 2026-11-17 01:30（UTC+8）。
+所有路径以 `cad2022-test/` 为根。
+
+## 一、水表井阶段（作废，1-7）
+
+| 工作区 | 内容 | apply | 结果 | 备注 |
+| --- | --- | --- | --- | --- |
+| pilot-loop-01 | v1 水表井 | — | 未 apply | 口径错误，作废 |
+| pilot-loop-02 | handoff 产物 | — | 实例已死 | 见 D7 |
+| pilot-loop-03 | v1 原地改图 | apply-v2.json | `committed_verification_failed` | 栅栏未释放，工作区报废 |
+| pilot-loop-04 | v2 | apply-v2.json | committed_verified | 抓图 pilot02_full.png |
+| pilot-loop-05 | v3 | apply-v3.json | committed_verified | 抓图 pilot03_full.png |
+| pilot-loop-06 | 空目录 | — | — | 未使用 |
+| pilot-loop-07 | v4 | apply-v4.json | committed_verified | 抓图 pilot04_full.png |
+
+## 二、闸阀井 V1.0 → V2（8-14）
+
+| 工作区 | 内容 | apply | 结果 | 备注 |
+| --- | --- | --- | --- | --- |
+| pilot-loop-08 | 尺寸标注 plan | apply-v5.json | **`rejected_before_submission`** | **D1 证据**：`unexpected or missing plan fields` + held fence |
+| pilot-loop-09 | V1.0 base | apply-5a.json / apply-5a2.json | **`Request ID already belongs to different parameters`** / committed_verified | **D3 证据** |
+| pilot-loop-10 | 阀 + 支墩 | apply-5b.json | committed_verified | 抓图 pilot05b_full.png |
+| pilot-loop-11 | 净 4800 base | apply-6a.json | **`This workspace already has a CLI or MCP session`** | **D4 证据** |
+| pilot-loop-12 | 同上重试 | apply-6a.json | committed_verified | 等 start 结束即成功 |
+| pilot-loop-13 | 阀/支墩 | apply-6b.json | committed_verified | |
+| pilot-loop-14 | 收口 | apply-6c.json | committed_verified | 抓图 pilot06_full.png |
+
+## 三、set_text 事故与 V3（15-19）
+
+| 工作区 | 内容 | apply | 结果 | 备注 |
+| --- | --- | --- | --- | --- |
+| pilot-loop-15 | set_text 改标题 | apply-6d.json（**0 字节**） | 进程被打断，输出空文件 | 工作区报废 |
+| pilot-loop-16 | 同操作重试 | apply-6d.json（25967 B） | **`foundation_plan_readback_mismatch` / `plugin_stage_not_passed`** | **D5 完整证据**，见 `logs/apply-6d-ws16-summary.json` |
+| pilot-loop-17 | V3 base（重建整套） | apply-7a.json | committed_verified | |
+| pilot-loop-18 | V3 阀/支墩 | apply-7b.json | committed_verified | |
+| pilot-loop-19 | V3 收口 | apply-7c.json | committed_verified | 抓图 pilot07_full*.png |
+
+## 四、V4 交付（20-22）
+
+| 工作区 | 内容 | apply | 结果 |
+| --- | --- | --- | --- |
+| pilot-loop-20 | V4 base（真实法兰面长度） | apply-8a.json | committed_verified |
+| pilot-loop-21 | V4 阀/支墩 | apply-8b.json | committed_verified |
+| pilot-loop-22 | V4 收口（交付图） | apply-8c.json | committed_verified；`pilot-08c.dwg/.dxf` + `outputs/pilot08_full.png` |
+
+## 五、统计
+
+- apply 总数 22 次，`committed_verified` 17 次，失败 5 次：
+  - 2 次参数被拒（D1、D3）
+  - 1 次会话竞争（D4）
+  - 1 次验证失败并锁死工作区（D5）
+  - 1 次进程被打断（D5 关联）
+- 因缺陷额外消耗的工作区：08（D1）、11（D4）、15/16（D5）、17-19（D5 导致重建）≈ 6 个，占 27%。
+- 每条图的平均成本：base + 设备 + 收口 = 3 次 apply ≈ 3 个目录 + 3 次 install/start。
+
+## 六、外部（GPT）复核时间线
+
+1. v1 DXF → 判「几何自洽但不合图集规范」
+2. v2 → 判「核心几何通过；支墩到上内壁只剩 350mm；管道必须用实际外径」
+3. V1.0 闸阀井 → 判「V2几何方案内部讨论可以交付；完整内部评审尚不能收口」
+4. V3 → 判「**V3 可以交付**，正式定位《内部方案评审版 V3.0》」
+5. V4 → 判「**V4 可以交付**；457/406/292 均正确；井室主体无需再改」
+   附验收边界：DN200 保温外径与井室净高仍需施工图阶段结合实际设备核定。

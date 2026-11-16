@@ -1,0 +1,11 @@
+{
+  "status": "rejected_before_submission",
+  "pending": false,
+  "effects": "none",
+  "registered": false,
+  "request_id": "pilot-05",
+  "context_id": "14d26a0af7334fe6ba6e35287d5810b4",
+  "error": "unexpected or missing plan fields",
+  "persisted": false,
+  "next_action": "no_new_write_queued: the held fence belongs to an earlier verified-but-unpersisted write; persist or resolve that request first"
+}

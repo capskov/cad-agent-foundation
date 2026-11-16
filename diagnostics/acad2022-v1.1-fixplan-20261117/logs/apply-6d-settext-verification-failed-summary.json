@@ -1,0 +1,74 @@
+{
+  "request_id": "pilot-06d2",
+  "context_id": "ec6e64bcb51c4ce383a66aac659706c4",
+  "status": "verification_pending",
+  "phase": "completed",
+  "effects": "committed",
+  "verification": "failed",
+  "pending": true,
+  "write_fence_released": false,
+  "verification_message": "foundation_plan_readback_mismatch,plugin_stage_not_passed",
+  "job": {
+    "request_id": "pilot-06d2",
+    "context_id": "ec6e64bcb51c4ce383a66aac659706c4",
+    "tool_name": "foundation_apply_plan",
+    "phase": "completed",
+    "effects": "committed",
+    "verification": "passed",
+    "observation": "plugin_snapshot",
+    "result_json": "{\"symbols_before\":{\"text_styles\":{\"Standard\":{\"handle\":\"11\",\"font_file\":\"\",\"big_font_file\":\"\",\"width_factor\":1.0,\"fixed_height\":0.0,\"is_vertical\":false,\"resolved_font\":{\"typeface\":\"宋体\",\"bold\":false,\"italic\":false,\"charset\":0,\"pitch_family\":34}},\"Annotative\":{\"handle\":\"132\",\"font_file\":\"\",\"big_font_file\":\"\",\"width_factor\":1.0,\"fixed_height\":0.0,\"is_vertical\":false,\"resolved_font\":{\"typeface\":\"宋体\",\"bold\":false,\"italic\":false,\"charset\":0,\"pitch_family\":34}}},\"dimension_styles\":{\"Standard\":{\"handle\":\"1B0\",\"text_style\":\"Standard\",\"text_height\":0.18,\"arrow_size\":0.18,\"overall_scale\":1.0,\"gap\":0.09,\"decimal_places\":4,\"extension_origin_offset\":0.0625,\"extension_beyond\":0.18,\"decimal_separator\":\".\",\"linear_scale_factor\":1.0,\"dimension_color\":0,\"extension_color\":0,\"text_color\":0},\"Annotative\":{\"handle\":\"137\",\"text_style\":\"Standard\",\"text_height\":2.5,\"arrow_size\":2.5,\"overall_scale\":0.0,\"gap\":0.625,\"decimal_places\":2,\"extension_origin_offset\":0.625,\"extension_beyond\":1.25,\"decimal_separator\":\",\",\"linear_scale_factor\":1.0,\"dimension_color\":0,\"extension_color\":0,\"text_color\":0},\"ISO-25\":{\"handle\":\"27\",\"text_style\":\"Standard\",\"text_height\":2.5,\"arrow_size\":2.5,\"overall_scale\":1.0,\"gap\":0.625,\"decimal_places\":2,\"extension_origin_offset\":0.625,\"extension_beyond\":1.25,\"decimal_separator\":\",\",\"linear_scale_factor\":1.0,\"dimension_color\":0,\"extension_color\":0,\"text_color\":0}},\"block_definitions\":{},\"xrefs\":{},\"paper_viewports\":{},\"paper_texts\":{},\"paper_blocks\":{}},\"symbols_after\":{\"text_styles\":{\"Standard\":{\"handle\":\"11\",\"font_file\":\"\",\"big_font_file\":\"\",\"width_factor\":1.0,\"fixed_height\":0.0,\"is_vertical\":false,\"resolved_font\":{\"typeface\":\"宋体\",\"bold\":false,\"italic\":false,\"charset\":0,\"pitch_family\":34}},\"Annotative\":{\"handle\":\"132\",\"font_file\":\"\",\"big_font_file\":\"\",\"width_factor\":1.0,\"fixed_height\":0.0,\"is_vertical\":false,\"resolved_font\":{\"typeface\":\"宋体\",\"bold\":false,\"italic\":false,\"charset\":0,\"pitch_family\":34}}},\"dimension_styles\":{\"Standard\":{\"handle\":\"1B0\",\"text_style\":\"Standard\",\"text_height\":0.18,\"arrow_size\":0.18,\"overall_scale\":1.0,\"gap\":0.09,\"decimal_places\":4,\"extension_origin_offset\":0.0625,\"extension_beyond\":0.18,\"decimal_separator\":\".\",\"linear_scale_factor\":1.0,\"dimension_color\":0,\"extension_color\":0,\"text_color\":0},\"Annotative\":{\"handle\":\"137\",\"text_style\":\"Standard\",\"text_height\":2.5,\"arrow_size\":2.5,\"overall_scale\":0.0,\"gap\":0.625,\"decimal_places\":2,\"extension_origin_offset\":0.625,\"extension_beyond\":1.25,\"decimal_separator\":\",\",\"linear_scale_factor\":1.0,\"dimension_color\":0,\"extension_color\":0,\"text_color\":0},\"ISO-25\":{\"handle\":\"27\",\"text_style\":\"Standard\",\"text_height\":2.5,\"arrow_size\":2.5,\"overall_scale\":1.0,\"gap\":0.625,\"decimal_places\":2,\"extension_origin_offset\":0.625,\"extension_beyond\":1.25,\"decimal_separator\":\",\",\"linear_scale_factor\":1.0,\"dimension_color\":0,\"extension_color\":0,\"text_color\":0}},\"block_definitions\":{},\"xrefs\":{},\"paper_viewports\":{},\"paper_texts\":{},\"paper_blocks\":{}},\"verification_scope\":\"declared_plan_properties\",\"schema\":\"foundation-plan-receipt-v1\",\"plan_sha256\":\"D32EDDE6195D88E6ACB7901D617F325856E117CAB3AD31938C8F8FEC38018B23\",\"outcome\":\"committed_verified\",\"effects\":\"committed\",\"commit_invoked\":true,\"commit_returned\":true,\"error\":null,\"objects\":{\"fix_title\":{\"entity\":\"24B\"},\"sub_title\":{\"entity\":\"26D\"}},\"created_handles\":[\"26D\"],\"before\":{\"24B\":{\"handle\":\"24B\",\"type\":\"DBText\",\"layer\":\"CF_TEXT\",\"color_index\":256,\"linetype\":\"ByLayer\",\"lineweight\":-1,\"extents\":{\"min\":{\"x\":300.0,\"y\":5619.8324022346369,\"z\":0.0},\"max\":{\"x\":10740.223463687151,\"y\":5885.7541899441339,\"z\":0.0}},\"owner_handle\":\"1F\",\"layout_name\":\"Model\",\"text\":\"三管共用钢筋混凝土闸阀井  DN500\\\\/DN400\\\\/DN200  净 5000x4800x3000  壁厚300\",\"position\":{\"x\":300.0,\"y\":5650.0,\"z\":0.0},\"height\":200.0,\"width_factor\":1.0,\"rotation\":0.0,\"text_style\":\"Standard\",\"horizontal_mode\":\"TextLeft\",\"vertical_mode\":\"TextBase\"}},\"after\":{\"24B\":{\"handle\":\"24B\",\"type\":\"DBText\",\"layer\":\"CF_TEXT\",\"color_index\":256,\"linetype\":\"ByLayer\",\"lineweight\":-1,\"extents\":{\"min\":{\"x\":300.0,\"y\":5620.9497206703909,\"z\":0.0},\"max\":{\"x\":3732.4022346368711,\"y\":5885.7541899441339,\"z\":0.0}},\"owner_handle\":\"1F\",\"layout_name\":\"Model\",\"text\":\"三管共用钢筋混凝土闸阀井\",\"position\":{\"x\":300.0,\"y\":5650.0,\"z\":0.0},\"height\":200.0,\"width_factor\":1.0,\"rotation\":0.0,\"text_style\":\"Standard\",\"horizontal_mode\":\"TextLeft\",\"vertical_mode\":\"TextBase\"},\"26D\":{\"handle\":\"26D\",\"type\":\"DBText\",\"layer\":\"CF_TEXT\",\"color_index\":256,\"linetype\":\"ByLayer\",\"lineweight\":-1,\"extents\":{\"min\":{\"x\":300.0,\"y\":5411.8994413407818,\"z\":0.0},\"max\":{\"x\":5019.5530726256984,\"y\":5571.45251396648,\"z\":0.0}},\"owner_handle\":\"1F\",\"layout_name\":\"Model\",\"text\":\"DN500\\\\/DN400\\\\/DN200  净 5000x4800x3000  壁厚300  C30 P6\",\"position\":{\"x\":300.0,\"y\":5430.0,\"z\":0.0},\"height\":120.0,\"width_factor\":1.0,\"rotation\":0.0,\"text_style\":\"Standard\",\"horizontal_mode\":\"TextLeft\",\"vertical_mode\":\"TextBase\"}},\"layers\":{},\"all_layers_before\":{\"0\":{\"handle\":\"10\",\"color_index\":7,\"is_off\":false,\"is_frozen\":false,\"is_locked\":false,\"is_plottable\":true,\"linetype_handle\":\"16\"},\"CF_WELL\":{\"handle\":\"229\",\"color_index\":3,\"is_off\":false,\"is_frozen\":false,\"is_locked\":false,\"is_plottable\":true,\"linetype_handle\":\"16\"},\"CF_PIPE\":{\"handle\":\"23D\",\"color_index\":4,\"is_off\":false,\"is_frozen\":false,\"is_locked\":false,\"is_plottable\":true,\"linetype_handle\":\"16\"},\"CF_SLEEVE\":{\"handle\":\"23E\",\"color_index\":5,\"is_off\":false,\"is_frozen\":false,\"is_locked\":false,\"is_plottable\":true,\"linetype_handle\":\"16\"},\"CF_TEXT\":{\"handle\":\"23F\",\"color_index\":7,\"is_off\":false,\"is_frozen\":false,\"is_locked\":false,\"is_plottable\":true,\"linetype_handle\":\"16\"},\"CF_EQUIP\":{\"handle\":\"250\",\"color_index\":6,\"is_off\":false,\"is_frozen\":false,\"is_locked\":false,\"is_plottable\":true,\"linetype_handle\":\"16\"},\"CF_DETAIL\":{\"handle\":\"261\",\"color_index\":8,\"is_off\":false,\"is_frozen\":false,\"is_locked\":false,\"is_plottable\":true,\"linetype_handle\":\"16\"}},\"all_layers_after\":{\"0\":{\"handle\":\"10\",\"color_index\":7,\"is_off\":false,\"is_frozen\":false,\"is_locked\":false,\"is_plottable\":true,\"linetype_handle\":\"16\"},\"CF_WELL\":{\"handle\":\"229\",\"color_index\":3,\"is_off\":false,\"is_frozen\":false,\"is_locked\":false,\"is_plottable\":true,\"linetype_handle\":\"16\"},\"CF_PIPE\":{\"handle\":\"23D\",\"color_index\":4,\"is_off\":false,\"is_frozen\":false,\"is_locked\":false,\"is_plottable\":true,\"linetype_handle\":\"16\"},\"CF_SLEEVE\":{\"handle\":\"23E\",\"color_index\":5,\"is_off\":false,\"is_frozen\":false,\"is_locked\":false,\"is_plottable\":true,\"linetype_handle\":\"16\"},\"CF_TEXT\":{\"handle\":\"23F\",\"color_index\":7,\"is_off\":false,\"is_frozen\":false,\"is_locked\":false,\"is_plottable\":true,\"linetype_handle\":\"16\"},\"CF_EQUIP\":{\"handle\":\"250\",\"color_index\":6,\"is_off\":false,\"is_frozen\":false,\"is_locked\":false,\"is_plottable\":true,\"linetype_handle\":\"16\"},\"CF_DETAIL\":{\"handle\":\"261\",\"color_index\":8,\"is_off\":false,\"is_frozen\":false,\"is_locked\":false,\"is_plottable\":true,\"linetype_handle\":\"16\"}},\"model_handles_before\":[\"240\",\"241\",\"242\",\"243\",\"244\",\"245\",\"246\",\"247\",\"248\",\"249\",\"24A\",\"24B\",\"251\",\"252\",\"253\",\"254\",\"255\",\"256\",\"257\",\"258\",\"259\",\"25A\",\"25B\",\"25C\",\"262\",\"263\",\"264\",\"265\",\"266\",\"267\",\"268\"],\"model_handles_after\":[\"240\",\"241\",\"242\",\"243\",\"244\",\"245\",\"246\",\"247\",\"248\",\"249\",\"24A\",\"24B\",\"251\",\"252\",\"253\",\"254\",\"255\",\"256\",\"257\",\"258\",\"259\",\"25A\",\"25B\",\"25C\",\"262\",\"263\",\"264\",\"265\",\"266\",\"267\",\"268\",\"26D\"],\"journal_finalized\":false,\"fence_release_authorized\":false,\"failure_stage\":null,\"layouts_before\":{\"Model\":{\"handle\":\"22\",\"model_type\":true,\"device\":\"无\",\"media\":\"ISO_A4_(210.00_x_297.00_MM)\",\"plot_style\":\"\",\"rotation\":0,\"plot_area\":\"Display\",\"center\":false,\"use_standard_scale\":true,\"standard_scale\":\"ScaleToFit\",\"scale_numerator\":1.0,\"scale_denominator\":8.7040847547398084,\"paper_units\":\"Millimeters\",\"paper_size\":[210.0,297.0],\"origin\":[11.549999237060547,-13.650000095367432],\"margins\":[7.5,20.0,7.5,20.0]},\"布局1\":{\"handle\":\"D3\",\"model_type\":false,\"device\":\"C:\\\\Documents and Settings\\\\basas\\\\Application Data\\\\Autodesk\\\\AutoCAD 2005\\\\R16.1\\\\enu\\\\plotters\\\\Default Windows System Printer.pc3\",\"media\":\"\",\"plot_style\":\"\",\"rotation\":0,\"plot_area\":\"layout\",\"center\":false,\"use_standard_scale\":true,\"standard_scale\":\"StdScale1To1\",\"scale_numerator\":1.0,\"scale_denominator\":1.0,\"paper_units\":\"Inches\",\"paper_size\":[0.0,0.0],\"origin\":[0.0,0.0],\"margins\":[0.0,0.0,0.0,0.0]},\"布局2\":{\"handle\":\"D7\",\"model_type\":false,\"device\":\"C:\\\\Documents and Settings\\\\basas\\\\Application Data\\\\Autodesk\\\\AutoCAD 2005\\\\R16.1\\\\enu\\\\plotters\\\\Default Windows System Printer.pc3\",\"media\":\"\",\"plot_style\":\"\",\"rotation\":0,\"plot_area\":\"layout\",\"center\":false,\"use_standard_scale\":true,\"standard_scale\":\"StdScale1To1\",\"scale_numerator\":1.0,\"scale_denominator\":1.0,\"paper_units\":\"Inches\",\"paper_size\":[0.0,0.0],\"origin\":[0.0,0.0],\"margins\":[0.0,0.0,0.0,0.0]}},\"layouts_after\":{\"Model\":{\"handle\":\"22\",\"model_type\":true,\"device\":\"无\",\"media\":\"ISO_A4_(210.00_x_297.00_MM)\",\"plot_style\":\"\",\"rotation\":0,\"plot_area\":\"Display\",\"center\":false,\"use_standard_scale\":true,\"standard_scale\":\"ScaleToFit\",\"scale_numerator\":1.0,\"scale_denominator\":8.7040847547398084,\"paper_units\":\"Millimeters\",\"paper_size\":[210.0,297.0],\"origin\":[11.549999237060547,-13.650000095367432],\"margins\":[7.5,20.0,7.5,20.0]},\"布局1\":{\"handle\":\"D3\",\"model_type\":false,\"device\":\"C:\\\\Documents and Settings\\\\basas\\\\Application Data\\\\Autodesk\\\\AutoCAD 2005\\\\R16.1\\\\enu\\\\plotters\\\\Default Windows System Printer.pc3\",\"media\":\"\",\"plot_style\":\"\",\"rotation\":0,\"plot_area\":\"layout\",\"center\":false,\"use_standard_scale\":true,\"standard_scale\":\"StdScale1To1\",\"scale_numerator\":1.0,\"scale_denominator\":1.0,\"paper_units\":\"Inches\",\"paper_size\":[0.0,0.0],\"origin\":[0.0,0.0],\"margins\":[0.0,0.0,0.0,0.0]},\"布局2\":{\"handle\":\"D7\",\"model_type\":false,\"device\":\"C:\\\\Documents and Settings\\\\basas\\\\Application Data\\\\Autodesk\\\\AutoCAD 2005\\\\R16.1\\\\enu\\\\plotters\\\\Default Windows System Printer.pc3\",\"media\":\"\",\"plot_style\":\"\",\"rotation\":0,\"plot_area\":\"layout\",\"center\":false,\"use_standard_scale\":true,\"standard_scale\":\"StdScale1To1\",\"scale_numerator\":1.0,\"scale_denominator\":1.0,\"paper_units\":\"Inches\",\"paper_size\":[0.0,0.0],\"origin\":[0.0,0.0],\"margins\":[0.0,0.0,0.0,0.0]}},\"failed_step\":null,\"failed_operation\":null,\"steps_executed_before_outcome\":[\"fix_title\",\"sub_title\"],\"step_execution_is_not_commit\":true}",
+    "error_code": null,
+    "error_message": null,
+    "plugin_sequence": 4,
+    "readback_revision": 4,
+    "write_fence_released": false,
+    "write_fence_finalized": false
+  },
+  "source_identity": {
+    "schema": "bimwright-foundation-source-identity-v1",
+    "observation": "immutable_request_target",
+    "identity_status": "known",
+    "request_id": "pilot-06d2",
+    "context_id": "ec6e64bcb51c4ce383a66aac659706c4",
+    "binding_identity": {
+      "owner_pid": 24188,
+      "owner_started_at_utc": "2026-11-16T17:10:58.4255102+00:00",
+      "owner_generation": "e847d83d2d0142cc81c77650416a4896",
+      "document_session_id": "d3fbe26608074b05a49bfe7e01a8ee8d",
+      "database_session_id": "ebdc4f0a652e441b89adb7b81efc3ed0",
+      "database_fingerprint": "1f285df0-af5c-bc46-a227-70a52ecc9cfb",
+      "drawing_path": "F:\\AI\\cad-agent-foundation-acad2022\\cad2022-test\\pilot-loop-16\\drawings\\work.dwg"
+    }
+  },
+  "outcome_summary": {
+    "schema": "bimwright-foundation-outcome-v1",
+    "effects": "committed",
+    "outcome": "committed_verification_failed",
+    "awaiting_execution": false,
+    "write_blocked": true,
+    "existing_handles": {
+      "created_handles": [
+        "26D"
+      ],
+      "objects": {
+        "fix_title": {
+          "entity": "24B"
+        },
+        "sub_title": {
+          "entity": "26D"
+        }
+      }
+    },
+    "plugin_verification": "passed",
+    "server_verification": "failed",
+    "next_action": "inspect_existing_handles"
+  },
+  "persisted": false,
+  "save_reply": {
+    "request_id": null,
+    "saved_path": "F:\\AI\\cad-agent-foundation-acad2022\\cad2022-test\\pilot-loop-16\\drawings\\pilot-06d.dwg",
+    "phase": "completed"
+  },
+  "next_action": "save_succeeded_but_finalize_pending: query the original write request; never replay the write",
+  "result_json": "<omitted: 24KB symbol table>"
+}
