@@ -1,0 +1,130 @@
+start rc 0 
+before callouts 0 0
+apply {"request_id": "plan-a1e2c44a844fb387777f97ba9bfc1e68", "status": "verification_pending", "phase": "completed", "effects": "committed", "verification": "passed", "write_fence_released": false}
+apply full {"request_id": "plan-a1e2c44a844fb387777f97ba9bfc1e68", "context_id": "00629b90f1a24061aedce9e9ecbc8e7a", "status": "verification_pending", "phase": "completed", "effects": "committed", "verification": "passed", "pending": true, "write_fence_released": false, "plugin_sequence": 4, "result_json": "{\"symbols_before\":{\"text_styles\":{\"Standard\":{\"handle\":\"11\",\"font_file\":\"\",\"big_font_file\":\"\",\"width_factor\":1.0,\"fixed_height\":0.0,\"is_vertical\":false,\"resolved_font\":{\"typeface\":\"宋体\",\"bold\":false,\"italic\":false,\"charset\":0,\"pitch_family\":34}},\"Annotative\":{\"handle\":\"DC\",\"font_file\":\"\",\"big_font_file\":\"\",\"width_factor\":1.0,\"fixed_height\":0.0,\"is_vertical\":false,\"resolved_font\":{\"typeface\":\"宋体\",\"bold\":false,\"italic\":false,\"charset\":0,\"pitch_family\":34}},\"WALL_TXT\":{\"handle\":\"1B8\",\"font_file\":\"hztxt_e.shx\",\"big_font_file\":\"hztxt.shx\",\"width_factor\":1.0,\"fixed_height\":0.0,\"is_vertical\":false,\"resolved_font\":{\"typeface\":\"\",\"bold\":false,\"italic\":false,\"charset\":1,\"pitch_family\":0}}},\"dimension_styles\":{\"Standard\":{\"handle\":\"27\",\"text_style\":\"Standard\",\"text_height\":0.18,\"arrow_size\":0.18,\"overall_scale\":1.0,\"gap\":0.09,\"decimal_places\":4,\"extension_origin_offset\":0.0625,\"extension_beyond\":0.18,\"decimal_separator\":\".\",\"linear_scale_factor\":1.0,\"dimension_color\":0,\"extension_color\":0,\"text_color\":0},\"Annotative\":{\"handle\":\"E1\",\"text_style\":\"Standard\",\"text_height\":0.18,\"arrow_size\":0.18,\"overall_scale\":0.0,\"gap\":0.09,\"decimal_pl
+after callouts 6 6
+readback [
+ {
+  "text_handle": "298",
+  "text": "240厚烧结页岩砖墙，M7.5水泥砂浆砌筑",
+  "insert": null,
+  "attachment": "BottomLeft",
+  "actual_width": 1.11410011248594,
+  "actual_height": 0.06850393700787401,
+  "extents": {
+   "min": {
+    "x": 1.6459,
+    "y": 2.712,
+    "z": 0.0
+   },
+   "max": {
+    "x": 2.8,
+    "y": 2.7805039370078743,
+    "z": 0.0
+   }
+  }
+ },
+ {
+  "text_handle": "29C",
+  "text": "20厚1:2水泥砂浆抹面（双面）",
+  "insert": null,
+  "attachment": "BottomLeft",
+  "actual_width": 0.814775028121485,
+  "actual_height": 0.06,
+  "extents": {
+   "min": {
+    "x": 2.0252,
+    "y": 2.112,
+    "z": 0.0
+   },
+   "max": {
+    "x": 2.88,
+    "y": 2.172,
+    "z": 0.0
+   }
+  }
+ },
+ {
+  "text_handle": "2A0",
+  "text": "C25混凝土压顶60厚",
+  "insert": null,
+  "attachment": "BottomLeft",
+  "actual_width": 0.5648031496062992,
+  "actual_height": 0.06,
+  "extents": {
+   "min": {
+    "x": 2.1952,
+    "y": 3.762,
+    "z": 0.0
+   },
+   "max": {
+    "x": 2.8,
+    "y": 3.822,
+    "z": 0.0
+   }
+  }
+ },
+ {
+  "text_handle": "2A4",
+  "text": "370厚砖砌大放脚",
+  "insert": null,
+  "attachment": "BottomLeft",
+  "actual_width": 0.47789088863892,
+  "actual_height": 0.06,
+  "extents": {
+   "min": {
+    "x": 2.3671,
+    "y": 1.362,
+    "z": 0.0
+   },
+   "max": {
+    "x": 2.8850000000000002,
+    "y": 1.4220000000000002,
+    "z": 0.0
+   }
+  }
+ },
+ {
+  "text_handle": "2A8",
+  "text": "C15混凝土条形基础",
+  "insert": null,
+  "attachment": "BottomLeft",
+  "actual_width": 0.5371991001124858,
+  "actual_height": 0.06,
+  "extents": {
+   "min": {
+    "x": 2.2128,
+    "y": 0.8719999999999999,
+    "z": 0.0
+   },
+   "max": {
+    "x": 2.79,
+    "y": 0.9319999999999999,
+    "z": 0.0
+   }
+  }
+ },
+ {
+  "text_handle": "2AC",
+  "text": "室外地面±0.000",
+  "insert": null,
+  "attachment": "BottomLeft",
+  "actual_width": 0.4783970753655794,
+  "actual_height": 0.06,
+  "extents": {
+   "min": {
+    "x": 2.2716,
+    "y": 1.042,
+    "z": 0.0
+   },
+   "max": {
+    "x": 2.79,
+    "y": 1.102,
+    "z": 0.0
+   }
+  }
+ }
+]
+persist {"saved": {"saved_path": "F:\\AI\\cad-agent-foundation-acad2022\\cad2022-test\\v11-wallAY\\s11-final4.dwg", "saved_size": 37780, "saved_sha256": "1d3e4cd30530b0c64e523f4bdf706aa2e01186f11658e3818a927c4446d6b2d9"}}
+query-after-save {"status": "completed", "phase": "completed", "verification": "passed", "write_fence_released": true, "pending": false}
+s11-final4 True 37780

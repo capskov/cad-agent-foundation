@@ -1,0 +1,262 @@
+{
+ "schema": "foundation-drawing-plan-v1",
+ "source_role": "annotation",
+ "units": "raw_drawing_units",
+ "steps": [
+  {
+   "id": "co-wall",
+   "op": "callout",
+   "text": "240厚烧结页岩砖墙，M7.5水泥砂浆砌筑",
+   "position": [
+    1.6459,
+    2.712
+   ],
+   "height": 0.06,
+   "width": 1.1541,
+   "vertices": [
+    [
+     3.5,
+     2.0
+    ],
+    [
+     2.8,
+     2.7
+    ],
+    [
+     1.6459,
+     2.7
+    ]
+   ],
+   "dot_radius": 0.0125,
+   "layer": "标注-引线",
+   "color": 2,
+   "text_style": "WALL_TXT",
+   "dimension_style": "WALL_DIM",
+   "text_color": 7,
+   "gap": 0,
+   "attachment": "BottomLeft",
+   "text_layer": "标注-文字",
+   "annotation_offset": [
+    0,
+    -0.012
+   ],
+   "dimtad": 0,
+   "has_hook_line": false
+  },
+  {
+   "id": "co-plaster",
+   "op": "callout",
+   "text": "20厚1:2水泥砂浆抹面（双面）",
+   "position": [
+    2.0252,
+    2.112
+   ],
+   "height": 0.06,
+   "width": 0.8548,
+   "vertices": [
+    [
+     3.48,
+     1.5
+    ],
+    [
+     2.88,
+     2.1
+    ],
+    [
+     2.0252,
+     2.1
+    ]
+   ],
+   "dot_radius": 0.0125,
+   "layer": "标注-引线",
+   "color": 2,
+   "text_style": "WALL_TXT",
+   "dimension_style": "WALL_DIM",
+   "text_color": 7,
+   "gap": 0,
+   "attachment": "BottomLeft",
+   "text_layer": "标注-文字",
+   "annotation_offset": [
+    0,
+    -0.012
+   ],
+   "dimtad": 0,
+   "has_hook_line": false
+  },
+  {
+   "id": "co-coping",
+   "op": "callout",
+   "text": "C25混凝土压顶60厚",
+   "position": [
+    2.1952,
+    3.762
+   ],
+   "height": 0.06,
+   "width": 0.6048,
+   "vertices": [
+    [
+     3.5,
+     3.05
+    ],
+    [
+     2.8,
+     3.75
+    ],
+    [
+     2.1952,
+     3.75
+    ]
+   ],
+   "dot_radius": 0.0125,
+   "layer": "标注-引线",
+   "color": 2,
+   "text_style": "WALL_TXT",
+   "dimension_style": "WALL_DIM",
+   "text_color": 7,
+   "gap": 0,
+   "attachment": "BottomLeft",
+   "text_layer": "标注-文字",
+   "annotation_offset": [
+    0,
+    -0.012
+   ],
+   "dimtad": 0,
+   "has_hook_line": false
+  },
+  {
+   "id": "co-footing",
+   "op": "callout",
+   "text": "370厚砖砌大放脚",
+   "position": [
+    2.3671,
+    1.362
+   ],
+   "height": 0.06,
+   "width": 0.5179,
+   "vertices": [
+    [
+     3.435,
+     0.8
+    ],
+    [
+     2.885,
+     1.35
+    ],
+    [
+     2.3671,
+     1.35
+    ]
+   ],
+   "dot_radius": 0.0125,
+   "layer": "标注-引线",
+   "color": 2,
+   "text_style": "WALL_TXT",
+   "dimension_style": "WALL_DIM",
+   "text_color": 7,
+   "gap": 0,
+   "attachment": "BottomLeft",
+   "text_layer": "标注-文字",
+   "annotation_offset": [
+    0,
+    -0.012
+   ],
+   "dimtad": 0,
+   "has_hook_line": false
+  },
+  {
+   "id": "co-concrete",
+   "op": "callout",
+   "text": "C15混凝土条形基础",
+   "position": [
+    2.2128,
+    0.872
+   ],
+   "height": 0.06,
+   "width": 0.5772,
+   "vertices": [
+    [
+     3.2,
+     0.45
+    ],
+    [
+     2.79,
+     0.86
+    ],
+    [
+     2.2128,
+     0.86
+    ]
+   ],
+   "dot_radius": 0.0125,
+   "layer": "标注-引线",
+   "color": 2,
+   "text_style": "WALL_TXT",
+   "dimension_style": "WALL_DIM",
+   "text_color": 7,
+   "gap": 0,
+   "attachment": "BottomLeft",
+   "text_layer": "标注-文字",
+   "annotation_offset": [
+    0,
+    -0.012
+   ],
+   "dimtad": 0,
+   "has_hook_line": false
+  },
+  {
+   "id": "co-ground",
+   "op": "callout",
+   "text": "室外地面±0.000",
+   "position": [
+    2.2716,
+    1.042
+   ],
+   "height": 0.06,
+   "width": 0.5184,
+   "vertices": [
+    [
+     3.2,
+     0.62
+    ],
+    [
+     2.79,
+     1.03
+    ],
+    [
+     2.2716,
+     1.03
+    ]
+   ],
+   "dot_radius": 0.0125,
+   "layer": "标注-引线",
+   "color": 2,
+   "text_style": "WALL_TXT",
+   "dimension_style": "WALL_DIM",
+   "text_color": 7,
+   "gap": 0,
+   "attachment": "BottomLeft",
+   "text_layer": "标注-文字",
+   "annotation_offset": [
+    0,
+    -0.012
+   ],
+   "dimtad": 0,
+   "has_hook_line": false
+  },
+  {
+   "id": "style-dim-mm-fix",
+   "op": "dimension_style",
+   "name": "WALL_DIM",
+   "text_style": "WALL_TXT",
+   "text_height": 0.045,
+   "arrow_size": 0.04,
+   "overall_scale": 1.0,
+   "gap": 0.015,
+   "decimal_places": 0,
+   "dimension_color": 3,
+   "extension_color": 3,
+   "text_color": 3,
+   "linear_scale_factor": 1000
+  }
+ ]
+}

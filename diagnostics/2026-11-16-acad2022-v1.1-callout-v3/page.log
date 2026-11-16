@@ -1,0 +1,4 @@
+start rc 0 
+digest 2DE6CCD02527235E5EEB4A10565637B2E25BEE7FACD1C94E0332856A9B8B5838
+page {"status": "verification_pending", "verification": "failed", "persisted": false, "save_reply": {"request_id": null, "saved_path": "F:\\AI\\cad-agent-foundation-acad2022\\cad2022-test\\v11-wallBA\\s11-page4.dwg", "phase": "completed"}, "next_action": "save_succeeded_but_finalize_pending: query the original write request; never replay the write"}
+s11-page4 True 37745

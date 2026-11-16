@@ -1,0 +1,8 @@
+start 0 
+apply {"request_id": "plan-63f599f3b02f51e799ca57bfc1e350e3", "status": "completed", "phase": "completed", "effects": "committed", "verification": "passed"}
+{"handle": "298", "text": "240厚烧结页岩砖墙，M7.5水泥砂浆砌筑", "actual_width": 1.11410011248594, "actual_height": 0.06850393700787401, "extents": {"min": {"x": 1.0, "y": 3.931496062992126, "z": 0.0}, "max": {"x": 3.0, "y": 4.0, "z": 0.0}}}
+{"handle": "299", "text": "20厚1:2水泥砂浆抹面（双面）", "actual_width": 0.814775028121485, "actual_height": 0.06, "extents": {"min": {"x": 1.0, "y": 3.79, "z": 0.0}, "max": {"x": 3.0, "y": 3.85, "z": 0.0}}}
+{"handle": "29A", "text": "C25混凝土压顶60厚", "actual_width": 0.5648031496062992, "actual_height": 0.06, "extents": {"min": {"x": 1.0, "y": 3.64, "z": 0.0}, "max": {"x": 3.0, "y": 3.7, "z": 0.0}}}
+{"handle": "29B", "text": "370厚砖砌大放脚", "actual_width": 0.47789088863892, "actual_height": 0.06, "extents": {"min": {"x": 1.0, "y": 3.4899999999999998, "z": 0.0}, "max": {"x": 3.0, "y": 3.55, "z": 0.0}}}
+{"handle": "29C", "text": "C15混凝土条形基础", "actual_width": 0.5371991001124858, "actual_height": 0.06, "extents": {"min": {"x": 1.0, "y": 3.34, "z": 0.0}, "max": {"x": 3.0, "y": 3.4, "z": 0.0}}}
+{"handle": "29D", "text": "室外地面±0.000", "actual_width": 0.4783970753655794, "actual_height": 0.06, "extents": {"min": {"x": 1.0, "y": 3.19, "z": 0.0}, "max": {"x": 3.0, "y": 3.25, "z": 0.0}}}
