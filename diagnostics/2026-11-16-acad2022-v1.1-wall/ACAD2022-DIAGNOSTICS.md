@@ -34,7 +34,12 @@
 - 现象：CLI 返回 `{"error":"Unknown request record; pass a request ID that this workspace submitted"}`，退出码 1；但目标 DWG 实际已生成（旧 `s2.dwg` 32,021 B）。
 - 修复：`write_id = write_reply.get('request_id') or request_id`，断言非空；finalize 查询与 context 都使用 `write_id`。源码在 `client/foundation.py`，运行时从 `20261116-fix1` 起。
 - 修复后状态：`v11-wallA` 正向回归通过——第 2 批 9 步 `verification=passed`、`persisted=true`、fence 释放、`save_reply.saved_path` 指向 `s2fix.dwg`，`Unknown request record` 未再出现。
-- 反向回归仍未执行：无 `save_to` 不得宣称成功、finalize 失败不得用文件存在冒充、重复 request id 不得重放。**因此只能声明“已修并正向通过”，不能声明“保存链路完整验收”。**
+- 反向回归已补跑（`v11-neg1b/2b/3b`）：
+  - 无 `save_to`：`verification_pending`、`verification=passed`、`persisted=false`、fence 未释放，`next_action=verified_not_persisted`；第二次 apply 被 fence 拒绝（`fence_held_by_earlier_unpersisted_write`）。
+  - 重复 request id：只生成 1 个请求记录，第二次返回原记录，未重放；模型空间仅 1 个 Polyline（句柄 `1B2`）。
+  - 保存失败（目标目录不存在）：save job `phase=failed`、`save_drawing_failed`、`persisted=false`、fence 保持 held、文件不存在，`next_action=save_failed`。
+- 仍未构造的场景：finalize 查询本身失败但文件已存在。代码结构上 `persisted` 只在 finalize 查询返回服务器确认后置真，不以文件存在为判据；但该极端场景没有实测。
+- 证据：`evidence/d02/D-02-save-identity.json`、`negative-regression.json`、`neg-dup-request.json`、`neg-savefail-request.json`。
 - 证据：`v11-wallA` 请求记录；`WALL-BUGS-FIXED-AND-WORKAROUNDS.md` 1.7。
 
 ### D-03 保存后同一会话 `drawing_path_mismatch`（V1.1 BUG-05 未根治）
@@ -113,6 +118,6 @@
 
 - PDF 已产出且尺寸文字正确，但 `plot_pdf` 的服务端最终判定仍 failed；不能宣称“出图链路 passed”。
 - SaveAs 后同会话不能连续，当前只能“另存新路径 + 新工作区”；尚未形成可复用脚本。
-- 保存链路的反向回归未执行；不能宣称“保存链路完整验收”。
+- 保存链路正向回归与三项反向回归均已通过；仅“finalize 查询失败但文件已存在”的极端场景未实测，不能据此宣称该场景已验收。
 - V1.1 的 35/35 是重开核验结论，不等于零 Bug；ED04 两条候选仍待人工判读。
 - 任何“已完成”均以 DWG 文件、journal 记录、重开读回三者同时存在为准；第三批现在满足，但此前那次用户主动终止不满足。

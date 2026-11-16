@@ -1,0 +1,74 @@
+{
+ "case1_no_save": {
+  "first": {
+   "status": "verification_pending",
+   "verification": "passed",
+   "persisted": false,
+   "write_fence_released": false,
+   "next_action": "verified_not_persisted: rerun with --save-to <absolute.dwg> (client save route) to persist and release the fence",
+   "error": null,
+   "request_id": "neg-nosave-1"
+  },
+  "second": {
+   "status": "rejected_before_submission",
+   "verification": null,
+   "persisted": false,
+   "error": "the D1 request or drawing risk fence conflicts with an existing operation",
+   "reason": "fence_held_by_earlier_unpersisted_write",
+   "request_id": "neg-nosave-2"
+  },
+  "rc": [
+   0,
+   0
+  ]
+ },
+ "case2_duplicate_request_id": {
+  "first": {
+   "status": "verification_pending",
+   "verification": "passed",
+   "created_handles": null,
+   "request_id": "neg-dup-1"
+  },
+  "second": {
+   "status": "verification_pending",
+   "verification": "passed",
+   "created_handles": null,
+   "request_id": "neg-dup-1"
+  },
+  "same_handles": true,
+  "rc": [
+   0,
+   0
+  ]
+ },
+ "case3_save_failure": {
+  "status": "verification_pending",
+  "verification": "passed",
+  "persisted": false,
+  "write_fence_released": false,
+  "error": null,
+  "save_reply": {
+   "found": true,
+   "job": {
+    "request_id": "save-c48698b15ca149bcbecd8e5b04dc9e7e",
+    "context_id": "c31ca786b1d8404a8450958a4f5ca355",
+    "tool_name": "save_drawing",
+    "phase": "failed",
+    "effects": "none",
+    "verification": "not_checked",
+    "observation": "plugin_snapshot",
+    "queue_deadline_utc": null,
+    "result_json": null,
+    "error_code": "save_drawing_failed",
+    "error_message": "target directory does not exist",
+    "verification_result_json": null,
+    "verification_error_code": null,
+    "verification_error_message": null,
+    "plugin_sequence": 2
+   }
+  },
+  "next_action": "save_failed: the write stays verified but unpersisted; its fence remains held and nothing may be replayed",
+  "file_exists": false,
+  "rc": 0
+ }
+}

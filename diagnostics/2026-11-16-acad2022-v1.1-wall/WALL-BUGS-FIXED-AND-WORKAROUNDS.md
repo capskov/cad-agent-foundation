@@ -53,7 +53,11 @@
 - 根因：`apply_with_optional_save()` 在未显式传 `request_id` 时，`apply()` 内部生成 ID，后续 finalize 仍用原始 `None`；保存作业与 finalize 的请求身份不一致。
 - 修复：`write_id = write_reply.get('request_id') or request_id`，断言非空；finalize 查询与 context 都使用 `write_id`。
 - 正向回归：`v11-wallA` 以第 1 批 `wall-section.dwg` 为源，安装 fix1、启动隔离 CAD，提交修正后的第 2 批 9 步；`verification=passed`、`persisted=true`、fence 释放、`save_reply.saved_path` 指向 `s2fix.dwg`，`Unknown request record` 不再出现。
-- 反向回归仍未执行：无 `save_to` 不得宣称成功、finalize 失败不得用“文件存在”冒充成功、重复 request id 不得重放。这一项目前是阻塞项，不能宣称“保存链路已完整验收”。
+- 反向回归已补跑（`v11-neg1b/2b/3b`）：
+  - 无 `save_to`：`verification_pending`、`verification=passed`、`persisted=false`、fence 未释放；第二次 apply 被 fence 拒绝。
+  - 重复 request id：只生成 1 个请求记录，第二次返回原记录，未重放；模型空间仅 1 个 Polyline（`1B2`）。
+  - 保存失败（目标目录不存在）：save job `phase=failed`、`persisted=false`、fence 保持 held、文件不存在。
+- 仅“finalize 查询失败但文件已存在”的极端场景未实测；`persisted` 只在 finalize 返回服务器确认后置真，不以文件存在为判据。
 
 ## 2. 本轮实际修改的源码与构建对应关系
 

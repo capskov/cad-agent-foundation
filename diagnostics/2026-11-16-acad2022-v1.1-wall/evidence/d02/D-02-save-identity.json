@@ -1,7 +1,7 @@
 {
  "schema": "acad2022-d02-save-identity-evidence-v1",
  "generated_at_utc": "2026-11-16",
- "conclusion": "保存身份已修：write_id 传递后，保存作业与 finalize 使用同一请求身份；v11-wallA 正向回归 persisted=true，Unknown request record 未再出现。反向回归尚未执行。",
+ "conclusion": "保存身份已修：write_id 传递后，保存作业与 finalize 使用同一请求身份；v11-wallA 正向回归 persisted=true，Unknown request record 未再出现。三项反向回归已补跑并全部符合预期。",
  "before_fix": {
   "observed_cli_error": "Unknown request record; pass a request ID that this workspace submitted",
   "observed_exit_code": 1,
@@ -52,9 +52,33 @@
   "verification": "passed",
   "note": "该探针用于验证 fix13 的尺寸样式修改校验链；与 D-02 保存身份修复独立。"
  },
+ "negative_regression": {
+  "workspace_root": "cad2022-test/v11-neg1b, v11-neg2b, v11-neg3b",
+  "case1_no_save": {
+   "first": {"status": "verification_pending", "verification": "passed", "persisted": false, "write_fence_released": false, "next_action": "verified_not_persisted: rerun with --save-to <absolute.dwg> (client save route) to persist and release the fence"},
+   "second": {"status": "rejected_before_submission", "error": "the D1 request or drawing risk fence conflicts with an existing operation", "reason": "fence_held_by_earlier_unpersisted_write"},
+   "verdict": "pass: 未保存不宣称持久化；fence 阻止第二次写入"
+  },
+  "case2_duplicate_request_id": {
+   "request_id": "neg-dup-1",
+   "request_files": 1,
+   "first": {"status": "verification_pending", "verification": "passed"},
+   "second": {"status": "verification_pending", "verification": "passed"},
+   "created_handle": "1B2",
+   "model_handles_after": ["1B2"],
+   "verdict": "pass: 第二次同号请求返回原记录，未重放；仅 1 个 Polyline"
+  },
+  "case3_save_failure": {
+   "target": ".../v11-neg3b/no-such-dir/out.dwg",
+   "save_job": {"phase": "failed", "error_code": "save_drawing_failed", "error_message": "target directory does not exist"},
+   "persisted": false,
+   "write_fence_released": false,
+   "file_exists": false,
+   "next_action": "save_failed: the write stays verified but unpersisted; its fence remains held and nothing may be replayed",
+   "verdict": "pass: 保存失败未冒充成功，fence 保持 held"
+  }
+ },
  "not_tested": [
-  "无 save_to 时不得宣称保存成功",
-  "finalize 失败时不得用文件存在冒充成功",
-  "重复 request id 不得重放"
+  "finalize 查询本身失败但文件已存在：本轮未构造该场景；代码结构上 persisted 只在 finalize 查询返回服务器确认后置真，不以文件存在为判据。"
  ]
 }

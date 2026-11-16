@@ -1,0 +1,162 @@
+{
+  "request_id": "neg-dup-1",
+  "context_id": "726674a1f01b45449969162f454b51f3",
+  "plan_digest": "c576861a5ab7f75f3c136f7fd752841e23062c206b48f5e27c66f992c12580fe",
+  "plan": {
+    "schema": "foundation-drawing-plan-v1",
+    "source_role": "annotation",
+    "units": "raw_drawing_units",
+    "steps": [
+      {
+        "id": "layer-neg",
+        "op": "layer",
+        "name": "NEG_TEST",
+        "color": 7
+      },
+      {
+        "id": "neg-box",
+        "op": "polyline",
+        "layer": "NEG_TEST",
+        "color": 7,
+        "vertices": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "closed": true
+      }
+    ]
+  },
+  "submit_attempts": 1,
+  "submit_reply": {
+    "request_id": "neg-dup-1",
+    "context_id": "726674a1f01b45449969162f454b51f3",
+    "status": "queued",
+    "phase": "queued",
+    "effects": "none",
+    "verification": "notchecked",
+    "pending": true,
+    "write_fence_released": false,
+    "plugin_sequence": 0,
+    "result_json": null,
+    "verification_message": null,
+    "job": {
+      "request_id": "neg-dup-1",
+      "context_id": "726674a1f01b45449969162f454b51f3",
+      "tool_name": "foundation_apply_plan",
+      "phase": "queued",
+      "effects": "none",
+      "verification": "not_checked",
+      "observation": "plugin_snapshot",
+      "result_json": null,
+      "error_code": null,
+      "error_message": null,
+      "plugin_sequence": 0,
+      "readback_revision": null,
+      "write_fence_released": false,
+      "write_fence_finalized": false
+    },
+    "source_identity": {
+      "schema": "bimwright-foundation-source-identity-v1",
+      "observation": "immutable_request_target",
+      "identity_status": "unknown",
+      "request_id": "neg-dup-1",
+      "context_id": "726674a1f01b45449969162f454b51f3",
+      "binding_identity": null
+    },
+    "outcome_summary": {
+      "schema": "bimwright-foundation-outcome-v1",
+      "effects": "none",
+      "outcome": "awaiting_execution",
+      "awaiting_execution": true,
+      "write_blocked": true,
+      "existing_handles": null,
+      "plugin_verification": "not_checked",
+      "server_verification": "notchecked",
+      "next_action": "query_original_request"
+    }
+  },
+  "last_reply": {
+    "request_id": "neg-dup-1",
+    "context_id": "726674a1f01b45449969162f454b51f3",
+    "status": "verification_pending",
+    "phase": "completed",
+    "effects": "committed",
+    "verification": "passed",
+    "pending": true,
+    "write_fence_released": false,
+    "plugin_sequence": 4,
+    "result_json": "{\"symbols_before\":{\"text_styles\":{\"Standard\":{\"handle\":\"11\",\"font_file\":\"\",\"big_font_file\":\"\",\"width_factor\":1.0,\"fixed_height\":0.0,\"is_vertical\":false,\"resolved_font\":{\"typeface\":\"宋体\",\"bold\":false,\"italic\":false,\"charset\":0,\"pitch_family\":34}},\"Annotative\":{\"handle\":\"DC\",\"font_file\":\"\",\"big_font_file\":\"\",\"width_factor\":1.0,\"fixed_height\":0.0,\"is_vertical\":false,\"resolved_font\":{\"typeface\":\"宋体\",\"bold\":false,\"italic\":false,\"charset\":0,\"pitch_family\":34}}},\"dimension_styles\":{\"Standard\":{\"handle\":\"27\",\"text_style\":\"Standard\",\"text_height\":0.18,\"arrow_size\":0.18,\"overall_scale\":1.0,\"gap\":0.09,\"decimal_places\":4,\"extension_origin_offset\":0.0625,\"extension_beyond\":0.18,\"decimal_separator\":\".\",\"dimension_color\":0,\"extension_color\":0,\"text_color\":0},\"Annotative\":{\"handle\":\"E1\",\"text_style\":\"Standard\",\"text_height\":0.18,\"arrow_size\":0.18,\"overall_scale\":0.0,\"gap\":0.09,\"decimal_places\":4,\"extension_origin_offset\":0.0625,\"extension_beyond\":0.18,\"decimal_separator\":\".\",\"dimension_color\":0,\"extension_color\":0,\"text_color\":0}},\"block_definitions\":{},\"xrefs\":{},\"paper_viewports\":{},\"paper_texts\":{},\"paper_blocks\":{}},\"symbols_after\":{\"text_styles\":{\"Standard\":{\"handle\":\"11\",\"font_file\":\"\",\"big_font_file\":\"\",\"width_factor\":1.0,\"fixed_height\":0.0,\"is_vertical\":false,\"resolved_font\":{\"typeface\":\"宋体\",\"bold\":false,\"italic\":false,\"charset\":0,\"pitch_family\":34}},\"Annotative\":{\"handle\":\"DC\",\"font_file\":\"\",\"big_font_file\":\"\",\"width_factor\":1.0,\"fixed_height\":0.0,\"is_vertical\":false,\"resolved_font\":{\"typeface\":\"宋体\",\"bold\":false,\"italic\":false,\"charset\":0,\"pitch_family\":34}}},\"dimension_styles\":{\"Standard\":{\"handle\":\"27\",\"text_style\":\"Standard\",\"text_height\":0.18,\"arrow_size\":0.18,\"overall_scale\":1.0,\"gap\":0.09,\"decimal_places\":4,\"extension_origin_offset\":0.0625,\"extension_beyond\":0.18,\"decimal_separator\":\".\",\"dimension_color\":0,\"extension_color\":0,\"text_color\":0},\"Annotative\":{\"handle\":\"E1\",\"text_style\":\"Standard\",\"text_height\":0.18,\"arrow_size\":0.18,\"overall_scale\":0.0,\"gap\":0.09,\"decimal_places\":4,\"extension_origin_offset\":0.0625,\"extension_beyond\":0.18,\"decimal_separator\":\".\",\"dimension_color\":0,\"extension_color\":0,\"text_color\":0}},\"block_definitions\":{},\"xrefs\":{},\"paper_viewports\":{},\"paper_texts\":{},\"paper_blocks\":{}},\"verification_scope\":\"declared_plan_properties\",\"schema\":\"foundation-plan-receipt-v1\",\"plan_sha256\":\"C576861A5AB7F75F3C136F7FD752841E23062C206B48F5E27C66F992C12580FE\",\"outcome\":\"committed_verified\",\"effects\":\"committed\",\"commit_invoked\":true,\"commit_returned\":true,\"error\":null,\"objects\":{\"layer-neg\":{\"layer\":\"NEG_TEST\"},\"neg-box\":{\"entity\":\"1B2\"}},\"created_handles\":[\"1B2\"],\"before\":{},\"after\":{\"1B2\":{\"handle\":\"1B2\",\"type\":\"Polyline\",\"layer\":\"NEG_TEST\",\"color_index\":7,\"linetype\":\"ByLayer\",\"lineweight\":-1,\"extents\":{\"min\":{\"x\":0.0,\"y\":0.0,\"z\":0.0},\"max\":{\"x\":1.0,\"y\":1.0,\"z\":0.0}},\"owner_handle\":\"1F\",\"layout_name\":\"Model\",\"vertex_count\":4,\"is_closed\":true,\"constant_width\":0.0,\"length\":4.0,\"area\":1.0,\"vertices\":[{\"index\":0,\"x\":0.0,\"y\":0.0,\"z\":0.0,\"bulge\":0.0,\"start_width\":0.0,\"end_width\":0.0},{\"index\":1,\"x\":1.0,\"y\":0.0,\"z\":0.0,\"bulge\":0.0,\"start_width\":0.0,\"end_width\":0.0},{\"index\":2,\"x\":1.0,\"y\":1.0,\"z\":0.0,\"bulge\":0.0,\"start_width\":0.0,\"end_width\":0.0},{\"index\":3,\"x\":0.0,\"y\":1.0,\"z\":0.0,\"bulge\":0.0,\"start_width\":0.0,\"end_width\":0.0}]}},\"layers\":{\"NEG_TEST\":{\"color_index\":7,\"is_off\":false,\"is_frozen\":false,\"is_plottable\":true}},\"all_layers_before\":{\"0\":{\"handle\":\"10\",\"color_index\":7,\"is_off\":false,\"is_frozen\":false,\"is_locked\":false,\"is_plottable\":true,\"linetype_handle\":\"16\"}},\"all_layers_after\":{\"0\":{\"handle\":\"10\",\"color_index\":7,\"is_off\":false,\"is_frozen\":false,\"is_locked\":false,\"is_plottable\":true,\"linetype_handle\":\"16\"},\"NEG_TEST\":{\"handle\":\"1B1\",\"color_index\":7,\"is_off\":false,\"is_frozen\":false,\"is_locked\":false,\"is_plottable\":true,\"linetype_handle\":\"16\"}},\"model_handles_before\":[],\"model_handles_after\":[\"1B2\"],\"journal_finalized\":false,\"fence_release_authorized\":false,\"failure_stage\":null,\"layouts_before\":{\"Model\":{\"handle\":\"22\",\"model_type\":true,\"device\":\"无\",\"media\":\"ANSI_A_(8.50_x_11.00_Inches)\",\"plot_style\":\"\",\"rotation\":90,\"plot_area\":\"Display\",\"center\":false,\"use_standard_scale\":true,\"standard_scale\":\"ScaleToFit\",\"scale_numerator\":1.0,\"scale_denominator\":2.5848954647083735,\"paper_units\":\"Inches\",\"paper_size\":[215.89999389648438,279.39999389648438],\"origin\":[0.0,0.0],\"margins\":[6.3499999046325684,19.049999237060547,6.350006103515625,19.04998779296875]},\"布局1\":{\"handle\":\"59\",\"model_type\":false,\"device\":\"None\",\"media\":\"\",\"plot_style\":\"\",\"rotation\":0,\"plot_area\":\"layout\",\"center\":false,\"use_standard_scale\":true,\"standard_scale\":\"StdScale1To1\",\"scale_numerator\":1.0,\"scale_denominator\":1.0,\"paper_units\":\"Inches\",\"paper_size\":[0.0,0.0],\"origin\":[0.0,0.0],\"margins\":[0.0,0.0,0.0,0.0]},\"布局2\":{\"handle\":\"5E\",\"model_type\":false,\"device\":\"None\",\"media\":\"\",\"plot_style\":\"\",\"rotation\":0,\"plot_area\":\"layout\",\"center\":false,\"use_standard_scale\":true,\"standard_scale\":\"StdScale1To1\",\"scale_numerator\":1.0,\"scale_denominator\":1.0,\"paper_units\":\"Inches\",\"paper_size\":[0.0,0.0],\"origin\":[0.0,0.0],\"margins\":[0.0,0.0,0.0,0.0]}},\"layouts_after\":{\"Model\":{\"handle\":\"22\",\"model_type\":true,\"device\":\"无\",\"media\":\"ANSI_A_(8.50_x_11.00_Inches)\",\"plot_style\":\"\",\"rotation\":90,\"plot_area\":\"Display\",\"center\":false,\"use_standard_scale\":true,\"standard_scale\":\"ScaleToFit\",\"scale_numerator\":1.0,\"scale_denominator\":2.5848954647083735,\"paper_units\":\"Inches\",\"paper_size\":[215.89999389648438,279.39999389648438],\"origin\":[0.0,0.0],\"margins\":[6.3499999046325684,19.049999237060547,6.350006103515625,19.04998779296875]},\"布局1\":{\"handle\":\"59\",\"model_type\":false,\"device\":\"None\",\"media\":\"\",\"plot_style\":\"\",\"rotation\":0,\"plot_area\":\"layout\",\"center\":false,\"use_standard_scale\":true,\"standard_scale\":\"StdScale1To1\",\"scale_numerator\":1.0,\"scale_denominator\":1.0,\"paper_units\":\"Inches\",\"paper_size\":[0.0,0.0],\"origin\":[0.0,0.0],\"margins\":[0.0,0.0,0.0,0.0]},\"布局2\":{\"handle\":\"5E\",\"model_type\":false,\"device\":\"None\",\"media\":\"\",\"plot_style\":\"\",\"rotation\":0,\"plot_area\":\"layout\",\"center\":false,\"use_standard_scale\":true,\"standard_scale\":\"StdScale1To1\",\"scale_numerator\":1.0,\"scale_denominator\":1.0,\"paper_units\":\"Inches\",\"paper_size\":[0.0,0.0],\"origin\":[0.0,0.0],\"margins\":[0.0,0.0,0.0,0.0]}},\"failed_step\":null,\"failed_operation\":null,\"steps_executed_before_outcome\":[\"layer-neg\",\"neg-box\"],\"step_execution_is_not_commit\":true}",
+    "verification_message": "write_requires_completed_save",
+    "job": {
+      "request_id": "neg-dup-1",
+      "context_id": "726674a1f01b45449969162f454b51f3",
+      "tool_name": "foundation_apply_plan",
+      "phase": "completed",
+      "effects": "committed",
+      "verification": "passed",
+      "observation": "plugin_snapshot",
+      "result_json": "{\"symbols_before\":{\"text_styles\":{\"Standard\":{\"handle\":\"11\",\"font_file\":\"\",\"big_font_file\":\"\",\"width_factor\":1.0,\"fixed_height\":0.0,\"is_vertical\":false,\"resolved_font\":{\"typeface\":\"宋体\",\"bold\":false,\"italic\":false,\"charset\":0,\"pitch_family\":34}},\"Annotative\":{\"handle\":\"DC\",\"font_file\":\"\",\"big_font_file\":\"\",\"width_factor\":1.0,\"fixed_height\":0.0,\"is_vertical\":false,\"resolved_font\":{\"typeface\":\"宋体\",\"bold\":false,\"italic\":false,\"charset\":0,\"pitch_family\":34}}},\"dimension_styles\":{\"Standard\":{\"handle\":\"27\",\"text_style\":\"Standard\",\"text_height\":0.18,\"arrow_size\":0.18,\"overall_scale\":1.0,\"gap\":0.09,\"decimal_places\":4,\"extension_origin_offset\":0.0625,\"extension_beyond\":0.18,\"decimal_separator\":\".\",\"dimension_color\":0,\"extension_color\":0,\"text_color\":0},\"Annotative\":{\"handle\":\"E1\",\"text_style\":\"Standard\",\"text_height\":0.18,\"arrow_size\":0.18,\"overall_scale\":0.0,\"gap\":0.09,\"decimal_places\":4,\"extension_origin_offset\":0.0625,\"extension_beyond\":0.18,\"decimal_separator\":\".\",\"dimension_color\":0,\"extension_color\":0,\"text_color\":0}},\"block_definitions\":{},\"xrefs\":{},\"paper_viewports\":{},\"paper_texts\":{},\"paper_blocks\":{}},\"symbols_after\":{\"text_styles\":{\"Standard\":{\"handle\":\"11\",\"font_file\":\"\",\"big_font_file\":\"\",\"width_factor\":1.0,\"fixed_height\":0.0,\"is_vertical\":false,\"resolved_font\":{\"typeface\":\"宋体\",\"bold\":false,\"italic\":false,\"charset\":0,\"pitch_family\":34}},\"Annotative\":{\"handle\":\"DC\",\"font_file\":\"\",\"big_font_file\":\"\",\"width_factor\":1.0,\"fixed_height\":0.0,\"is_vertical\":false,\"resolved_font\":{\"typeface\":\"宋体\",\"bold\":false,\"italic\":false,\"charset\":0,\"pitch_family\":34}}},\"dimension_styles\":{\"Standard\":{\"handle\":\"27\",\"text_style\":\"Standard\",\"text_height\":0.18,\"arrow_size\":0.18,\"overall_scale\":1.0,\"gap\":0.09,\"decimal_places\":4,\"extension_origin_offset\":0.0625,\"extension_beyond\":0.18,\"decimal_separator\":\".\",\"dimension_color\":0,\"extension_color\":0,\"text_color\":0},\"Annotative\":{\"handle\":\"E1\",\"text_style\":\"Standard\",\"text_height\":0.18,\"arrow_size\":0.18,\"overall_scale\":0.0,\"gap\":0.09,\"decimal_places\":4,\"extension_origin_offset\":0.0625,\"extension_beyond\":0.18,\"decimal_separator\":\".\",\"dimension_color\":0,\"extension_color\":0,\"text_color\":0}},\"block_definitions\":{},\"xrefs\":{},\"paper_viewports\":{},\"paper_texts\":{},\"paper_blocks\":{}},\"verification_scope\":\"declared_plan_properties\",\"schema\":\"foundation-plan-receipt-v1\",\"plan_sha256\":\"C576861A5AB7F75F3C136F7FD752841E23062C206B48F5E27C66F992C12580FE\",\"outcome\":\"committed_verified\",\"effects\":\"committed\",\"commit_invoked\":true,\"commit_returned\":true,\"error\":null,\"objects\":{\"layer-neg\":{\"layer\":\"NEG_TEST\"},\"neg-box\":{\"entity\":\"1B2\"}},\"created_handles\":[\"1B2\"],\"before\":{},\"after\":{\"1B2\":{\"handle\":\"1B2\",\"type\":\"Polyline\",\"layer\":\"NEG_TEST\",\"color_index\":7,\"linetype\":\"ByLayer\",\"lineweight\":-1,\"extents\":{\"min\":{\"x\":0.0,\"y\":0.0,\"z\":0.0},\"max\":{\"x\":1.0,\"y\":1.0,\"z\":0.0}},\"owner_handle\":\"1F\",\"layout_name\":\"Model\",\"vertex_count\":4,\"is_closed\":true,\"constant_width\":0.0,\"length\":4.0,\"area\":1.0,\"vertices\":[{\"index\":0,\"x\":0.0,\"y\":0.0,\"z\":0.0,\"bulge\":0.0,\"start_width\":0.0,\"end_width\":0.0},{\"index\":1,\"x\":1.0,\"y\":0.0,\"z\":0.0,\"bulge\":0.0,\"start_width\":0.0,\"end_width\":0.0},{\"index\":2,\"x\":1.0,\"y\":1.0,\"z\":0.0,\"bulge\":0.0,\"start_width\":0.0,\"end_width\":0.0},{\"index\":3,\"x\":0.0,\"y\":1.0,\"z\":0.0,\"bulge\":0.0,\"start_width\":0.0,\"end_width\":0.0}]}},\"layers\":{\"NEG_TEST\":{\"color_index\":7,\"is_off\":false,\"is_frozen\":false,\"is_plottable\":true}},\"all_layers_before\":{\"0\":{\"handle\":\"10\",\"color_index\":7,\"is_off\":false,\"is_frozen\":false,\"is_locked\":false,\"is_plottable\":true,\"linetype_handle\":\"16\"}},\"all_layers_after\":{\"0\":{\"handle\":\"10\",\"color_index\":7,\"is_off\":false,\"is_frozen\":false,\"is_locked\":false,\"is_plottable\":true,\"linetype_handle\":\"16\"},\"NEG_TEST\":{\"handle\":\"1B1\",\"color_index\":7,\"is_off\":false,\"is_frozen\":false,\"is_locked\":false,\"is_plottable\":true,\"linetype_handle\":\"16\"}},\"model_handles_before\":[],\"model_handles_after\":[\"1B2\"],\"journal_finalized\":false,\"fence_release_authorized\":false,\"failure_stage\":null,\"layouts_before\":{\"Model\":{\"handle\":\"22\",\"model_type\":true,\"device\":\"无\",\"media\":\"ANSI_A_(8.50_x_11.00_Inches)\",\"plot_style\":\"\",\"rotation\":90,\"plot_area\":\"Display\",\"center\":false,\"use_standard_scale\":true,\"standard_scale\":\"ScaleToFit\",\"scale_numerator\":1.0,\"scale_denominator\":2.5848954647083735,\"paper_units\":\"Inches\",\"paper_size\":[215.89999389648438,279.39999389648438],\"origin\":[0.0,0.0],\"margins\":[6.3499999046325684,19.049999237060547,6.350006103515625,19.04998779296875]},\"布局1\":{\"handle\":\"59\",\"model_type\":false,\"device\":\"None\",\"media\":\"\",\"plot_style\":\"\",\"rotation\":0,\"plot_area\":\"layout\",\"center\":false,\"use_standard_scale\":true,\"standard_scale\":\"StdScale1To1\",\"scale_numerator\":1.0,\"scale_denominator\":1.0,\"paper_units\":\"Inches\",\"paper_size\":[0.0,0.0],\"origin\":[0.0,0.0],\"margins\":[0.0,0.0,0.0,0.0]},\"布局2\":{\"handle\":\"5E\",\"model_type\":false,\"device\":\"None\",\"media\":\"\",\"plot_style\":\"\",\"rotation\":0,\"plot_area\":\"layout\",\"center\":false,\"use_standard_scale\":true,\"standard_scale\":\"StdScale1To1\",\"scale_numerator\":1.0,\"scale_denominator\":1.0,\"paper_units\":\"Inches\",\"paper_size\":[0.0,0.0],\"origin\":[0.0,0.0],\"margins\":[0.0,0.0,0.0,0.0]}},\"layouts_after\":{\"Model\":{\"handle\":\"22\",\"model_type\":true,\"device\":\"无\",\"media\":\"ANSI_A_(8.50_x_11.00_Inches)\",\"plot_style\":\"\",\"rotation\":90,\"plot_area\":\"Display\",\"center\":false,\"use_standard_scale\":true,\"standard_scale\":\"ScaleToFit\",\"scale_numerator\":1.0,\"scale_denominator\":2.5848954647083735,\"paper_units\":\"Inches\",\"paper_size\":[215.89999389648438,279.39999389648438],\"origin\":[0.0,0.0],\"margins\":[6.3499999046325684,19.049999237060547,6.350006103515625,19.04998779296875]},\"布局1\":{\"handle\":\"59\",\"model_type\":false,\"device\":\"None\",\"media\":\"\",\"plot_style\":\"\",\"rotation\":0,\"plot_area\":\"layout\",\"center\":false,\"use_standard_scale\":true,\"standard_scale\":\"StdScale1To1\",\"scale_numerator\":1.0,\"scale_denominator\":1.0,\"paper_units\":\"Inches\",\"paper_size\":[0.0,0.0],\"origin\":[0.0,0.0],\"margins\":[0.0,0.0,0.0,0.0]},\"布局2\":{\"handle\":\"5E\",\"model_type\":false,\"device\":\"None\",\"media\":\"\",\"plot_style\":\"\",\"rotation\":0,\"plot_area\":\"layout\",\"center\":false,\"use_standard_scale\":true,\"standard_scale\":\"StdScale1To1\",\"scale_numerator\":1.0,\"scale_denominator\":1.0,\"paper_units\":\"Inches\",\"paper_size\":[0.0,0.0],\"origin\":[0.0,0.0],\"margins\":[0.0,0.0,0.0,0.0]}},\"failed_step\":null,\"failed_operation\":null,\"steps_executed_before_outcome\":[\"layer-neg\",\"neg-box\"],\"step_execution_is_not_commit\":true}",
+      "error_code": null,
+      "error_message": null,
+      "plugin_sequence": 4,
+      "readback_revision": 4,
+      "write_fence_released": false,
+      "write_fence_finalized": false
+    },
+    "source_identity": {
+      "schema": "bimwright-foundation-source-identity-v1",
+      "observation": "immutable_request_target",
+      "identity_status": "known",
+      "request_id": "neg-dup-1",
+      "context_id": "726674a1f01b45449969162f454b51f3",
+      "binding_identity": {
+        "owner_pid": 52832,
+        "owner_started_at_utc": "2026-11-16T01:39:03.4529425+00:00",
+        "owner_generation": "d4924e4becdb47e7b88c3d4875629a45",
+        "document_session_id": "bb5626b57f79467180d0ade156395e9a",
+        "database_session_id": "02a5563c2a0244869456082dd23c53b4",
+        "database_fingerprint": "0dc58146-c6ec-49a6-ad54-c5f3567aed88",
+        "drawing_path": "F:\\AI\\cad-agent-foundation-acad2022\\cad2022-test\\v11-neg2b\\drawings\\work.dwg"
+      }
+    },
+    "outcome_summary": {
+      "schema": "bimwright-foundation-outcome-v1",
+      "effects": "committed",
+      "outcome": "committed_verification_pending",
+      "awaiting_execution": false,
+      "write_blocked": true,
+      "existing_handles": {
+        "created_handles": [
+          "1B2"
+        ],
+        "objects": {
+          "layer-neg": {
+            "layer": "NEG_TEST"
+          },
+          "neg-box": {
+            "entity": "1B2"
+          }
+        }
+      },
+      "plugin_verification": "passed",
+      "server_verification": "passed",
+      "next_action": "inspect_existing_handles"
+    }
+  },
+  "last_query_error": "plugin snapshot identity does not match the immutable D1 write reservation",
+  "query_failures": 1
+}
