@@ -1,0 +1,60 @@
+{
+ "schema": "acad2022-d02-save-identity-evidence-v1",
+ "generated_at_utc": "2026-11-16",
+ "conclusion": "保存身份已修：write_id 传递后，保存作业与 finalize 使用同一请求身份；v11-wallA 正向回归 persisted=true，Unknown request record 未再出现。反向回归尚未执行。",
+ "before_fix": {
+  "observed_cli_error": "Unknown request record; pass a request ID that this workspace submitted",
+  "observed_exit_code": 1,
+  "observed_file_fact": {
+   "path": "cad2022-test/v11-wall3/s2.dwg",
+   "size": 32021,
+   "note": "文件实际存在，但 CLI 以失败退出；这是修复前的原始现场。"
+  },
+  "root_cause": "apply() 内部生成 request_id，但 finalize 仍使用原始 None；保存作业与 finalize 的 context/身份不一致。"
+ },
+ "fix": {
+  "file": "client/foundation.py",
+  "function": "apply_with_optional_save()",
+  "code": "write_id = write_reply.get('request_id') or request_id; require(write_id)",
+  "package": "artifacts/packages/20261116-fix1",
+  "client_sha256": "B99B5473E7A0E6B3F516F9AA1DFF65C3C59A6ECBCA1CCB1AE746C582084790DB"
+ },
+ "positive_regression": {
+  "workspace": "cad2022-test/v11-wallA",
+  "source": "cad2022-test/v11-wall2/wall-section.dwg",
+  "batch": "第 2 批修正版，9 步",
+  "plan_request_id": "plan-b986dd73b6dcf24373a19d70fb51aabe",
+  "context_id": "706791afe3794b2c9a987ce710b276e8",
+  "plan_digest": null,
+  "save_request_id": "save-243cac7aefd247138890b0382cdfc7c8",
+  "save_result": {
+   "saved_path": "F:\\AI\\cad-agent-foundation-acad2022\\cad2022-test\\v11-wallA\\s2fix.dwg",
+   "saved_size": 32021,
+   "saved_sha256": "7e71198cfb3bb667077fae10498d219671475f07eb550108c31e914e05d43b44"
+  },
+  "verification": "passed",
+  "persisted": true,
+  "write_fence_released": true
+ },
+ "dimlfac_probe": {
+  "workspace": "cad2022-test/v11-wallX",
+  "request_id": "plan-fe2ff6cf69d969d2a64fb2b96660c68f",
+  "plan_digest": null,
+  "step": "dimension_style WALL_DIM linear_scale_factor=1000",
+  "before": {
+   "style": "WALL_DIM",
+   "linear_scale_factor": 1.0
+  },
+  "after": {
+   "style": "WALL_DIM",
+   "linear_scale_factor": 1000.0
+  },
+  "verification": "passed",
+  "note": "该探针用于验证 fix13 的尺寸样式修改校验链；与 D-02 保存身份修复独立。"
+ },
+ "not_tested": [
+  "无 save_to 时不得宣称保存成功",
+  "finalize 失败时不得用文件存在冒充成功",
+  "重复 request id 不得重放"
+ ]
+}

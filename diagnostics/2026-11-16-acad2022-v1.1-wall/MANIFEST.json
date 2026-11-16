@@ -1,0 +1,1420 @@
+{
+ "schema": "cad-foundation-source-snapshot-manifest-v1",
+ "generated_at_utc": "2026-11-16T01:21:34.564994+00:00",
+ "source_root": "F:\\AI\\cad-agent-foundation-acad2022\\src\\cad-agent-foundation-main",
+ "snapshot_root": "diagnostics/2026-11-16-acad2022-v1.1-wall/source-snapshot",
+ "scope": [
+  "client/ (foundation.py, plot_style.py)",
+  "third_party/bimwright-dwg-mcp/fork/src/shared/",
+  "third_party/bimwright-dwg-mcp/fork/src/plugin-acad22/",
+  "third_party/bimwright-dwg-mcp/fork/src/plugin-acad24/ (App.cs shared by acad22)",
+  "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/",
+  "third_party/bimwright-dwg-mcp/fork/src/plugin-journal-net8/",
+  "third_party/bimwright-dwg-mcp/fork/src/server/",
+  "tools/assembly-info/"
+ ],
+ "excluded": [
+  "bin/",
+  "obj/",
+  "artifacts/packages/",
+  "deliverables/",
+  "cad2022-test/"
+ ],
+ "file_count": 276,
+ "total_bytes": 2213285,
+ "key_files": {
+  "client/foundation.py": "B99B5473E7A0E6B3F516F9AA1DFF65C3C59A6ECBCA1CCB1AE746C582084790DB",
+  "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationPlanExtensions.cs": "A129445AFDF86959DFEB6A4C6AB385559F9EEE764E3F139A4734DDFBC32F0936",
+  "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/FoundationExtendedOperations.cs": "56F7A616B4034967201EEBEF28B2004EEFE6952C499748A688CF81053C7D6F62",
+  "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationDrawingPlan.cs": "7C6EF1690151841E51BB9EEDF7F23FDDD5218739C79D17527325124DFEA1140B",
+  "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/FoundationPlanWriteHandler.cs": "14F28C0FA016232B938AF25325FD1811A5FD39E8A773FBDDFDD65FE377C06308"
+ },
+ "built_artifacts": {
+  "fix13_package": "artifacts/packages/20261116-fix13",
+  "fix13_plugin_sha256": "77FC7C3EFA6079C63D1F87FCF725A9D37A89AB2E8B7951FA725347CF5D46E346",
+  "fix13_plugin_bundle_sha256": "BA928511F56684C5F83223EE6202730DCBCAB68FE276488C035480C7A3F9C024",
+  "fix13_plugin_mvid": "784f7287-08c2-4a0e-aa9b-e4192db2f327"
+ },
+ "files": [
+  {
+   "path": "client/foundation.py",
+   "size": 33300,
+   "sha256": "B99B5473E7A0E6B3F516F9AA1DFF65C3C59A6ECBCA1CCB1AE746C582084790DB"
+  },
+  {
+   "path": "client/plot_style.py",
+   "size": 6456,
+   "sha256": "AE966B7CC02F46BBDDD3BCA12BA8B6F5D8FB5E15F414A8206247FCD2CE0E834C"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad22/Bimwright.Dwg.Plugin.Acad22.csproj",
+   "size": 3614,
+   "sha256": "2A6CEA768AA32E8633E2BEA85D47A9C9E268BE5C1A944156697A3895EFD35FE4"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad24/App.cs",
+   "size": 29741,
+   "sha256": "BC01225A7C25D96B65651CE33C36DD8595A2702C417E183560B7C73C86DBC22B"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad24/Bimwright.Dwg.Plugin.Acad24.csproj",
+   "size": 2331,
+   "sha256": "BF20B713EDECDB97C6B76C98C0C097A6A5AC1F22AA159E548EB6F17F14182177"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/AcadDocumentContextRegistry.cs",
+   "size": 25205,
+   "sha256": "BF8A8EE6CC6541E787087227841B00040F8F22C2010D8D79EAA09479FE8B3BE3"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/Bimwright.Dwg.Plugin.Acad26.csproj",
+   "size": 3235,
+   "sha256": "8206CC4625AAB008A6034E4B0FEE0EBA723A6CB22C335F483C47CD34BF98D6D7"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/D1Road08PreflightHandler.cs",
+   "size": 1678,
+   "sha256": "27CB5CA8129B1F33DF4822FA6197E081FFE258EF7D45DB659B67834C06324AA7"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/FoundationBlockOperations.cs",
+   "size": 5779,
+   "sha256": "1B26813642898C4147D62D02CFB56BCDD108293004090529B85EB20AB0DDD721"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/FoundationCurveOperations.cs",
+   "size": 1707,
+   "sha256": "ADE63CB6D2E89AD937CAAE20BD2302791CE33B556F2D7A2920E841787AA94170"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/FoundationDocumentInfo.cs",
+   "size": 1739,
+   "sha256": "73B9EF8903F10E144072F0686C0884C6E72B654D8CD7C113AF0F83118DA61A76"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/FoundationDxfExport.cs",
+   "size": 4347,
+   "sha256": "DFF621F6EFBB3E2F46AFB1E647B9F8660376B46F520DD8AD52C2B2922D1001E6"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/FoundationExtendedOperations.cs",
+   "size": 21505,
+   "sha256": "56F7A616B4034967201EEBEF28B2004EEFE6952C499748A688CF81053C7D6F62"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/FoundationGeometryReader.cs",
+   "size": 9736,
+   "sha256": "A573733099815C1CC2827641E080F209B5BF1510F92563E6FE735FBE4CBEED89"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/FoundationPaperEntityCatalog.cs",
+   "size": 6957,
+   "sha256": "0604435B7F2D8BAC3F646D2E347E7DFDCAC0A46EBFC7AABBA739EEDD2F95D7C8"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/FoundationPhase2Operations.cs",
+   "size": 10188,
+   "sha256": "E0EF58B4E24918D6B1B8BF147185F8749C1E2CBF6B65156D6F577E69D5F57106"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/FoundationPlanWriteHandler.cs",
+   "size": 48960,
+   "sha256": "14F28C0FA016232B938AF25325FD1811A5FD39E8A773FBDDFDD65FE377C06308"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/FoundationPrintCatalog.cs",
+   "size": 4778,
+   "sha256": "89648FCA0C5A0A68585B6C5EC73BCFF3FF1DEECC1245837953648BB1CE98848C"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/FoundationPrinting.cs",
+   "size": 10915,
+   "sha256": "141B8261AA47397B9B4228B94B3A3AC34CACB457251CC451C766CAA6494FE369"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/FoundationRasterReference.cs",
+   "size": 1164,
+   "sha256": "0DDE3A1E9386AD0628E094BA7D6009050B3370437ADD551CB623A5ECA118A1A5"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/FoundationResourceCatalog.cs",
+   "size": 1550,
+   "sha256": "72BC07C2EA5811474C6C08D43590CB74ABA605AB6EE8A82E78E3D1D7A5537959"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/FoundationViewHandler.cs",
+   "size": 5137,
+   "sha256": "A65C138E3EE7D464EA79C2E8925323F48D0168E082D9653298B7B47E7BD8CCA0"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/FoundationXrefPath.cs",
+   "size": 2030,
+   "sha256": "E071811BADDD7F2D55EBB3583EAFD918C65E8B0622A8FFEF15C23E761D9675BA"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/H1FixedHatchPreflightHandler.cs",
+   "size": 4031,
+   "sha256": "6A1D16A96592DA23300DD6667D3D9E1C6AE2B76BE289BDBB4122C3BEC3E1791B"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/H1FixedHatchRepairMethod.cs",
+   "size": 7001,
+   "sha256": "25AD495D50E827AD5BCACED3493E869E72AADC49E1C1856E16ED80079C41A2DB"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/H1FixedHatchWriteHandler.cs",
+   "size": 2284,
+   "sha256": "0D42DD85B87D3063B49F2E6021E9A770443AB85588A65A3C124DC52A00694834"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/J10FixedHatchRepairMethod.cs",
+   "size": 9312,
+   "sha256": "4D0627053FF70ADCF41640E0F575EF2B23B7A530D35CB7C6359DCAA1D62188D7"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-acad26/Road08R01WriteHandler.cs",
+   "size": 158533,
+   "sha256": "72643D256EAF11ACC8C275337B58ADA1D31F2766548808E44244BD6E5F00E4AE"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-journal-net8/Bimwright.Dwg.Plugin.Journal.csproj",
+   "size": 811,
+   "sha256": "222E049FDC31F11807ABEAC1B749502839815212B1747DD7ED86DA31A33C8A5D"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-journal-net8/PluginExecutionQueue.cs",
+   "size": 32638,
+   "sha256": "6D6F0062DC71A6E0986D7549575692485AFDD8F14A034916492575CDB4088290"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-journal-net8/PluginJsonCanonicalizer.cs",
+   "size": 4790,
+   "sha256": "7228E8C68420EDEF666FF3A71DAA0F3BDE44B28C1C3C3423B94CC1DD2A8E3189"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-journal-net8/PluginOwnerLivenessProviders.cs",
+   "size": 3776,
+   "sha256": "272C96E6A21DEC4F9590F85E402576DCB49B4C1BB5816FC88F912E297CB284D2"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-journal-net8/PluginWriteOutcomeGuard.cs",
+   "size": 3806,
+   "sha256": "AD255C6B38BD15F9F573DDE57338F04157D7BB9F1234CA98FEA5FC67255BC11E"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-journal-net8/ProcessExecutionLease.cs",
+   "size": 5249,
+   "sha256": "0771D3D0E4460B0C77AD7B022E21AB946134AF017ECAA8F5AA571E355FCD7396"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/plugin-journal-net8/SqlitePluginIntentJournal.cs",
+   "size": 109879,
+   "sha256": "D9C0282F9239210A9930EC42B14A7ABB9F387B0D7C0FF3E0F800328BB907ED0E"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/AuthToken.cs",
+   "size": 10911,
+   "sha256": "EE723A0492AE4A04FBC724519B0F50AA66E6EFFA74D1F359514BB07D8FCEB3CB"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Bake/BakeDb.cs",
+   "size": 13715,
+   "sha256": "1D2F0FAA79A1D9C6B5A5BC03660C84D0D8BCB3AA4929AAB9C5CE2B96880E1357"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Bake/BakePaths.cs",
+   "size": 1487,
+   "sha256": "3A0F7B17FA329F823D6497B3ECAC8D338ECFDF6050C4F78169303956350225D3"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Bake/BakeSuggestionRecord.cs",
+   "size": 699,
+   "sha256": "B58DCE67867F371DB50074E57FBD7A1566BF1ACF239ED0D9032AE6495BBB9FFA"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Bake/BakeSuggestionStates.cs",
+   "size": 646,
+   "sha256": "EEC2B8EDA2D2899AE893EE0C12DA8352DF9160AB695E281F559BD8193D4DE2B3"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Bake/ClusterEngine.cs",
+   "size": 528,
+   "sha256": "8C8C748D8F978FE3086734A7F0AAB4D6A3000E34997883CF9B56F0A061D69687"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Bake/SuggestionProposer.cs",
+   "size": 1355,
+   "sha256": "DBF7AF7809CF69A87435AB481C706563118A4E03A19255A0C113FE738DF3AEDE"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Bake/ToolBakerAuditLog.cs",
+   "size": 688,
+   "sha256": "A4D9225087AD9D62A13F2F16C5E8E33C9D747B9FDACD4A4CCD301F0EDFC44F5A"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Bake/UsageEvent.cs",
+   "size": 404,
+   "sha256": "1923B04F62D7DDE3F53C2F9E9CF8481BDEF1F312F2B9F8D13B17AD6FA734A2D8"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Bake/UsageEventLogger.cs",
+   "size": 1058,
+   "sha256": "8956C5C3005319100CFD3A8DCF01AB5CDA3D2C3D82B66FC86A7A4E381BB0377B"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Bimwright.Dwg.Server.csproj",
+   "size": 5584,
+   "sha256": "5D5A6404884D2D8D2AC546DEAF756EA74C804F2B3D801C74F6113DE71BB209D6"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Dto.cs",
+   "size": 1646,
+   "sha256": "467F808D389A1BDE2D937DA3FEE4E502C0A106E015C73451B845DC5ABE5ACFB4"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/DwgMcpConfig.cs",
+   "size": 12997,
+   "sha256": "856A502CBA4BB736E479F4841310F16631A643FEF469DD74D5A828439105AC6E"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Execution/BoundPluginContextStore.cs",
+   "size": 39807,
+   "sha256": "B70DC08D6D211D6DF19037F07D093580C9D52EEC66DFBFF9816CF7E4AE20AC12"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Execution/BoundPluginExecutionGateway.cs",
+   "size": 108574,
+   "sha256": "3329B01ADC382C73FF95B11FB00B9DBD23EFCFD9CFA3D653ECDBD633F0D5EC59"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Execution/BoundPluginExecutionGateway.D1.cs",
+   "size": 76222,
+   "sha256": "4B08729C6218EFC21D4A4BB999CE66D42BC7E1EEE2D10950A293A8584EA5E89A"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Execution/BoundPluginExecutionGateway.FoundationPlan.cs",
+   "size": 4223,
+   "sha256": "741E386E24674BFAE5BAEFB87919E043840E5282D877D2A35C8FDDA64AF9DC88"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Execution/BoundPluginExecutionGateway.H1.cs",
+   "size": 1826,
+   "sha256": "4F33F8F19E75CE45A7952DFACF6018BC0782359A2AC6F0999D0657BC1F989F5E"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Execution/BoundPluginExecutionGateway.H1Write.cs",
+   "size": 7098,
+   "sha256": "CDAF88D21C0E24FCF4D855D594E3EA71E1F0F001A134FE60D164397B0E9DB523"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Execution/CommonArgumentMcpServerTool.cs",
+   "size": 10465,
+   "sha256": "959A4FC2B04B73175A22F51E05F80F282ED2BA1EFA6E67126F74F2768E3918B0"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Execution/D1Road08ReadbackVerifier.cs",
+   "size": 49130,
+   "sha256": "23C12F8764E90FA0C646F89A2C299D73C8B7FEFFA61800A90D8E47DEFAC32FC0"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Execution/D1WritePilotScope.cs",
+   "size": 4325,
+   "sha256": "6E4CC54D1A74127E1E49658421B154F47970ABAE1E636F2B0B76A3ADC0E62193"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Execution/GovernedToolFactory.cs",
+   "size": 5201,
+   "sha256": "7244636147D751FA65DA12F3E1427E7EAF85FA7507E883124A73540553B281AB"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Execution/RequestLedger.cs",
+   "size": 74072,
+   "sha256": "B69DF9A57C2CE46889DC65E7C9C81F8E72265EA1E179C75EBFC493871E196C18"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Execution/RequestLedgerModels.cs",
+   "size": 4719,
+   "sha256": "FDA5A108D61589F25605A67368BB8A2535E56E826EFD2E3E8BD4B3322EE424F7"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Execution/SqliteBoundPluginOwnershipStore.cs",
+   "size": 37401,
+   "sha256": "B452A1D09FD072424224C34C1F0900C473083578A7294CBF1F384AEA36732F62"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Execution/ToolPolicyManifest.cs",
+   "size": 6794,
+   "sha256": "3F5938E6F778CDC3144652575757101E79792D7D42407A79BDD751638E917FE3"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Handlers/AcceptBakeSuggestionHandler.cs",
+   "size": 7425,
+   "sha256": "279E2091D5CAEAC40095874083AF1100293491BBAF8E00A278FF5FC7B3B50F46"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Handlers/DismissBakeSuggestionHandler.cs",
+   "size": 1206,
+   "sha256": "6960447B928939083C2AD4AA220730314B4F30209298432AEBB0B70DC1960CE2"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Handlers/ListBakeSuggestionsHandler.cs",
+   "size": 1331,
+   "sha256": "673737FA14EE0AA3216CF4EE29D5F511D85B0CBD580F7AE984E5470F358E68C7"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/LispSecurityScanner.cs",
+   "size": 14523,
+   "sha256": "B1E4F42D99E6511D6ED72E4D122F5AF030345346C417336D687AD4CEA7EED4F6"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Logging/McpLogger.cs",
+   "size": 1032,
+   "sha256": "6270F918DFCFCC1A8CB0A9AD366B7AA1A1AA6F4A69CE7AA1816151632A94950A"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Logging/McpSessionLog.cs",
+   "size": 826,
+   "sha256": "19321B86A5E148E0DF6B048889A1A54801810CA6EF6EC4CE7C33CA29A21B47D3"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Logging/McpSessionLogEntry.cs",
+   "size": 368,
+   "sha256": "95D52ACB187679E841323A9A5EC0FA0D7A56AC070B8E4FFBE676A2B53B5F97F1"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Logging/SummaryGenerator.cs",
+   "size": 1066,
+   "sha256": "B90F21E87AE43DA58A2DCCEC397F5654BDB9A2614F63FF1FDAFE050C5C83ACB6"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Memory/JournalEntry.cs",
+   "size": 326,
+   "sha256": "5AF4489251EDE0926A25BEC6CE212F0E12999B91CB019930BC80F331ED0DE31A"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Memory/JournalLogger.cs",
+   "size": 676,
+   "sha256": "D0A1E95C9D3222847EBA91E8CFB18F490E97630E9382CF624430A46DA429F1E4"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Memory/PatternDetector.cs",
+   "size": 873,
+   "sha256": "833C0F5D2FD1F2745E0CE94D6CC6045C71D7BD58FA3EA17B0281D2B257412525"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Memory/SessionContext.cs",
+   "size": 614,
+   "sha256": "F8F9A220225E692A49C2E26A326F74A534C6DD7955EF39B30F6A992D26D09932"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/PluginClient.cs",
+   "size": 17505,
+   "sha256": "1D3DE383235A3E479D05D49B28C02032A1E9A845F89F44787C58750E5BB25658"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Program.cs",
+   "size": 38204,
+   "sha256": "72DC3B321D9253419546C0465C5E402073ADC9EDB0D5C1A350FD7033F2D92D63"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Properties/AssemblyInfo.cs",
+   "size": 424,
+   "sha256": "4FA5D20269DDB8B66C6A4C763848AE327F4EA6500E545EF92717A1DD3927CD05"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/ServerLogger.cs",
+   "size": 2071,
+   "sha256": "A8CE6C8E087768FA02DEAC939F3CB983A8C038C1AE0CE70F87E66A06297AA81F"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/ServerState.cs",
+   "size": 1433,
+   "sha256": "BD728A89DD8EA19AAC7FA88455A71572E314CC39B53387D1121258B72F528CF5"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/ToolCatalogBuilder.cs",
+   "size": 3722,
+   "sha256": "83FF6A0A59FD7AB820CF664CB8F7095D09197A8942A8DF079127242583F2A4F3"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Tools/AnnotationTools.cs",
+   "size": 7555,
+   "sha256": "FC89C66E0836496FC4DC99269B04EE5D243CE91142C90A8D5A99813E80F7ADD8"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Tools/BatchTools.cs",
+   "size": 1007,
+   "sha256": "F380077C9A2CBE6B3E274123158B81399BF77D888E0F472EEF7E0AA97DB2E291"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Tools/BlockTools.cs",
+   "size": 1148,
+   "sha256": "923A62D673718D3C0CBA84824D26ADBCD84E0FA80B43E01FCEDB7A601203D381"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Tools/BlockWriteTools.cs",
+   "size": 4441,
+   "sha256": "30143678C109D7D900855DDB9684BBF5159E07EA4D48C51F2C6FC497C0FF4D91"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Tools/CodeTools.cs",
+   "size": 2948,
+   "sha256": "BE419293BFB8657F90A98C85A3C7FD23601F5592F51AA1D9F247D5C41EAFDF54"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Tools/D1Road08PreflightTools.cs",
+   "size": 2227,
+   "sha256": "F4C9812A7A8E0038A289ED7B091AABA7A0560B9CEDA406EAF6ACF9D89CC20254"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Tools/D1Road08WriteTools.cs",
+   "size": 2257,
+   "sha256": "82D295B567A136C49F35091AF6E597A6491E9169EE4256BABFA9358C80AEB461"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Tools/DimensionTools.cs",
+   "size": 7878,
+   "sha256": "3FCE279D46C6006AF046667F8339AB7BFB24DC2CE73041AA75A61906ECC5FEAC"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Tools/DrawingTools.cs",
+   "size": 609,
+   "sha256": "9BD994E28B9822066A72729C3A65743492BF20B714868197EEB84D28EA7503FB"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Tools/DrawingWriteTools.cs",
+   "size": 2935,
+   "sha256": "3E192AE5E3539F4CF9ADEE246D5BF2CEE2E7692192BE7DE8F484C7CAC0D7A502"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Tools/ExportTools.cs",
+   "size": 1134,
+   "sha256": "3834BABD8992B7644117FDFD07313D9CDEFC53C1BC380967B75055E0DEDA4046"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Tools/FoundationDrawingPlanTools.cs",
+   "size": 3970,
+   "sha256": "DD950CD3B5C8BE1328EA6DD404003C0D1F5031CE15E22F870D4C6A6E9399171C"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Tools/FoundationExecutionTools.cs",
+   "size": 5092,
+   "sha256": "DE0C6B26498F8F7ACA60A5770972349696AD2092A057E9B064DEDA2D91C270C6"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Tools/FoundationSaveTools.cs",
+   "size": 1496,
+   "sha256": "FF9BF7F70FCF4199551596D34483C8191F54FDCEE6AF16C266E5C06278F0273D"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Tools/H1FixedHatchPreflightTools.cs",
+   "size": 1827,
+   "sha256": "412E3A2174D95BC06D0E5EA705D360EC8461474CB5CCA281137069997AD80C46"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Tools/H1FixedHatchWriteTools.cs",
+   "size": 971,
+   "sha256": "300EE80BA0D90008657363167BB7D1E55B2C8A7CBE63916524DD28A009B39B29"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Tools/MetaTools.cs",
+   "size": 2504,
+   "sha256": "7CF16B55D2CB91297ECD847BA5A3F92A37178A812895DE187AD37BE58680CECB"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Tools/ModifyTools.cs",
+   "size": 30850,
+   "sha256": "8CDE7804194EE201A3E44EBB0382C1595BE2F4F19E10DAAD57087C50C8BBB0F6"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Tools/QueryTools.cs",
+   "size": 14709,
+   "sha256": "9C87A0B3057A95ED60E5E4A98A17D466201F2C96B0D47F7CA4A6F0C028D64E09"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Tools/ToolBakerTools.cs",
+   "size": 3213,
+   "sha256": "1E67D56EE317AFFF90DB0C03AFAAA25430198D0D7254A547E0140BED57B00B44"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Tools/ToolBakerWriteTools.cs",
+   "size": 3728,
+   "sha256": "2A208B348399D91756AB44DC91C0E11FF71A5C6814A576B734FA748A1462EFEE"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Tools/ViewTools.cs",
+   "size": 8925,
+   "sha256": "79D4C5576D37CADB22513BAB30814BEC8E096475040D5612A241111B105090D9"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/Tools.cs",
+   "size": 5401,
+   "sha256": "AB2A0FA5C0362C4739184C8B8171369F10EFE12B7334EDE7CCAF83030785B435"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/ToolsetFilter.cs",
+   "size": 2107,
+   "sha256": "E24861CB16D77CC3A0315F73D6280484C5539EF472A8F492A3600CFA834D4931"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/server/ViewImageResponse.cs",
+   "size": 3013,
+   "sha256": "9B98BAB4EA454EC8E2B3B65846C4A2BE3F0E252A538312A33754CA6A22EF5A3A"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Annotation/AnnotationEntityFactory.cs",
+   "size": 12569,
+   "sha256": "3397C5706B82C61F729D9D5AD77B50677121CABB685CF7739D4AB5287B478B68"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Annotation/AnnotationRequestValidation.cs",
+   "size": 2093,
+   "sha256": "9431E3A5B07A9F5D8925048F3F3B671C188716AF22B71DE4556F463880493162"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/assets/fonts/README.md",
+   "size": 557,
+   "sha256": "96131E10B4A0D7FF8A87F42E7568B6DE4244F2AF993FF55AF8BCD1C1105A1ACA"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Blocks/BlockAttributeService.cs",
+   "size": 8622,
+   "sha256": "CA19395D49F9F907A963957BE9FF01363D1EA6032C913350B679040A8682B93C"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Blocks/BlockDefinitionResolver.cs",
+   "size": 4921,
+   "sha256": "854F2A3C8619D2933191C410DFD3E9DC4C79285B5FE4C3DE4DDE964F7376E69E"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Blocks/BlockReferenceResolver.cs",
+   "size": 961,
+   "sha256": "6205BD1522711F1F4F83A072F8518048310B2A12569EFE0128A23B6FDD7A4723"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Cad/CadEntityProperties.cs",
+   "size": 25633,
+   "sha256": "D54BA777F08D6DAF6DA032194CB7FB94757DCC2DD6EF97C73A3C0E41E88279DC"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Cad/CadHandleResolver.cs",
+   "size": 1071,
+   "sha256": "49FC5F15AA65DD4802F39041F15084132D8D8D3DF2970063DA00D56DC5CC96E7"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Cad/CadLayerService.cs",
+   "size": 5863,
+   "sha256": "1132E13B6EAD05F40CECCEE9AB196C0CC1012876C10A0FD92EAF3FC1927B10A9"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Cad/CadPrimitiveValidation.cs",
+   "size": 2279,
+   "sha256": "0EADA88997345FA4CCBF814E9600ED989295F9A27DB1C83B18AF20322012D614"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Cad/CadPrimitiveWriter.cs",
+   "size": 878,
+   "sha256": "4E1660AB7B1EA2006E1624A73790ACD538340B27D57DA6752A146163817AFA38"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Cad/CadQueryPageToken.cs",
+   "size": 10421,
+   "sha256": "7444E20CEA98FC480D40D8F0C02B314A28B8529F9A2F8E98EEF3B10E7F996D81"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Cad/CadQueryService.cs",
+   "size": 9049,
+   "sha256": "83770C92972B177B5C91BD489BFE67B0D9715AC1C68213FF4E0C9251ECF945FD"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Cad/CadTransformService.cs",
+   "size": 1294,
+   "sha256": "F3B2611A654CC0EC40C08BDA6654BD223D036AF767A82C33C9FFFC34A5973C0D"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Cad/CadWire.cs",
+   "size": 5774,
+   "sha256": "4A23187DA9F68897AA0D971C340D3328784E5350858262ED3713E21F64725D0E"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Cad/HandleBatchRequest.cs",
+   "size": 5401,
+   "sha256": "771C01B217126F9FF3F317D2CFED3A109267CC988AB55133DA18FF8B5F3CDA3C"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Clustering/SpatialClusterer.cs",
+   "size": 12686,
+   "sha256": "A606E5AC9427DB092EA0F665643C6174EA442299C10C6996B493A3F43EF4A0F1"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Config/PluginSettings.cs",
+   "size": 5144,
+   "sha256": "A3D8ADCC0C4A99AADB8E59B742EB7058D3AE15BB251EB5EAE923DB550442943E"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Dimensions/DimensionEntityFactory.cs",
+   "size": 9807,
+   "sha256": "7627D44F4D6E6DD529584EC1C1093E610A24AFC5B2D513D815E2BA8AFF3C7F9A"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Dimensions/DimensionRequestValidator.cs",
+   "size": 4937,
+   "sha256": "E8C9AB1DEA79B18BFB8FA26250EBCFEE94647AACE1FDB229026F5D4E3E31FBD2"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Dimensions/DimensionStyleResolver.cs",
+   "size": 1171,
+   "sha256": "F1E3CE6F47A210FD768A9C89B43DD3B9073E52D091A1CCE3009BD72CC3A485A8"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Dimensions/DimensionTargetResolver.cs",
+   "size": 2100,
+   "sha256": "D4F67A8FE1CB23004A08EE14E15D21186A8205D9CF55E525F5E68C9B9169FA49"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Drawing/DrawingSaveService.cs",
+   "size": 1838,
+   "sha256": "E5038B430AB3FFE15B6173113BF5E99300D50C4D53C078CA4CD61B4FDFD84DB7"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Drawing/PurgeDrawingService.cs",
+   "size": 3824,
+   "sha256": "72D2E63E32F73AB5A644DB7B0A59875FEA766235F01D0974998C1F614DE784C9"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Drawing/SystemVariableCatalog.cs",
+   "size": 3457,
+   "sha256": "48EDC1AECBC6B28CE808EE8093AB1E5D56EBEE00C5E57D169B9329775C0D3B87"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/DrawingRiskKey.cs",
+   "size": 6800,
+   "sha256": "33F13FEF7FE27B9892F2173BB4BF681095A9608D20D99D9E6437F05A46D84316"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationAngularContract.cs",
+   "size": 2573,
+   "sha256": "2891DEC417F7D3849D4DA6C64D21AFE4C32E1B3F7B12952ACE90FA21768B3CFC"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationArchiveRoundoffRecovery.cs",
+   "size": 2602,
+   "sha256": "6E743DEE059A69297F7AAF0197B2CB6BF7D277ED5BB85D061092887A658010B7"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationBlockCacheRecovery.cs",
+   "size": 2011,
+   "sha256": "0AAAAA119F11DEAB93CD2C66214F7BEBECCDF869089E4BCC95FF4ECEF75AB493"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationBlockContract.cs",
+   "size": 6308,
+   "sha256": "34EF71597E9EE7D5BF7F519E7E4E5F392E5BA914828DA4B6A582AB1C4602733C"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationCurveEdits.cs",
+   "size": 3223,
+   "sha256": "3C30EBFACAA44DD0AC51284A6186F37F01314A27BED6FDB1C4BEAA330B3C29A1"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationDrawingPlan.cs",
+   "size": 36777,
+   "sha256": "7C6EF1690151841E51BB9EEDF7F23FDDD5218739C79D17527325124DFEA1140B"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationDxfContract.cs",
+   "size": 1731,
+   "sha256": "E15606849CACDAD7A1BEC212D1D08D3788065E49BCFB8BC0125831394340A7BE"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationPaperViewportContract.cs",
+   "size": 5806,
+   "sha256": "CB4244DB557C0C075187BAA09CBA37FE51C69D899E5C48CE3E54D3183AA29442"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationPhase2.cs",
+   "size": 15016,
+   "sha256": "D08039CA8EB9BCEB67445854E293E39D123FCE26717564A8A481ED9574D5FA4D"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationPlanExtensions.cs",
+   "size": 28073,
+   "sha256": "A129445AFDF86959DFEB6A4C6AB385559F9EEE764E3F139A4734DDFBC32F0936"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationPrintContract.cs",
+   "size": 5787,
+   "sha256": "B82C21DF49D8F8F317A626BB8152950EA41F70814D7E0C09BDA11EDC4C552EA0"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationSaveFontRecovery.cs",
+   "size": 2696,
+   "sha256": "149D3088E94EFFBDA312F0F7A4844A4A7E4EF9B48CFF36D55D10FE977BE8DDA3"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationSaveRequest.cs",
+   "size": 2101,
+   "sha256": "B08EC594CCD3DF7A0776F7F9AB3BF2E054A880291AC1B4E5EA761CC4462A8365"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationSaveXrefCacheRecovery.cs",
+   "size": 3216,
+   "sha256": "7E877BD3D500556BE2BE8A0EF0FE456579A5578B1D7CF93EC5D365FA12123C91"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationTextAnchorRecovery.cs",
+   "size": 1430,
+   "sha256": "C7D41FB739E6E1B1F9A61ADADB15F23408098A7B2566D7A3295939E1E9056A2E"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationViewRequest.cs",
+   "size": 2428,
+   "sha256": "C5E44F75CE69CDCF31B2F8CBF7BA12187A1C0C4C3613BD30768A971F65F42D79"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationXrefPathContract.cs",
+   "size": 1627,
+   "sha256": "5246603317CD8C1772A487BC90F62160A3A17E77605A38BC82299F0A8AA434D8"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/H1FixedHatchPreflightContract.cs",
+   "size": 8796,
+   "sha256": "86455349CD80F3646A8A38AE04738D1421514AE8C29FDE21F16C8788122BA87F"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/H1FixedHatchRepairReadbackContract.cs",
+   "size": 1676,
+   "sha256": "B41A3E04F8EE1FEF9694DE09C95E217A368186F6EB81B00E91AFADF48DA44260"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/H1FixedHatchWriteContract.cs",
+   "size": 2408,
+   "sha256": "6B058A780386E08D7846AE997B0F777A544B70C9EC3EA3830DEF78874D1E4F23"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/J10FixedHatchWriteContract.cs",
+   "size": 7122,
+   "sha256": "7706B1667956FDABB9461C8092370CA33ADF9E021255A6016395A3F2C68AC4D9"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/NativeLibraryPreloader.cs",
+   "size": 2711,
+   "sha256": "904FF039B503685A3562F58E13A14DF8B18EE0F82CFB038AF955444323C97966"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/NetFrameworkAssemblyResolver.cs",
+   "size": 3515,
+   "sha256": "8DD4BBF4E2A2D3A96E63301AB570ADFD66B24BF7EEAF80EC5207B7055DE58396"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/NetFrameworkPolyfills.cs",
+   "size": 311,
+   "sha256": "58CBB58C2C60BE1F6731A8F3D919D6D1761EAD69B87B2480B88A8B916354ED7C"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/NetFx.cs",
+   "size": 5801,
+   "sha256": "44C5FDA7BD36224163F082A76484C8E461052C12B989F993680060A76CA8E373"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/PluginJobModels.cs",
+   "size": 23119,
+   "sha256": "C8FC65EFDF1BF40B850508CF9206F0C7EB5C8A97C585618650A5C310DD968612"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Execution/Road08R01D1WriteContract.cs",
+   "size": 19421,
+   "sha256": "9339234FDD149A8A8F441715A8CB3273B75B1B2C952E502E9756984C67DB4CD2"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Export/ExportPathPolicy.cs",
+   "size": 6132,
+   "sha256": "13B7A20A039EB41C22B315821CAF9284CD092293CB61C73EE33386EACB778BD3"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/Annotation/AnnotationHandlerSupport.cs",
+   "size": 4113,
+   "sha256": "42A100511E21D7CC5E70A015B0A1960BDF9C8DE35CB90F87F0A175BF48DE2BE2"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/Annotation/CreateLeaderHandler.cs",
+   "size": 1049,
+   "sha256": "A0E4E001379E1049E24C4A3F4D50D4346C1C80DF689F9262202B5232FB57D43B"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/Annotation/CreateMTextHandler.cs",
+   "size": 1040,
+   "sha256": "342383CE3F5D18990555EF3095E686305EAD064DF97BDD5561ED98C791AF3310"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/Annotation/CreateTableHandler.cs",
+   "size": 1009,
+   "sha256": "1533B8A1CF6E29CD8B9E503F4DA619176F1A26B0399579B35A574BD4B22D300C"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/Annotation/CreateTextHandler.cs",
+   "size": 1036,
+   "sha256": "7893BAB672426C393A99C8908CF1F42D241291CE49EBF801298D7B34FC7847E9"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/ApplyBakeSuggestionHandler.cs",
+   "size": 2441,
+   "sha256": "85254A3CCAF13A10C0A2B55C321FDA7DD2D0A3E6D4D42E10C085A47892C72DCF"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/ApplyUnicodeStyleHandler.cs",
+   "size": 4288,
+   "sha256": "88AD400D58B428F724D9851C0331EF0085F70CB63726F606BE7076084B5619B8"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/BatchExecuteHandler.cs",
+   "size": 960,
+   "sha256": "0564BBD250E8C448882D9FD7662D8978FA4005E936879A3C057CEC31CBA0F27B"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/Blocks/BlockHandlers.cs",
+   "size": 17094,
+   "sha256": "D8827D10E0EC3AE6084992C41A770442EF03DF27134883202D3C6211151B14BB"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/ChangeColorHandler.cs",
+   "size": 3767,
+   "sha256": "722774036A52DC3B6623E28AE797C3E36EC1FCEC871BC5D958226F6949967C02"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/ChangeLayerHandler.cs",
+   "size": 5628,
+   "sha256": "57BE60BBE3E6CEB192817286605B686AD4696A077FDE9254E499449AF8AAB74A"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/CollapseAndRewriteHandler.cs",
+   "size": 4422,
+   "sha256": "C16230A1FC5C03959C3BBD32E1FB7CB88BA04A893E5CF670412589AD1DC8B83A"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/CopyEntitiesHandler.cs",
+   "size": 4067,
+   "sha256": "87FA102C086D9FFB7BCAD89C66B76C25456053203A1309B176C47B65B29AFF13"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/CountEntitiesHandler.cs",
+   "size": 1180,
+   "sha256": "A02BBF9F8AF57F8A8B48ECEADE62095997B37AE5E6D83E3A8BCBBD959ADC5F04"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/CreateArcHandler.cs",
+   "size": 3454,
+   "sha256": "BD1E7A1653D737861F07A8D1543F8015474F2A62C78FA5EF7CBDFE6EB9F5B670"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/CreateCircleHandler.cs",
+   "size": 3670,
+   "sha256": "D210D945CCC6D1C38897DF13881073FF53994D20996CD9527AB5F1E22FD94A2F"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/CreateEllipseHandler.cs",
+   "size": 3938,
+   "sha256": "429EC2860F6450244B475DD76EE60FEF9DFB3DC793F52DDB3B1E4C57F14E5C7F"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/CreateLayerHandler.cs",
+   "size": 1766,
+   "sha256": "F88A26C9832FAE662C0ED145B8D7B03CC0476D5A043CDCD482792D3BBE39D78E"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/CreateLineHandler.cs",
+   "size": 3792,
+   "sha256": "26A130431442C45131EFF11C3440C5137C99834A29B4E4BE7F48836C593CA9F9"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/CreatePointHandler.cs",
+   "size": 5815,
+   "sha256": "8844633249CA590725B1AFFF1CA4E369335780CE519D1FE1C73C97AD3EABDE0F"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/CreatePolylineHandler.cs",
+   "size": 3882,
+   "sha256": "F2788E7FAC76A3CF91F336184DEABF126A14B17C7ABAAED3065BB9EFFC3993A2"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/CreateRectangleHandler.cs",
+   "size": 3329,
+   "sha256": "2CD4492252F1D1D0CE5496A852BD42755426B6E83446E3B10DDADFD832F930BA"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/Dimensions/DimensionHandlers.cs",
+   "size": 4525,
+   "sha256": "EFCFB828D3A0BCE1BA97E7B969EFC829840F63738F71D61D6503DE6088FFFBDA"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/Dimensions/DimensionHandlerSupport.cs",
+   "size": 3434,
+   "sha256": "BD36105B5A47A312493962984E00427A6EBB544804F09DE4BE8C8DACC5B32D26"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/Drawing/DrawingHandlers.cs",
+   "size": 7148,
+   "sha256": "86A05718F82149CD32D09E5ABA19B6F9019EB6D55CB02AC8F6866031E56CAFAB"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/EraseEntitiesHandler.cs",
+   "size": 2112,
+   "sha256": "52DB5A784435983156A22B55AC31A7BE5045BD8499B39F1DBDBFD70046D92D01"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/Export/ExportHandlers.cs",
+   "size": 1643,
+   "sha256": "9C5001A776EE5F4DCBADD0BFCC2AD26EA9196A4EABAD9B474AF3E8E82DC57B61"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/GetDrawingInfoHandler.cs",
+   "size": 4786,
+   "sha256": "2DD7880240C07CD7EFD22090F63DE50A896C3EB8C9AAE802015FABA24622BD15"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/GetEntityPropertiesHandler.cs",
+   "size": 4481,
+   "sha256": "B2FE2DEEBDC23326C736C106A5DD65E57F092D2E8ED99EF350F30628D0F1A3D6"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/GetSelectedTextsHandler.cs",
+   "size": 9620,
+   "sha256": "19838F2C8E8289C57D04A8FB9BE2BA44CD3E1D4A589637A24F0A451C8821F1C0"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/ListBakedToolsHandler.cs",
+   "size": 595,
+   "sha256": "2C4F85FBF37C372046A7256A0916173CDBDFD02475A2A1863DD28B43F0FE271B"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/ListLayersHandler.cs",
+   "size": 598,
+   "sha256": "E44058B125C49EE48E886CC2DBA4F4A69E5996A1EB364B60131B6EABA371BD0D"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/MoveEntitiesHandler.cs",
+   "size": 4914,
+   "sha256": "05625E623C9919F355C8F3A118DDD1C47E852EB51CBD92EA2CA3B66FF1564F56"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/OffsetEntitiesHandler.cs",
+   "size": 7898,
+   "sha256": "9A137CD3C18BEBBA629F6E79FC1D0E3544265D26D86F39E9AB390DFBCDD9BFE9"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/QueryEntitiesHandler.cs",
+   "size": 12316,
+   "sha256": "DBF246DF986E000CF4D73367DFFD3F7A89AE2FF5213F67276BCBDB9F4150137B"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/RotateEntitiesHandler.cs",
+   "size": 3025,
+   "sha256": "B04C276E6BFDBCC718F740EAA6AAEE05FB9D3F851E4735747C83292475418CCA"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/RunBakedToolHandler.cs",
+   "size": 3604,
+   "sha256": "FCA1A36272B6DD94A3A4C401B65565FC0B2466C84E0BC9CB4F29410267283F07"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/RunLispHandler.cs",
+   "size": 724,
+   "sha256": "AA4175A46501281793139585733FD9668DC0ECB54802A12CDF946DA01F01286B"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/ScaleEntitiesHandler.cs",
+   "size": 2893,
+   "sha256": "E79F9694EE72CB6C6A8E1E59DB911476116E0E368DA427A314AD54FAA2A4BE11"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/SelectByLayerHandler.cs",
+   "size": 1821,
+   "sha256": "901FFDF15FB7E840DF639C0EEEC6E67BAB1DC1E69384B77C03272E0CE8AE7FC6"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/SelectByTypeHandler.cs",
+   "size": 1837,
+   "sha256": "2C8408540F96F3F570815656151ECC34BD44D00DB146E26914F58F1B226B4A78"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/SendCodeHandler.cs",
+   "size": 7286,
+   "sha256": "A86C9923E6728847C1D32039736F27FBFCDEC4E1CC4E6CC13D534120332F71F5"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/TranslateAndRewriteHandler.cs",
+   "size": 4780,
+   "sha256": "CE5E5A36FC768CF48AF47B232F53175A40C52B8DF474EDD6C4FA753296891583"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/UpdateTextsHandler.cs",
+   "size": 6250,
+   "sha256": "1AC096F3A0672C840B684397F2872C4F030451BA6873CF149F806FEE0BE91C81"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Handlers/View/ViewHandlers.cs",
+   "size": 7305,
+   "sha256": "F26E09F0B5CAAE8E37204BD9FA09215F985E904FDE633A161EDC60BAB61BE89A"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Infrastructure/BatchExecutor.cs",
+   "size": 3525,
+   "sha256": "68B1D2C1F4D03FE925EA2C8AB9DA71677F7D96C6C799EE5E4AA0AAAD6BED05F5"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Infrastructure/BimwrightAppRoot.cs",
+   "size": 12716,
+   "sha256": "BA486097642B9203E1B6479BB4C08169519CB54C86CA34D8B240F7524AC30C3C"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Infrastructure/ClusterStateStore.cs",
+   "size": 1746,
+   "sha256": "957E266DDE9B66DB6FF46A3A92B5AE86E79EACCE50BB70CF62174C0A52D4F2AC"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Infrastructure/CommandDispatcher.cs",
+   "size": 51008,
+   "sha256": "89F0E5DB44519B2A5602C64B630DD13A3BA1D41F09EF7DE894165C8D29866EA8"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Infrastructure/CommandResult.cs",
+   "size": 444,
+   "sha256": "341FE8B7B97423292CCF69B83453300919E5F1C6B8E9F954DDB10137D4BADBA8"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Infrastructure/DocumentInvoker.cs",
+   "size": 1507,
+   "sha256": "59EF42A11EE379B57DECDA0F61E893748A530AA13F2CB8736C88CD97A9DD6DA6"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Infrastructure/DwgApiExecutor.cs",
+   "size": 1879,
+   "sha256": "6D506D6508E83C5875740EDB30DC904279AE95152767AE077DB76C95B5B6F1EC"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Infrastructure/IAcadCommand.cs",
+   "size": 321,
+   "sha256": "86FCC1C5013E15F9844DE7E8DE6F3652803B67645305D8EE367948985637A715"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Infrastructure/MainThreadExecutor.cs",
+   "size": 2048,
+   "sha256": "D0821B2F20BF13021871B9886D041DF3C4006A0BCB18DC71D76A0B09A4D279B9"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Infrastructure/PluginLog.cs",
+   "size": 958,
+   "sha256": "6E3C77238917FE74B298A03DF4674C4580916E8AE26B2D5D6BDEEBCD0127DECF"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Infrastructure/PluginReadOnlyJobParameters.cs",
+   "size": 8397,
+   "sha256": "C708D49A7E3E5FFC869B9E5220685E60FF56FB63DF92FD9F62777C6F4004B3EC"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Infrastructure/PluginTarget.cs",
+   "size": 470,
+   "sha256": "B18DE0D0299E76DD7B6BC486E8FC76AD99A5E624AD34E6AC7DC6097234D7EAAC"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Infrastructure/ResponseSizeGuard.cs",
+   "size": 1739,
+   "sha256": "E6B70F81655CB16CB996D9999F502A1549BEBE79E981987DFB738A4436245A9C"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Infrastructure/SchemaValidator.cs",
+   "size": 23394,
+   "sha256": "A9ECA3A507C74551B699000E95CE4373E73CFE78C9DC051B12F6AC5D9206F28E"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Infrastructure/SocketServer.cs",
+   "size": 175,
+   "sha256": "D304D58E88FFBBE29A3571BDC73E131F222A4FD063A7A2546A36588C2E3E6FE9"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Localization/L.cs",
+   "size": 6877,
+   "sha256": "5F73811D0D4EAA5DB899EC728E8399BE4FBC28D6887CE63C9ADA1F28B9045EEF"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Rewriting/BboxFitSizer.cs",
+   "size": 2646,
+   "sha256": "86589D225FA93BE39487E54C8FFAE52C632BA8776E3969570217D5D23E84ACB6"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Rewriting/FinalTextScalePolicy.cs",
+   "size": 1193,
+   "sha256": "4D7D8D3AC7DE6BC75E73766BD1A88C631FD75109D1B43DB42F54900D9AA206A8"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Rewriting/RewriteExecutor.cs",
+   "size": 20568,
+   "sha256": "B799BEFB9B782539B9B9689349E98DABFBDCE611C0CF98526364DDC398DCA997"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Rewriting/RewriteRequestBuilder.cs",
+   "size": 9090,
+   "sha256": "F824A63572EB16060DCC5BC27CA822594D9256F4726341DE980431EE71EEB607"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Rewriting/RewriteTypes.cs",
+   "size": 7053,
+   "sha256": "00E9D7C20B16EA068BEF7C6849B842031D63C792AFBB53BBCF9085E75278B302"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Rewriting/TextMetrics.cs",
+   "size": 1783,
+   "sha256": "758AFB5B7AD9216186CDE94084640F5AC9D912A3818C81FF43F1DEE8CBB9FA75"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Security/BakeRedactor.cs",
+   "size": 717,
+   "sha256": "B32F2A3785D2C903D21B5590D66D00086048381C320E6784FC06B732C0D2F254"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Security/ErrorSanitizer.cs",
+   "size": 1439,
+   "sha256": "8F73256919A0EC205F12B93324B63C4CE996961A2ADAA8911AFDD2D6DEF88437"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Security/LispExecutionPolicy.cs",
+   "size": 875,
+   "sha256": "2C57B2C17BF5BBB135D7C78CF41E0B59202F00F1A18A29F35BFD7E667906E61D"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Security/McpResponsePrivacy.cs",
+   "size": 656,
+   "sha256": "2EC655662D5C9FC6C7B2448E1B61755CA06D394147CDD5D198679165342F1C34"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Security/PathAllowlist.cs",
+   "size": 1705,
+   "sha256": "1AC0AD23433575507CD22D9AC537D51E1F8092966B1537699FB15587B6ECDAC6"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Security/SecretMasker.cs",
+   "size": 891,
+   "sha256": "D9BC7F9C6E76483F6204AFCDB29523AA15F64908C9AD25CC18B17154BFCAABC3"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/ToolBaker/BakeCompilerPolicy.cs",
+   "size": 1312,
+   "sha256": "6B131741A326B0726FC756C7CA8C68E9748EB3766B4523D9970063E29F3744F7"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/ToolBaker/BakedToolDispatchAuthorizer.cs",
+   "size": 902,
+   "sha256": "F0B4AC749D8EE3C26C58FA37D5D5E112E0F61CCC1A497077C7EE6D28302B8975"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/ToolBaker/BakedToolParameterDefaults.cs",
+   "size": 593,
+   "sha256": "82871A45073EE2AC46BE42B8B64CF95ED282F16F9E27CCC65CBF11AA2AB2167F"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/ToolBaker/BakedToolRecord.cs",
+   "size": 1031,
+   "sha256": "246F9ECF5ADC6C6B772E231E5CA47C5CF9BE97013A67C36366544C2B6950BF96"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/ToolBaker/BakedToolRuntimeCache.cs",
+   "size": 684,
+   "sha256": "0AB8EB237B43970D0C161A8533610DEF5F75F2E19E3797203C2D811C1BD9E840"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/ToolBaker/BakedToolRuntimeCommandFactory.cs",
+   "size": 2081,
+   "sha256": "DA3BBAB0E348F0E4C83145697731D7338F57A11287A2FC5875488F552DFBBF18"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/ToolBaker/BakedToolRuntimeSource.cs",
+   "size": 767,
+   "sha256": "9DFC7F88910382AE3BB3B4D26D15A38971B078F4B1D049E56438FB190C64C17D"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/ToolBaker/ToolCompiler.cs",
+   "size": 6226,
+   "sha256": "27D6EE9F9431D635BA85EC0F3B88C8D10500E6CB5BC66D75FCDDA15D20D64E66"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/ToolCatalog/ToolCatalogStore.cs",
+   "size": 3770,
+   "sha256": "329D3B68BB8CC6A3F7A685A27A9EA6E75897758309E3AD20B45427E4EE0869F6"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Transport/ControlPipeListener.cs",
+   "size": 6491,
+   "sha256": "979ADCA8D96965879FBA758CBD64D5EA60359BD71BCD3E7AC5305899E4B13223"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Transport/DiscoveryFileMutex.cs",
+   "size": 7041,
+   "sha256": "AFD607EFBA3735EA9861BC0B19984646107A56B84BE2A254EC03AE9386A774BD"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Transport/IPluginExecutionPump.cs",
+   "size": 1148,
+   "sha256": "5ED0699084E792ECC9687C75E95A1F8C86D3B99B009583B6FBAE0FACFF688DC0"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Transport/ITransportServer.cs",
+   "size": 601,
+   "sha256": "056732E1C50052EC9C3359D778F7F09D4CDC8034B683AB1814793264AC321043"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Transport/PipeControlFrameProtocol.cs",
+   "size": 5058,
+   "sha256": "5AB05BCDC7E35756C6A28205062882BB953606EBFFDADDCBD02FFF7E3BD438E1"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Transport/PipeListenerLifecycle.cs",
+   "size": 5912,
+   "sha256": "CBB830D23131BA304555954CBBB33FC56323682DAC87EE83F0A17F1D7DA73652"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Transport/PipeTransportServer.cs",
+   "size": 13390,
+   "sha256": "E2A76E7E5E108FB08A24BE7C073C2F93B0B03FDA0430997CADFF0026D0529479"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Transport/ServerPipeFactory.cs",
+   "size": 2735,
+   "sha256": "9C317FCE20069D4CD8F059E0AE5693BF0B4F8820C6820F612EEBCCE7F1C79846"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Transport/TcpTransportServer.cs",
+   "size": 8641,
+   "sha256": "07D3925E42CFF5A7A110B6B7672074D688D405F68B2EF120BD64C8F31EC9DEAE"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Unicode/McpLayerService.cs",
+   "size": 1778,
+   "sha256": "60795B93B9DDBD8D7B66800B3C576999D05F3797002888D6194C069B6C05FB1E"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Unicode/UnicodeScaleHeuristics.cs",
+   "size": 1679,
+   "sha256": "849987E21C3E3AC09C12CCBEBE9D0B683277BD3D5F0DD9CA0912655C777233D5"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Unicode/UnicodeStyleService.cs",
+   "size": 9190,
+   "sha256": "D320B522206BDD83C0A5C549C3816D4784F1EF4123458FE1452DCC55A220DF9A"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/View/CaptureViewContract.cs",
+   "size": 2948,
+   "sha256": "AE6797547AFB025DCD93533BC95300C28255FE4F730CF6C76E16363B4A919A96"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/View/CaptureViewMath.cs",
+   "size": 1452,
+   "sha256": "E429EA15686EEC5705380DCA4A085982784DB5074EF65E6C3D9787DD7D645BC5"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/View/CaptureViewService.cs",
+   "size": 7790,
+   "sha256": "7CE60BCFE52E75240148517A780799FA4389317F2B116FE16B96D3B10A2E20F9"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/View/DrawingRevision.cs",
+   "size": 4209,
+   "sha256": "8E9C58B3CD59F3CB4233940643DCC9E1864E1C0D14987DBA0141B747D0B52E76"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/View/ViewCaptureStore.cs",
+   "size": 1712,
+   "sha256": "71EF91BAFF1E6465AE334213A395E90ECF5DCC8807E2197FDCAB755C068ABD3F"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/View/ViewReadingContract.cs",
+   "size": 7139,
+   "sha256": "33D3F94C9E67C8F83D2698A822E5E0713994CBDEBD7BC8CDC17378DB4F6EBD75"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/View/ViewReadingService.cs",
+   "size": 2978,
+   "sha256": "DEDD7E3D965ECCBD75C695D3F2124C559D7AD5D951B04C857B9BC1F4A4661AA8"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/View/ViewReadingWorkflow.cs",
+   "size": 2227,
+   "sha256": "A72FA04EFB5BE81BF74D74C2457F8FBBE1DE5A0AA30ECF5832562CDB6017492B"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/View/ViewZoomService.cs",
+   "size": 4280,
+   "sha256": "13EF653F24F9BDC54C03304CCD46A5E31522AA7485E4B8DFAA0803DA9EAD86D0"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Views/BrandAssets.cs",
+   "size": 1558,
+   "sha256": "B11C9885CDCC891CCE3A9B8961AE85FD491A93D1D34ED9A6BFA30DE9D50D142B"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Views/Settings/SettingsWindow.cs",
+   "size": 18364,
+   "sha256": "B497F5FDFD16F275E50086C2E63CD1BCDD7133B58AAFC691D7400D15F8717452"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Views/Toast/ActivityAggregator.cs",
+   "size": 13004,
+   "sha256": "A9576D23D027B49A1A9CB6691EF148FA0A4AA8EC80010C9871A65CA474B4545C"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Views/Toast/McpToastHost.cs",
+   "size": 9224,
+   "sha256": "FB8AF69A8308F3C5443209DA6802DBF19F314C6235BF9CF33A51DC50FA1A1398"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Views/Toast/McpToastManager.cs",
+   "size": 9745,
+   "sha256": "EA3D176BEAB553108D1F81F0C9B4CB52280A17361BA5CDFBD1DB8BC0C1FE4F7B"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Views/Toast/McpToastNotifier.cs",
+   "size": 6649,
+   "sha256": "AF8B567EA0075A140DB1BC78BF1D4108CA0A46AC1CF558966A4B2869222170BF"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Views/Toast/McpToastTheme.cs",
+   "size": 3153,
+   "sha256": "CA759ABD37EEF4E972BFAEB00A7539AD6855CFD299339DEC839748F1EA9189C3"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Views/Toast/McpToastViewModel.cs",
+   "size": 1301,
+   "sha256": "FCA39AFB8EC08EF0A01BAE9F412C67610734E706B0CFCDAE12FA936A655A82D8"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Views/Toast/McpToastWindow.cs",
+   "size": 31288,
+   "sha256": "E53B6BAD580AADE7A66F518D05DACE4044DBE409B46D1C4C5B715ACD59432584"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Views/Toast/RollingToastNumber.cs",
+   "size": 3524,
+   "sha256": "4235C08B9BD186D66AD24E2C02E4B73B965D5D15A7089ACF8893261F6B101888"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Views/Toast/ToastContentBuilder.cs",
+   "size": 11538,
+   "sha256": "062F3F153A28658C7FC034302EB42D0F748E866F962E54B7FC1476F5DCDEF8F8"
+  },
+  {
+   "path": "third_party/bimwright-dwg-mcp/fork/src/shared/Views/Toast/ToolNameFormatter.cs",
+   "size": 1487,
+   "sha256": "91F9D8935999D8102B1DAC75852B7CF72306EFC1E7EE3BD0771959BFB8443D0E"
+  },
+  {
+   "path": "tools/assembly-info/assembly-info.csproj",
+   "size": 210,
+   "sha256": "DA2D65915C599EAD09A16AEBBB6C8DD1F3A2A83E26B6B552C53EF1D3151518AD"
+  },
+  {
+   "path": "tools/assembly-info/Program.cs",
+   "size": 446,
+   "sha256": "E97B937A3DF9FDDA9A80233B4EA4C48D26CC6C55D0DFCFFC195E1BAD7FA24C0A"
+  }
+ ]
+}
