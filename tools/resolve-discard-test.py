@@ -32,6 +32,9 @@ def sess():
     return json.load(open(os.path.join(WS, "session.json"), encoding="utf-8-sig"))
 
 
+os.makedirs(os.path.dirname(WS), exist_ok=True)
+if os.path.isdir(WS):
+    import shutil; shutil.rmtree(WS)
 os.makedirs(WS, exist_ok=True)
 print("install", run("install", "--acad-year", "2022", "--cad", CAD)[0])
 code, out, err = run("start", "--acad-year", "2022", "--cad", CAD, "--write", "--allow-save", "--source", SRC)

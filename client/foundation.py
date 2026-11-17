@@ -262,7 +262,7 @@ class Gateway:
             self.client.initialize(30);names={t['name'] for t in self.client.tools_list(30)['tools']}
             expected=set(E.CATALOG_ALLOWLIST)
             if self.session['write_enabled']:expected.remove('dwg_inspect_lisp');expected.add('dwg_apply_plan');expected.add('dwg_view')
-            if self.session.get('save_enabled'):expected.add('dwg_foundation_save_drawing')
+            if self.session.get('save_enabled'):expected.add('dwg_foundation_save_drawing');expected.add('dwg_recover')
             require(names==expected,'Unexpected tool catalog')
             self.bound=self.call('dwg_bind_active_document',{})
             gate,issues=E.check_binding_identity(self.bound['binding_snapshot'],self.session['pid'],self.session['started'],self.session['drawing']);require(gate=='identity_matched',str(issues))
