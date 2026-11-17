@@ -1,3 +1,19 @@
+> ## ⚠️ 本文结论已被推翻（2026-11-17）
+>
+> 本文主张的"`extents` 跨会话漂移 / 两份富回执 `DeepEquals` 恒 false"均不成立。
+> 实测证据：`pilot-15` 与 `pilot-16` 的 `receipt.before["24B"]` 17 字段零差异，连小数位数都一致；
+> 服务端 `verification_result_json` 存的是**瘦报告**（`foundation-plan-readback-v1`），不存在"两份富回执比对"。
+>
+> **真实根因**：net48（插件）与 net8（服务端）对同一个 double 序列化出不同文本——
+> 插件出 17 位（`5619.8324022346369`），服务端出最短往返形式（`5619.832402234637`），
+> 于是同一实体算出两个 SHA256，插件在 precommit 算出的 `expected_sha256` 服务端永远复现不出来。
+> net48 的真实规则经实测为"G15 能往返就用 G15，否则退回 G17；文本既无小数点也无 E 再补 `.0`"。
+>
+> 修复：`shared\Execution\FoundationDrawingPlan.cs` 内自实现 `CanonicalText/NumberText/Quote`，
+> net8 完全复现 net48 的 canonical 文本与历史哈希（`9D37…`/`D32E…` 双基准 16/16 PASS）。
+> 本文以下内容仅作为**已被证伪的推理过程**保留，勿再据此设计修复方案。
+> 最新状态见 `09-dev-status-20261117.md`。
+
 # D5 根因证据：set_text 验证失败的字段级回放（P0-A / A4）
 
 > 数据来源：`pilot-loop-16` 的三个 SQLite 账本，**未重跑任何 CAD 写入**。

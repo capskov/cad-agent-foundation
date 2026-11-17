@@ -14,7 +14,7 @@
 > | D3 request_id 冲突 | S1 缺陷 | **降为提示/文档缺陷（P2）**：同 id 不同参数必须拒绝，这是正确的幂等保护 | A |
 > | D5 set_text 锁死 | S0 根因=readback 把宽度/字型属性也比了 | **根因未定**：先落盘两份回执做字段级 diff；不得预先放宽；fence 不得自动释放 | B（现象）/ C（根因） |
 > | D6 一图一保存 | S1，建议加 revision 开关 | **改判为设计约束**：需定义 revision 生命周期，不是加参数 | A |
-> | D8 无 export_dxf | S1 功能缺失 | **改判为装配缺口**：源码有实现，运行插件 DLL 里无该符号；另有 INSUNITS∈{0,6} 门槛 | A |
+> | D8 无 export_dxf | S1 功能缺失 | **已修复**：装配/脱漏为误判（`dll-inspect` 读元数据确认三个 DXF 方法都在运行 DLL 里）；真因是 `FoundationDxfExport.cs` 的 INSUNITS∈{0,6} 门槛拦截毫米图。已放宽为 0/4/6、不缩放、导出后回读校验，实测通过 | 已关闭 |
 >
 > 另：原文"22 次 apply / 17 成功 / 5 失败"已更正为 **20 次尝试 / 14 次 committed_verified**，
 > 详见 `02-evidence.md` 第五节。
@@ -183,20 +183,34 @@ Owned CAD process has exited
 
 ---
 
-## D8 [S1] 2022 移植无 `export_dxf`
+## D8 [S1] 2022 移植无 `export_dxf`（已修复，2026-11-17）
 
-**现象**：`Operations` 列表里登记了 `export_dxf`，但 2022 移植版执行不通；只能：
+**原现象**：`Operations` 列表里登记了 `export_dxf`，但 2022 移植版执行不通；此前只能用
+`accoreconsole.exe /i <dwg> /s <scr> /l zh-CN`（脚本内 DXFOUT + 16，且必须 `/s` 而非 `/b`）。
 
-```
-accoreconsole.exe /i <dwg> /s <scr> /l zh-CN     # 脚本内 DXFOUT + 16
-```
+**根因（更正此前"装配缺口"的判断）**：`_tools\dll-inspect` 直接读取运行中插件 DLL 的元数据，
+`ExportDxfHandler`、`FoundationPlanWriteHandler.ExportDxf`、`ValidateDxf/VerifyDxf` 全部存在，
+`#US` 堆按 UTF-16LE 也能扫到 `export_dxf`、`file_name`，`plugin-acad22.csproj` 整目录 Link 编译
+`plugin-acad26\*.cs`。所以不是源码没编进去，也不是装配漏了，真正拦截的是
+`plugin-acad26\FoundationDxfExport.cs:17` 的单位门槛：原实现只允许 `INSUNITS∈{0,6}`（无单位/米），
+否则抛 `file_output_requires_metres_or_explicit_unitless_metres`；而交付图是毫米图（`INSUNITS=4`），
+于是每次都在写入前被拒。
 
-注意：**必须用 `/s` 而不是 `/b`**（`/b` 会停在命令行不动，且不报错）。
+**修复**：允许 `INSUNITS=0/4/6`，**不自动缩放**（`coordinate_scaling="none"`，保持 raw 坐标）；
+`INSUNITS=0` 保留"单位未明确"语义，不擅自认定为米；新增可选 `expected_insunits` 校验，不符抛
+`INSUNITS_mismatch:expected=..actual=..`；导出后回读 `disk.Insunits` 必须等于源图，否则抛
+`DXF_insunits_readback_mismatch`；同时检查 `DXF_disk_entities_missing`；artifact 元数据新增
+`insunits / insunits_unit / insunits_disk_readback / coordinate_scaling`。
 
-**影响**：DXF 交接（给外部评审）依赖外部工具，链路脆弱；脚本化时会无提示卡住。
+**实测（隔离工作区 `d5fix-03`）**：毫米交付图 `export_dxf` → `committed_verified`、
+`plugin_verification=passed`、`server_verification=passed`、`write_fence_released=true`，
+产物 `drawings\outputs\d5fix-export.dxf`（127695 B），DXF 头 `$INSUNITS 70 = 4`，
+receipt 记 `insunits=4 / millimetres / disk_readback=4 / coordinate_scaling=none`。
+负向用例（把 `expected_sha256` 换成全 0）→ `failed / no_effect_terminal`，且未生成任何 DXF，
+证明放宽单位门槛没有连带放宽实体校验。
 
-**修复方向**：实现 `export_dxf` 到插件侧（`AcadDocument` + `DXFOUT` 命令封装），或至少把
-`accoreconsole /s` 包成 `foundation export-dxf` 并加超时。
+**遗留**：通用 `dwg_export_dxf`（`shared\Handlers\Export\ExportHandlers.cs`）本来没有这道单位门，
+保持原状；是否也加 `expected_insunits` 待定，两条路径语义需先对齐。
 
 ---
 
