@@ -577,8 +577,26 @@ namespace Bimwright.Dwg.Plugin
                 // released before the drawing has actually reached disk: otherwise a
                 // crash (or a failed save) leaves the journal claiming a completed
                 // write that only ever existed in a dead process's memory.
+                //
+                // A pure file-output step (export_dxf / plot_pdf) never mutates the DWG and its
+                // artifact is atomically published then independently read back before verification
+                // passes, so there is no in-memory drawing change to lose. Requiring a redundant
+                // drawing save for it would hold the fence forever on an unchanged DWG. Exempt only
+                // that declared, sha256-verified file-artifact case.
+                bool fileOutputOnly = false;
+                if (snapshot.ToolName == FoundationDrawingPlan.PluginToolName)
+                {
+                    try
+                    {
+                        JObject receipt = string.IsNullOrEmpty(snapshot.ResultJson) ? null : JObject.Parse(snapshot.ResultJson);
+                        fileOutputOnly = receipt?.Value<string>("effects_scope") == "output_file_only"
+                            && receipt["output_file"]?["sha256"]?.Type == JTokenType.String;
+                    }
+                    catch { fileOutputOnly = false; }
+                }
                 if (stagePending && App.FoundationSaveEnabled
                     && snapshot.ToolName == FoundationDrawingPlan.PluginToolName
+                    && !fileOutputOnly
                     && !App.PluginJournal.HasCompletedSaveAfter(snapshot.RequestId))
                     return CommandResult.Fail("write_requires_completed_save");
 
