@@ -283,6 +283,17 @@ namespace Bimwright.Dwg.Server
 
         private static bool IsConsistentRecoveredD1Write(LedgerJob job, BoundPluginRequestOwnership owner)
         {
+            // An operator-abandoned unknown write is a deliberate, audited terminal state:
+            // the plugin journal set phase=failed, error_code=abandoned_after_recovery and
+            // released the fence, advancing plugin_sequence by one. It must be accepted on
+            // restart rather than fail-closed. This precedes the sequence checks because the
+            // owner record may still carry the pre-abandon sequence.
+            if (job.Phase == JobPhase.Failed
+                && string.Equals(job.ErrorCode, "abandoned_after_recovery", System.StringComparison.Ordinal)
+                && job.WriteFenceReleased
+                && job.PluginSequence.HasValue && job.PluginSequence.Value >= 0)
+                return true;
+
             if (job.PluginSequence.HasValue && !owner.PluginSequence.HasValue)
                 return false;
             if (job.PluginSequence.HasValue && owner.PluginSequence.HasValue

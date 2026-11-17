@@ -706,6 +706,51 @@ WHERE request_id=$id AND provider_generation=$generation
         return changed;
     }
 
+    /// <summary>
+    /// Mirrors an operator-abandoned unknown write (plugin ResolveUnknownJob) into the
+    /// ledger. Only an unknown, still-fenced write whose authoritative plugin snapshot
+    /// advanced the sequence by exactly one is accepted. Releases the fence. Does not
+    /// replay or invent any verification result; the row becomes a terminal failed state
+    /// distinguished by error_code=abandoned_after_recovery.
+    /// </summary>
+    public bool RecordAbandonedRecovery(string requestId, string operatorNote, long pluginSequence)
+    {
+        using IDisposable lease = EnterOperation(exclusive: true);
+        string id = RequiredIdentifier(requestId, nameof(requestId));
+        if (string.IsNullOrWhiteSpace(operatorNote))
+            throw new ArgumentException("operator note is required", nameof(operatorNote));
+        if (pluginSequence < 0) throw new ArgumentOutOfRangeException(nameof(pluginSequence));
+        using SqliteConnection connection = OpenConnection();
+        using SqliteTransaction transaction = connection.BeginTransaction(deferred: false);
+        LedgerJob? current = ReadJob(connection, transaction, id);
+        if (current == null || !current.IsWrite || current.WriteFenceReleased
+            || current.Phase != JobPhase.Unknown
+            || (current.PluginSequence.HasValue && pluginSequence != current.PluginSequence.Value + 1))
+        {
+            transaction.Rollback();
+            return false;
+        }
+        using (SqliteCommand update = CreateCommand(connection, transaction, @"
+UPDATE request_jobs SET phase='failed',error_code='abandoned_after_recovery',error_message=$message,
+ write_fence_released=1,plugin_sequence=$sequence,updated_at_utc=$updated,observed_at_utc=$observed,
+ server_unavailable=0 WHERE request_id=$id AND phase='unknown' AND write_fence_released=0;"))
+        {
+            update.Parameters.AddWithValue("$message", operatorNote);
+            update.Parameters.AddWithValue("$sequence", pluginSequence);
+            update.Parameters.AddWithValue("$updated", FormatTimestamp(DateTimeOffset.UtcNow));
+            update.Parameters.AddWithValue("$observed", FormatTimestamp(DateTimeOffset.UtcNow));
+            update.Parameters.AddWithValue("$id", id);
+            if (update.ExecuteNonQuery() != 1)
+            {
+                transaction.Rollback();
+                return false;
+            }
+        }
+        ReleaseFence(connection, transaction, id);
+        transaction.Commit();
+        return true;
+    }
+
     /// <summary>Closes the startup-only reservation/listing window after reconciliation succeeds.</summary>
     public void CompleteStartupReconciliation()
     {
