@@ -654,7 +654,10 @@ def main():
                                 'error':'resolve --recover is not implemented in this build; it needs an evidence-based design (prove the on-disk version came from this request before trusting it)',
                                 'next_action':'do_not_guess; use --inspect to look, or --discard to abandon an unknown write'}
                     elif args.discard:
-                        result=g.call('dwg_recover',{'context_id':g.context,'request_id':args.request_id,
+                        _stored=args.workspace/'requests'/(args.request_id+'.json')
+                        _req=read(_stored) if _stored.exists() else None
+                        _ctx=_req['context_id'] if isinstance(_req,dict) and isinstance(_req.get('context_id'),str) else g.context
+                        result=g.call('dwg_recover',{'context_id':_ctx,'request_id':args.request_id,
                                                      'confirm':bool(args.confirm),'operator_note':args.operator_note or ''})
                     else:
                         result=g.query(args.request_id)
