@@ -1397,6 +1397,17 @@ namespace Bimwright.Dwg.Server.Execution
             }, null);
         }
 
+        public async Task<string> RecoverJobAsync(string contextId, string requestId, bool confirm, string operatorNote)
+        {
+            if (_contexts.TryGetOwnedRequest(requestId, contextId, requireConfirmed: false,
+                    out _, out BoundPluginRequestOwnership routedOwner)
+                && routedOwner.IsWrite)
+                return routedOwner.ToolName == H1FixedHatchWriteContract.PluginToolName
+                    ? Envelope(Guid.NewGuid().ToString("N"), false, null, "H1 recovery is disabled; query the original request.")
+                    : await RecoverD1WriteJobAsync(contextId, requestId, confirm, operatorNote).ConfigureAwait(false);
+            return Envelope(Guid.NewGuid().ToString("N"), false, null, "resolve --discard applies only to owned write requests");
+        }
+
         private async Task<bool> EnsurePluginCatalogAsync(DiscoveryInfo discovery)
         {
             var key = EndpointKey(discovery);

@@ -575,7 +575,7 @@ def publish(g,target,overwrite=False):
 
 def main():
     p=argparse.ArgumentParser(description='CAD foundation first release; all drawings are owned copies')
-    p.add_argument('action',choices=['install','start','doctor','read','query','apply','save','publish-dwg','stop','status','mcp','view','plot-style'])
+    p.add_argument('action',choices=['install','start','doctor','read','query','apply','save','publish-dwg','stop','status','mcp','view','plot-style','resolve'])
     p.add_argument('--workspace',type=Path,required=True);p.add_argument('--cad',default=None)
     p.add_argument('--acad-year',type=int,default=DEFAULT_ACAD_YEAR,help='Target AutoCAD release year (2022 or 2026)')
     p.add_argument('--source');p.add_argument('--write',action='store_true');p.add_argument('--headless',action='store_true')
@@ -585,6 +585,10 @@ def main():
     p.add_argument('--overwrite',action='store_true',help='allow --save-to to replace an existing .dwg (default refuses)')
     p.add_argument('--reopen',action='store_true',help='start only: relaunch a stopped session on its existing owned drawing')
     p.add_argument('--target',help='publish-dwg: absolute .dwg path for the delivery copy')
+    p.add_argument('--discard',action='store_true',help='resolve: abandon an unknown/recovery write and release its fence (audited, no replay)')
+    p.add_argument('--recover',action='store_true',help='resolve: not implemented in this build; report only')
+    p.add_argument('--confirm',action='store_true',help='resolve --discard: required explicit confirmation')
+    p.add_argument('--operator-note',dest='operator_note',default=None,help='resolve --discard: short operator note (>=4 chars) recorded in the ledger')
     args=p.parse_args();args.workspace=args.workspace.resolve()
     if not args.cad: args.cad=default_cad_root(args.acad_year)
     with lease(args.workspace):
@@ -638,10 +642,22 @@ def main():
                           'last_saved_sha256':g.session.get('last_saved_sha256'),
                           'last_saved_at_utc':g.session.get('last_saved_at_utc'),
                           'fences':held_fences(g.session),
-                          'resolve_tools':None,
-                          'note':'No resolve/discard tool exists in this build; a held write is finalized by saving its drawing'}
+                          'resolve_tools':{'inspect':'dwg_job_get','discard':'dwg_recover','recover':None},
+                          'note':'A held write is finalized by saving its drawing. resolve --discard abandons an unknown/recovery write; resolve --recover is not implemented'}
                     if args.request_id:snap['request']=g.query(args.request_id)
                     result=snap
+                elif args.action=='resolve':
+                    if not args.request_id:
+                        result={'error':'resolve requires --request-id'}
+                    elif args.recover:
+                        result={'request_id':args.request_id,'implemented':False,
+                                'error':'resolve --recover is not implemented in this build; it needs an evidence-based design (prove the on-disk version came from this request before trusting it)',
+                                'next_action':'do_not_guess; use --inspect to look, or --discard to abandon an unknown write'}
+                    elif args.discard:
+                        result=g.call('dwg_recover',{'context_id':g.context,'request_id':args.request_id,
+                                                     'confirm':bool(args.confirm),'operator_note':args.operator_note or ''})
+                    else:
+                        result=g.query(args.request_id)
                 else:result=g.query(args.request_id)
         print(json.dumps(E.redact(result),ensure_ascii=False,indent=2));return 0
 if __name__=='__main__':

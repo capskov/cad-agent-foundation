@@ -344,6 +344,43 @@ namespace Bimwright.Dwg.Server.Execution
                 : Envelope(response.Id, true, new { disposition, job = ProjectD1PluginSnapshot(job) }, null);
         }
 
+        internal async Task<string> RecoverD1WriteJobAsync(string contextId, string requestId, bool confirm, string operatorNote)
+        {
+            if (ActiveFixedWriteScope == null || _ledger == null
+                || !_contexts.TryGetOwnedRequest(requestId, contextId, requireConfirmed: true,
+                    out BoundPluginContext bound, out BoundPluginRequestOwnership ownership)
+                || ownership.RecoveryQueryOnly
+                || !MatchesD1Ownership(ownership, bound, requestId, null)
+                || !TryValidateD1BoundContext(bound, out BoundPluginOwnerIdentity identity, out _))
+                return Envelope(Guid.NewGuid().ToString("N"), false, null, "D1 recovery is unavailable for this request owner");
+            if (!confirm)
+                return Envelope(Guid.NewGuid().ToString("N"), false, null, "confirm=true is required to abandon an unknown write");
+            string note = operatorNote?.Trim() ?? string.Empty;
+            if (note.Length < 4)
+                return Envelope(Guid.NewGuid().ToString("N"), false, null, "operator_note must be at least 4 characters");
+            long? before = CaptureD1LedgerSequence(requestId, bound);
+            McpResponse response;
+            try { response = await _send(bound.Discovery, "job_recovery_resolve", new { request_id = requestId, confirm = true, operator_note = note }).ConfigureAwait(false); }
+            catch
+            {
+                TryMarkD1LedgerUnavailable(requestId, identity.ProviderGeneration, before, bound);
+                return D1Unknown(requestId, contextId, "plugin recovery resolution state is unknown; the drawing risk fence may remain held");
+            }
+            JObject result = response?.Result as JObject;
+            if (response == null || !response.Ok || !TryGetString(result, "disposition", out string disposition))
+            {
+                TryMarkD1LedgerUnavailable(requestId, identity.ProviderGeneration, before, bound);
+                return Envelope(response?.Id, false, null, response?.Error ?? "plugin returned an invalid recovery_resolve response");
+            }
+            JObject job = result["job"] as JObject;
+            if (job == null || !TryGetInt64(job, "plugin_sequence", out long pluginSequence))
+                return Envelope(response.Id, false, null, "plugin recovery_resolve returned no authoritative job sequence");
+            if (!_ledger.RecordAbandonedRecovery(requestId, note, pluginSequence))
+                return Envelope(response.Id, false, null, "server ledger could not mirror the abandoned recovery state");
+            return Envelope(response.Id, true,
+                new { disposition, released_risk_keys = result["released_risk_keys"], job = ProjectD1PluginSnapshot(job) }, null);
+        }
+
         private bool TryValidateD1BoundContext(BoundPluginContext bound,
             out BoundPluginOwnerIdentity identity, out string error)
         {

@@ -53,6 +53,18 @@ namespace Bimwright.Dwg.Server.Tools
             return BoundPluginExecutionGateway.Shared.CancelJobAsync(invocation.ContextId, invocation.RequestId);
         }
 
+        [McpServerTool(Name = "dwg_recover", ReadOnly = false, Idempotent = false), Description(
+            "Abandon an unknown/recovery write whose CAD owner was lost. Calls the plugin's operator recovery resolution, releases the held drawing-risk fence, and mirrors the audited terminal state (error_code=abandoned_after_recovery) into the ledger so a restart does not fail closed. Never replays, re-saves or re-verifies the write. Requires confirm=true and an operator_note of at least 4 characters.")]
+        public static Task<string> RecoverJob(bool confirm,
+            [Description("A short operator note (at least 4 characters) recording why the write is being abandoned; stored in the ledger.")] string operator_note)
+        {
+            var invocation = ToolInvocationScope.Current;
+            if (invocation == null || invocation.ToolName != "dwg_recover")
+                return Task.FromResult(Rejected("dwg_recover requires its governed invocation scope"));
+            return BoundPluginExecutionGateway.Shared.RecoverJobAsync(
+                invocation.ContextId, invocation.RequestId, confirm, operator_note);
+        }
+
         public static IReadOnlyList<McpServerTool> CreateToolInstances()
         {
             var methods = typeof(FoundationExecutionTools)
@@ -66,6 +78,7 @@ namespace Bimwright.Dwg.Server.Tools
                     "dwg_job_get" => (Context: true, Request: true),
                     "dwg_job_get_historical" => (Context: true, Request: true),
                     "dwg_job_cancel" => (Context: true, Request: true),
+                    "dwg_recover" => (Context: true, Request: true),
                     _ => throw new System.InvalidOperationException("Unknown foundation control tool: " + method.Name)
                 };
                 var inner = McpServerTool.Create(method, (object)null, new McpServerToolCreateOptions());
