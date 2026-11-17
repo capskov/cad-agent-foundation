@@ -329,6 +329,16 @@ class Gateway:
         if isinstance(raw,str):
             try:reply['saved']=json.loads(raw)
             except Exception:pass
+        # Remember the exact bytes this session last verified on disk. Publishing needs that
+        # digest, because AutoCAD keeps DBMOD set after an API-level SaveAs even when the file
+        # on disk is current.
+        saved=reply.get('saved') if isinstance(reply.get('saved'),dict) else None
+        saved_path=saved.get('saved_path') if saved else None
+        if reply.get('job',{}).get('phase')=='completed' and saved_path and Path(saved_path).is_file():
+            self.session['last_saved_sha256']=sha(Path(saved_path))
+            self.session['last_saved_at_utc']=dt.datetime.now(dt.timezone.utc).isoformat()
+            self.session['last_saved_request_id']=rid
+            write(self.work/'session.json',self.session)
         return reply
     def apply(self,plan,request_id=None,save_to=None):
         require(self.session['write_enabled'],'This session is read-only')
@@ -396,17 +406,27 @@ class Gateway:
         if not save_to:
             result=dict(write_reply)
             result['persisted']=False
-            result['next_action']='verified_not_persisted: rerun with --save-to <absolute.dwg> (client save route) to persist and release the fence'
+            result['next_action']='verified_not_persisted: rerun with --save-to <bound owned drawing> to persist and release the fence'
             return result
-        saved=self.persist(save_to,overwrite=overwrite)
+        # Only the bound owned drawing may be saved by this route. Saving anywhere else is a
+        # SaveAs that changes the active document path while the plugin journal scope and the
+        # server-side drawing identity still describe the old file, so it is refused here,
+        # before any save runs, rather than reported as a failure after the identity moved.
+        target=Path(save_to).resolve()
+        owned=Path(self.session['drawing'])
+        require(target==owned,'apply --save-to must target the bound owned drawing: '+str(owned)+' (use publish-dwg for a delivery copy, got '+str(target)+')')
+        saved=self.persist(target,overwrite=overwrite)
         saved_json=saved.get('saved') if isinstance(saved.get('saved'),dict) else None
         saved_ok=saved_json.get('saved_path') if isinstance(saved_json,dict) else None
-        if saved.get('job',{}).get('phase')=='completed' and saved_ok:
-            # SaveAs changes the drawing path. Keep the session identity in step with
-            # the real document so later writes are not blocked by a stale path gate.
-            if str(Path(saved_ok))!=str(Path(self.session['drawing'])):
-                self.session['drawing']=str(Path(saved_ok))
-                write(self.work/'session.json',self.session)
+        # A completed save of the bound drawing keeps its path; the session identity is never
+        # rewritten here. A save reply naming any other file means the host changed something
+        # this client does not own, so the write stays unpersisted and nothing is rebound.
+        if saved.get('job',{}).get('phase')=='completed' and saved_ok and str(Path(saved_ok))!=str(Path(self.session['drawing'])):
+            result=dict(write_reply)
+            result['persisted']=False
+            result['save_reply']=saved
+            result['next_action']='save_target_differs_from_bound_drawing: identity left unchanged; use publish-dwg for a delivery copy'
+            return result
         if saved.get('job',{}).get('phase')!='completed' or not saved_ok:
             result=dict(write_reply)
             result['persisted']=False
@@ -422,9 +442,71 @@ class Gateway:
             result['next_action']='save_succeeded_but_finalize_pending: query the original write request; never replay the write'
         return result
 
+def publish(g,target,overwrite=False):
+    """Publish a verified, saved working DWG as a delivery copy.
+
+    This is a file operation on the client: the bound document, the session identity, the
+    plugin journal scope and the revision are all left untouched. The copy is written to a
+    unique temporary file in the target directory, digest-checked against the source and only
+    then atomically renamed, so a failed publish never leaves a plausible-looking delivery DWG.
+    """
+    s=g.session;owned=Path(s['drawing'])
+    require(owned.is_file(),'Owned working drawing is missing; nothing to publish')
+    raw=str(target)
+    require('..' not in PureWindowsPath(raw).parts,'Delivery target must not contain parent-directory segments')
+    dst=Path(target).resolve()
+    require(dst.suffix.lower()=='.dwg','Delivery target must be a .dwg file')
+    require(dst!=owned,'Delivery target must differ from the bound working drawing')
+    if dst.exists() and not overwrite:
+        raise RuntimeError('Delivery target already exists; rerun with --overwrite to replace it: '+str(dst))
+    # Re-read the live document state: the bind-time snapshot still shows the unsaved flag
+    # from before the last save, so publishing has to check the drawing as it is now.
+    fresh=g.call('dwg_bind_active_document',{})
+    gate,issues=E.check_binding_identity(fresh['binding_snapshot'],s['pid'],s['started'],s['drawing'])
+    require(gate=='identity_matched',str(issues))
+    info=(fresh.get('document_info') or {}) or {}
+    require(info.get('document_count')==1,'Publish requires exactly one open owned drawing')
+    # The drawing must match the bytes this session last verified on disk. DBMOD is not used
+    # as the gate: an API-level SaveAs leaves it set even when the file is current.
+    saved_digest=s.get('last_saved_sha256')
+    require(bool(saved_digest),'Publish requires a verified save in this session; run save first')
+    disk_digest=sha(owned)
+    require(disk_digest==saved_digest,'Publish refused: the working DWG on disk differs from the last verified save; save again')
+    require(info.get('command_active')==0,'Publish requires an idle drawing (no active command)')
+    require(info.get('loaded_plugin_mvid')==s['installation']['plugin_mvid'],'Loaded plugin changed since start')
+    counts=held_fences(s);require(not any(counts.values()),'Publish refused: unresolved write fence '+str(counts))
+    xrefs=(info.get('foundation_catalog') or {}).get('xref_definitions') or info.get('xref_definitions') or []
+    xref_note=[]
+    if isinstance(xrefs,list):
+        for row in xrefs:
+            path=row.get('path') if isinstance(row,dict) else None
+            if path: xref_note.append(str(path))
+    source_sha=sha(owned);dst.parent.mkdir(parents=True,exist_ok=True)
+    temp=dst.with_name(dst.stem+'.publish-'+uuid.uuid4().hex[:8]+'.dwg')
+    try:
+        shutil.copy2(owned,temp)
+        require(temp.is_file() and sha(temp)==source_sha,'Temporary copy differs from the source drawing; publish aborted')
+        os.replace(str(temp),str(dst))
+    finally:
+        if temp.exists():
+            try:temp.unlink()
+            except OSError:pass
+    target_sha=sha(dst);require(target_sha==source_sha,'Published file digest does not match the source drawing')
+    record={'schema':'foundation-publish-v1','published_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),
+            'source_path':str(owned),'source_sha256':source_sha,'target_path':str(dst),'target_sha256':target_sha,
+            'bytes':dst.stat().st_size,'overwrote_existing':bool(overwrite),'drawing_identity_changed':False,
+            'journal_scope_changed':False,'external_references':xref_note,'complete_engineering_package':not xref_note}
+    outdir=g.work/'publishes';outdir.mkdir(exist_ok=True)
+    name=dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ')+'-'+dst.stem+'.json'
+    write(outdir/name,record)
+    return {'published':True,'target_path':str(dst),'source_sha256':source_sha,'target_sha256':target_sha,
+            'bytes':record['bytes'],'external_references':xref_note,
+            'warning':None if not xref_note else 'The drawing references external files; a single DWG is not a complete package',
+            'record':str(outdir/name)}
+
 def main():
     p=argparse.ArgumentParser(description='CAD foundation first release; all drawings are owned copies')
-    p.add_argument('action',choices=['install','start','doctor','read','query','apply','save','stop','status','mcp','view','plot-style'])
+    p.add_argument('action',choices=['install','start','doctor','read','query','apply','save','publish-dwg','stop','status','mcp','view','plot-style'])
     p.add_argument('--workspace',type=Path,required=True);p.add_argument('--cad',default=None)
     p.add_argument('--acad-year',type=int,default=DEFAULT_ACAD_YEAR,help='Target AutoCAD release year (2022 or 2026)')
     p.add_argument('--source');p.add_argument('--write',action='store_true');p.add_argument('--headless',action='store_true')
@@ -433,6 +515,7 @@ def main():
     p.add_argument('--save-to',type=Path,help='apply only: persist the bound owned drawing to this absolute .dwg after the write is verified')
     p.add_argument('--overwrite',action='store_true',help='allow --save-to to replace an existing .dwg (default refuses)')
     p.add_argument('--reopen',action='store_true',help='start only: relaunch a stopped session on its existing owned drawing')
+    p.add_argument('--target',help='publish-dwg: absolute .dwg path for the delivery copy')
     args=p.parse_args();args.workspace=args.workspace.resolve()
     if not args.cad: args.cad=default_cad_root(args.acad_year)
     with lease(args.workspace):
@@ -455,12 +538,42 @@ def main():
                 elif args.action=='query':result=g.submit_read('dwg_query_entities',read(args.arguments))
                 elif args.action=='apply':result=g.apply_with_optional_save(read(args.plan),args.request_id,args.save_to,overwrite=args.overwrite)
                 elif args.action=='save':
-                    rows=g.submit_read('dwg_get_entity_properties',{'handles':json.dumps(E.parse_handles(args.handles)),'include_geometry':True}).get('data',{}).get('entities',[])
-                    handles=E.parse_handles(args.handles);require(len(rows)==len(handles) and {r.get('handle') for r in rows}==set(handles) and all(r.get('ok') is True and isinstance(r.get('entity_digest'),str) for r in rows),'Fresh expected objects not all readable')
-                    plan={'schema':'foundation-drawing-plan-v1','source_role':'annotation','units':'raw_drawing_units','steps':[{'id':'save','op':'save','expected_layouts':g.bound['document_info']['foundation_catalog']['layout_digests'],'expected':[{'handle':r['handle'],'expected_sha256':r['entity_digest']} for r in rows]}]}
-                    result=g.apply(plan,args.request_id)
+                    # Save means one thing only: write the current bound DWG to its own file.
+                    # It is not a publish and it does not decide anything about a new path, so
+                    # the drawing identity cannot move here. Pending verified writes are
+                    # finalized by re-querying them; none of them is ever replayed.
+                    saved=g.persist(g.session['drawing'],overwrite=True)
+                    job=saved.get('job',{}) or {}
+                    result={'save':{'request_id':saved.get('request_id'),'phase':job.get('phase'),
+                                    'saved_path':(saved.get('saved') or {}).get('saved_path'),
+                                    'error':job.get('error_message')}}
+                    pending=[]
+                    for f in sorted((args.workspace/'requests').glob('*.json')):
+                        r=read(f)
+                        if r.get('save') or r.get('terminal_rejection'):continue
+                        try:snap=g.query(r)
+                        except Exception:continue
+                        summary=snap.get('outcome_summary') or {}
+                        if summary.get('effects')=='committed' and snap.get('write_fence_released') is not True:
+                            pending.append(snap.get('request_id'))
+                    result['pending_write_requests']=pending
+                    result['drawing_identity_changed']=False
+                    result['next_action']='saved_current_drawing_and_released_pending_writes' if not pending else 'pending writes still fenced; query each request id, never replay'
+                elif args.action=='publish-dwg':result=publish(g,args.target or '',overwrite=args.overwrite)
                 elif args.action=='stop':result=stop(g)
-                else:result=g.query(read(args.workspace/'requests'/(args.request_id+'.json')))
+                elif args.action=='status':
+                    # Minimal audit surface: session facts plus, when asked, the stored
+                   # request record of a write that is committed but not yet released.
+                    snap={'workspace':str(args.workspace),'drawing':g.session['drawing'],'phase':g.session.get('phase'),
+                          'pid':g.session.get('pid'),'save_enabled':bool(g.session.get('save_enabled')),
+                          'last_saved_sha256':g.session.get('last_saved_sha256'),
+                          'last_saved_at_utc':g.session.get('last_saved_at_utc'),
+                          'fences':held_fences(g.session),
+                          'resolve_tools':None,
+                          'note':'No resolve/discard tool exists in this build; a held write is finalized by saving its drawing'}
+                    if args.request_id:snap['request']=g.query(args.request_id)
+                    result=snap
+                else:result=g.query(args.request_id)
         print(json.dumps(E.redact(result),ensure_ascii=False,indent=2));return 0
 if __name__=='__main__':
     try:sys.exit(main())
