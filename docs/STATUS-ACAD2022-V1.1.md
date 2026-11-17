@@ -44,6 +44,7 @@
 - **已纠正的旧判断**：`drawing_path_mismatch` **不来自** `MatchesD1Ownership`，而是客户端 `check_binding_identity`（`support/readonly-entry.py:549`，比较 `snapshot['drawing_path']` 与 `session['drawing']`，两边均 `normcase+normpath`）。
 - **本轮字段级取证**：干净保存后 `snapshot.drawing_path == session.drawing`（逐字符相同）、`owner_pid` 一致 → **bind 身份本应通过**。故 L2 根因待定（可能与时序/脏状态/早期工作区残留有关），**不要**先发明“跨保存图纸指纹”，也**不要**放宽 `MatchesD1Ownership`。
 - 细节：`docs/resolve-discard-diag.md`（含给 GPT 的三个问题）。
+- **RC2 处置（已实现）**：`resolve --discard` 默认拒绝，需环境变量 `BIMWRIGHT_RC_UNVERIFIED_DISCARD=1` 才在隔离测试环境执行；RC2 文档明确不宣称支持该能力。
 
 ### B2. `stop` 在 API 保存后可能 exit 1 —— 待干净复核
 - `client/foundation.py:79` `stop` 要求 `document_count==1 and dbmod==0 and command_active==0`。

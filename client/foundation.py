@@ -654,11 +654,16 @@ def main():
                                 'error':'resolve --recover is not implemented in this build; it needs an evidence-based design (prove the on-disk version came from this request before trusting it)',
                                 'next_action':'do_not_guess; use --inspect to look, or --discard to abandon an unknown write'}
                     elif args.discard:
-                        _stored=args.workspace/'requests'/(args.request_id+'.json')
-                        _req=read(_stored) if _stored.exists() else None
-                        _ctx=_req['context_id'] if isinstance(_req,dict) and isinstance(_req.get('context_id'),str) else g.context
-                        result=g.call('dwg_recover',{'context_id':_ctx,'request_id':args.request_id,
-                                                     'confirm':bool(args.confirm),'operator_note':args.operator_note or ''})
+                        if os.environ.get('BIMWRIGHT_RC_UNVERIFIED_DISCARD')!='1':
+                            result={'request_id':args.request_id,'implemented':False,'verified':False,
+                                    'error':'resolve --discard is implemented but NOT positively verified in this RC; it is gated behind BIMWRIGHT_RC_UNVERIFIED_DISCARD=1 for isolated testing only. Do not use on real drawings.',
+                                    'next_action':'safe loop for controlled beta: query the original request (status --request-id), never replay the write, keep the fence, persist the drawing explicitly'}
+                        else:
+                            _stored=args.workspace/'requests'/(args.request_id+'.json')
+                            _req=read(_stored) if _stored.exists() else None
+                            _ctx=_req['context_id'] if isinstance(_req,dict) and isinstance(_req.get('context_id'),str) else g.context
+                            result=g.call('dwg_recover',{'context_id':_ctx,'request_id':args.request_id,
+                                                         'confirm':bool(args.confirm),'operator_note':args.operator_note or ''})
                     else:
                         result=g.query(args.request_id)
                 else:result=g.query(args.request_id)
