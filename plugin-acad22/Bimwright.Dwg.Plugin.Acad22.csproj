@@ -1,0 +1,75 @@
+<!-- AutoCAD 2022 (R24.1) port, capskov local adaptation, 2026-11-15.
+     Compiles shared infrastructure + Foundation execution layer + intent journal
+     against the AutoCAD 2022 managed assemblies on .NET Framework 4.8. -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>Bimwright.Dwg.Plugin</RootNamespace>
+    <AssemblyName>Bimwright.Dwg.Plugin.Acad22</AssemblyName>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <PlatformTarget>x64</PlatformTarget>
+    <AutoCadVersionYear>2022</AutoCadVersionYear>
+    <DefineConstants>$(DefineConstants);ACAD2022;ACAD2026</DefineConstants>
+    <AutoCad2022Dir Condition="'$(AutoCad2022Dir)' == ''">F:\Program Files\Autodesk\AutoCAD 2022</AutoCad2022Dir>
+  </PropertyGroup>
+
+  <Target Name="ValidateAutoCadReferences" BeforeTargets="ResolveReferences">
+    <Error Condition="!Exists('$(AutoCad2022Dir)\accoremgd.dll') or !Exists('$(AutoCad2022Dir)\acdbmgd.dll') or !Exists('$(AutoCad2022Dir)\acmgd.dll')"
+           Text="AutoCAD 2022 managed assemblies were not found under '$(AutoCad2022Dir)'. Install AutoCAD 2022 or build with /p:AutoCad2022Dir=&quot;C:\Path\To\AutoCAD 2022&quot;." />
+  </Target>
+
+  <ItemGroup>
+    <Compile Include="..\plugin-acad24\App.cs" Link="App.cs" />
+    <Compile Include="..\plugin-acad26\*.cs" LinkBase="Foundation" />
+    <Compile Include="..\plugin-journal-net8\*.cs" LinkBase="Journal" />
+    <Compile Include="..\shared\**\*.cs" LinkBase="Shared" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="accoremgd">
+      <HintPath>$(AutoCad2022Dir)\accoremgd.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="acdbmgd">
+      <HintPath>$(AutoCad2022Dir)\acdbmgd.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="acmgd">
+      <HintPath>$(AutoCad2022Dir)\acmgd.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="System.Xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.8.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.31" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <!-- 2.1.12 declares a win-arm native asset that the package does not ship, which
+         breaks CopyLocal for any RID-agnostic (net48) build. Pin the repaired 2.1.13. -->
+    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.13" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\shared\assets\fonts\OpenSans-CondensedLight.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>Fonts\OpenSans-CondensedLight.ttf</TargetPath>
+    </Content>
+  </ItemGroup>
+
+  <!-- A net48 host resolves DllImport("e_sqlite3") from the application directory,
+       not from runtimes/win-x64/native, so flatten the 64-bit native next to the plugin. -->
+  <Target Name="FlattenSqliteNative" AfterTargets="Build">
+    <ItemGroup>
+      <SqliteNativeX64 Include="$(OutDir)runtimes\win-x64\native\e_sqlite3.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(SqliteNativeX64)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true"
+          Condition="Exists('$(OutDir)runtimes\win-x64\native\e_sqlite3.dll')" />
+  </Target>
+</Project>
