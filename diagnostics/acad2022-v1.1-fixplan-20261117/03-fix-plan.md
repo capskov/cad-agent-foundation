@@ -1,95 +1,96 @@
-# 03 修复计划（针对 ACAD2022-V1.1 底座）
+# 03 修复计划（v2，按评审意见重排）
 
-**原则**：先修"能出图"，再修"出得好"；每一期以"一条真实图纸能从头到尾不换工作区跑完"为验收。
-**不改 schema 版本号之前不动 v1 契约**（`foundation-drawing-plan-v1` 仍需向后兼容，改动以"放宽"为主）。
+**原则**
+1. 先"能可信地写"，再"能写得好看"；**先统一基线，再动任何代码**。
+2. **严格事务保护不削弱**：fence 不自动放、失败不静默继续写；恢复必须显式、可审计。
+3. v1 契约（`foundation-drawing-plan-v1`）只放宽、不收紧。
 
----
-
-## P0 —— 让标注可用、让写入失败不再毁工作区（目标 3 天）
-
-### P0-1 标注链路（对应 D1）
-
-1. `FoundationPlanExtensions.cs`
-   - `linear_dimension / aligned_dimension / radial_dimension`：`dimension_style` 从 required 移到 optional；
-   - 缺省时：先查 `dimension_styles` 里是否有 `DIM_STYLE`，没有则**自动创建**（text_style 用现有 `Standard`，
-     text_height=200，arrow_size=100，overall_scale=1，gap=50）；
-   - 保留显式传 `dimension_style` 的能力（用于定义符合国标的箭头/字高）。
-2. `FoundationDrawingPlan.cs` 的字段校验：把"缺字段"改为字段级错误
-   —— `{"error":"missing_field","field":"dimension_style","op":"linear_dimension","hint":"可选；缺省用自动样式"}`。
-3. 新增 plan 级 `dimension_style` 操作（已存在于 schema，需要在 2022 插件侧确认可执行）。
-4. 验收：一条 plan 里同时出 `linear_dimension` ×6（井室长宽、壁厚、管中心、阀中心、套管），
-   DXF 里 `DIMENSION` 实体数 ≥ 6，且 `dimension_text` 与实际量值一致。
-
-> 本轮交付图 `DIMENSION=0` 就是这个缺口，补上之后才能进"施工图深化"。
-
-### P0-2 事务与栅栏（对应 D2 / D3 / D5）
-
-1. **拒绝路径必须释放 fence**：参数校验失败 → 回滚登记 → fence 释放，不留悬挂请求。
-2. **新增 `foundation resolve`**：`--request-id X --discard`（丢弃悬挂写）、`--inspect`（列出悬挂请求与差异）。
-3. **request_id 语义**：
-   - 同 id + 同参数哈希 → 幂等返回原结果（不报错）
-   - 同 id + 不同参数 → `{"error":"request_id_conflict","suggested_id":"...-2"}`
-4. **`set_text` readback 只比对声明属性**：`text` 内容 + `handle` + `layer`；其余（宽度因子、对齐点、
-   字型缓存差异）不参与比较；失败时输出 `{"expected":{...},"actual":{...},"diff":[字段]}`。
-5. **失败语义统一**：`committed_verification_failed` 不再 `write_blocked=true` 永久锁；
-   改为"当前 revision 标记为 untrusted，允许 `resolve --discard` 后继续"。
-6. 回归测试：把 `pilot-loop-16` 的 `set_text` plan 作为固定用例，要求 `verification=passed`。
-
-### P0-3 会话就绪（对应 D4）
-
-- `apply` 前 `wait_for_session(timeout=90s)`：轮询 `status`，未 ready 则等待；
-- 超时才报 `workspace_busy`，并在错误里给出 `wait_seconds_observed`；
-- `start --wait-ready` 选项，供脚本使用。
-
-**P0 出口标准**：14 条固定 plan（几何 + 标注 + 改字）在**同一工作区**跑完，
-无一次需要换目录，无一次 `write_blocked`。
-
-> 短期绕过（不改代码）：`linear_dimension` 显式传 `"dimension_style":"Standard"`（blank.dwg 已内置），
-> 可立即产出真实 DIMENSION 实体，用于先补交付图的标注缺口；正式修复仍按 P0-1 做。
+> v1 版本的"P0=标注优先"已被评审推翻：标注只是缺能力，而基线不一致会让所有改动落错文件。
+> 结论：P0-A 基线 → P0-B 写入状态确认 → P0-C 标注。
 
 ---
 
-## P1 —— 工作流可用性（目标 1 周）
+## P0-A 统一基线与证据（先做，预计 0.5 天）
 
-| 编号 | 对应 | 内容 | 验收 |
-| --- | --- | --- | --- |
-| P1-1 | D6 | `foundation revision --from <dwg>` 或 `apply --new-revision`：save 后自动重开事务 | 一张图 5 次修改只需 1 个目录 |
-| P1-2 | D7 | 修 `session_handoff.py`：不再杀新实例；`stop` 与 `status` 语义对齐 | handoff 后 `apply` 连续 3 次成功 |
-| P1-3 | D8 | 实现 `export_dxf`（插件侧命令封装）或 `foundation export-dxf`（`accoreconsole /s` + 超时 + 回读校验） | 产出 DXF 且 `DIMENSION/TEXT` 数量与 DWG 一致 |
-| P1-4 | D10 | `view` 只读化，不依赖写事务所有权 | 保存后 `view` 首次即可截图 |
-
----
-
-## P2 —— 表达力与规范（目标 2 周）
-
-| 编号 | 对应 | 内容 |
+| # | 动作 | 验收 |
 | --- | --- | --- |
-| P2-1 | D9 | `text` 增 `alignment/justify`；`layer`/实体增 `linetype`（含虚线 `DASHED`） |
-| P2-2 | D11 | `archive` 支持 preflight（层不存在则创建并设状态） |
-| P2-3 | D12 | `capture` 支持 `fit=entities` 自动框；`file_name` 放宽 Unicode |
-| P2-4 | D13 | `export_dxf` 固定 `$DWGCODEPAGE` 与内容编码一致（UTF-8 或真 ANSI_936） |
-| P2-5 | 附2 | plan 支持 `provenance`（A/B/C + 来源页），让"图集值 / 推断值 / 占位值"可区分 |
+| A1 | 明确**唯一构建源** = `src\cad-agent-foundation-main`；`_review-repo` 降级为只读镜像并在 README 声明 | 镜像顶部写清"非构建源，仅为评审快照" |
+| A2 | 补"源码↔二进制"对照：构建树目录哈希、plugin dll sha256、server dll sha256（本轮已核对 plugin `77FC7C3E…` = manifest 一致） | `foundation doctor` 能打印三者 |
+| A3 | 实测 `INSUNITS`（只读），确认 `export_dxf` 的 `∈{0,6}` 门槛是否会命中毫米图 | 一个布尔结论 + 证据文件 |
+| A4 | **D5 证据补齐**：让服务端比较用的 `verification_result_json` 与 `result_json` 同时落盘，对 `pilot-loop-16` 做字段级 diff | 得到"哪几个字段不一致"的清单（不允许猜） |
+| A5 | **D2 受控实验**：新工作区 → 一次"通过校验但未持久化"的写 → 一次参数拒绝 → 观察 fence 归属 | 证实或证伪，写进文档 |
+| A6 | 统计口径固定：以 `apply-*.json` 文件为准（20 次 / 14 成功），工作区数不参与 | 与脚本一致 |
 
 ---
 
-## 风险与兼容性
+## P0-B D5：写入后状态确认闭环（最关键，预计 1.5 天）
 
-1. **schema 兼容**：把 `dimension_style` 从 required 改 optional 是**放宽**，不破坏 v1；
-   新增 `provenance` 属于**加字段**，旧 plan 不受影响。任何收紧都要升 v2 并保留 v1 解析器。
-2. **fence 语义变更**风险最大：`write_blocked` 一旦从"永久锁"改为"可丢弃"，必须保证
-   **不会在 DWG 里留下半完成的写入**。方案是"失败即 revision 作废 + 强制从上一版 dwg 重开"，
-   而不是"就地继续写"。
-3. **readback 放宽**有掩盖真实错误的可能：只放宽 `set_text`，几何实体（polyline/circle）的 readback 保持严格。
-4. **accoreconsole 导出**是外部进程，必须加超时与退出码检查，否则会静默卡住（本轮踩过）。
-5. **不要动的东西**：`units=raw_drawing_units`、16 步 / 64 句柄 / 128 KiB 上限。本轮所有图都远未触顶，
-   上限不是瓶颈。
+硬事实：`job.verification=passed`、服务端 `failed`、`verification_message=foundation_plan_readback_mismatch,plugin_stage_not_passed`、
+`write_fence_released=false`、`write_fence_finalized=false`、`readback_revision=4`。两份回执都在，但只有一份落盘。
+
+1. **先测量**：按 A4 拿到 diff，判断是"恢复分支前提不满足"还是"真不一致"。
+2. **不预放宽**：`VerifyReadback` 的严格相等保持；恢复分支（text anchor 等）在前提不满足时**给出原因**，而不是静默 false。
+3. **失败语义**：`committed_verification_failed` → revision 标记 `unverifiable`，fence **保持**，提供三条显式恢复命令：
+   - `resolve --inspect`：列出悬挂请求 + 两份回执 diff
+   - `resolve --recover`：从磁盘重读回填，重建可核验状态（**不重放写入**）
+   - `resolve --discard`：以上一版 dwg 重开 revision（原文件保留，不覆盖）
+4. **禁止重放**：已提交的写永不自动重发（把现有 `next_action` 提示变成硬约束）。
+
+出口：`pilot-loop-16` 的 `set_text` plan 可复现；要么通过，要么失败时能拿到字段级 diff 且能安全恢复。
 
 ---
 
-## 交付节奏建议
+## P0-C D1：标注能力（预计 1 天）
 
-- 第 1 天：D1 代码改 + 单测（离线用 plan→JSON 校验器即可验证字段语义）
-- 第 2 天：D2/D3 fence 与 request_id
-- 第 3 天：D5 readback + 字段级 diff；跑 P0 出口标准
-- 第 4-7 天：P1（revision / export-dxf / view）
-- 第 2 周：P2 表达力，并用"三管闸阀井施工图版"作为收官验证图（含剖面、配筋说明、标注、设备表）
+1. **保持显式标注样式**（不硬编码自动样式）：`dimension_style` 仍必填，错误改为字段级
+   `{"error":"missing_field","field":"dimension_style","op":"linear_dimension"}`。
+2. 文档补：`blank.dwg` 已内置 `Standard` / `Annotative`；plan 写 `"dimension_style":"Standard"` 即可。
+3. **必须实测**：六条真实 DIMENSION（井室 5000×4800、壁厚 300、管中心 1000/1400/1400、阀中心 X=2800、套管、支墩）
+   出图 + 回读；DXF 里 DIMENSION 实体数 ≥ 6，量值与几何一致。
+4. 只有实测通过后，文档才允许写"标注能力可用"。
+
+出口：图上出现真实 DIMENSION 且回读 passed；`DIMENSION` 数不为 0。
+
+---
+
+## P1 工作流可用性（预计 1 周）
+
+| # | 缺陷 | 内容 | 验收 |
+| --- | --- | --- | --- |
+| P1-1 | D4 | `apply` 等待 session ready（≤90s），超时 `workspace_busy` + 实际等待秒数 | 连续 10 次"start 后立刻 apply"全成功 |
+| P1-2 | D6 | **先做 revision 生命周期设计**（谁创建、谁可写、失败归谁），再实现；不是加开关 | 一张图 5 次修改只需 1 次 revision 切换 |
+| P1-3 | D7 | 修 `session_handoff.py`：不连带杀新实例；`stop`/`status` 语义对齐 | handoff 后连续 3 次 apply 成功 |
+| P1-4 | D8 | 查清 2022 插件为何没编进 `FoundationDxfExport`（构建/装配），先归因再决定改法；再议 `INSUNITS` 门槛 | 2022 上 `export_dxf` 成功产出 DXF，实体数与 DWG 一致 |
+| P1-5 | D10 | `view` 只读化，不依赖写事务所有权 | 保存后 `view` 首次即出图 |
+
+---
+
+## P2 表达力与规范（预计 1–2 周）
+
+| # | 缺陷 | 内容 |
+| --- | --- | --- |
+| P2-1（原 D3） | request_id 提示 | `request_id_conflict` 错误码 + 建议新 id（**不是功能缺陷**） |
+| P2-2 | D9 | `text` 增 `alignment/justify`；`layer`/实体增 `linetype`（虚线） |
+| P2-3 | D11 | `archive` preflight（层不存在则创建并设状态） |
+| P2-4 | D12 | `capture` 支持 `fit=entities`；`file_name` 放宽 Unicode |
+| P2-5 | D13 | `export_dxf` 固定 `$DWGCODEPAGE` 与内容编码一致；补 `$INSUNITS` 写入 |
+| P2-6 | 附2 | plan 支持 `provenance`（A/B/C + 来源页），区分"图集值 / 推断值 / 占位值" |
+
+---
+
+## 验收标准（v2 修正，解决与 D6 的冲突）
+
+- **P0 出口**：一条 plan 链**最多跨 1 次 revision 切换**，全程 `write_blocked=false`、`verification=passed`，
+  失败可诊断（有字段级 diff）、可恢复（三条 resolve 命令之一）。
+  ~~原标准"14 条 plan 在同一工作区跑完、无需换目录"~~ → 与 D6 现状冲突，作废。
+- **交付级出口**：施工图深化版（剖面 + 配筋 + 设备表 + 标注），一张图从 plan 到交付全程无需人工介入 CAD。
+
+---
+
+## 风险
+
+1. 基线统一前改代码 = 白改（本轮已踩到：镜像与构建树三个关键文件哈希不同）。
+2. `fence` 语义调整风险最高 → 坚持"不自动放、只提供显式恢复"。
+3. `INSUNITS` 门槛是写死的行业假设（只认米/无单位），毫米图是常态；需产品决策：放宽到 0/4/6 还是强制换算。
+4. `accoreconsole` 导出是外部进程，必须带超时 + 退出码检查，否则静默卡死（本轮踩过）。
+5. **不要动**：`units=raw_drawing_units`、16 步 / 64 句柄 / 128 KiB 上限（本轮远未触顶）。

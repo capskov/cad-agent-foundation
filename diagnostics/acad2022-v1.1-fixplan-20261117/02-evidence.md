@@ -45,15 +45,23 @@
 | pilot-loop-21 | V4 阀/支墩 | apply-8b.json | committed_verified |
 | pilot-loop-22 | V4 收口（交付图） | apply-8c.json | committed_verified；`pilot-08c.dwg/.dxf` + `outputs/pilot08_full.png` |
 
-## 五、统计
+## 五、统计（v2 更正，2026-11-17）
 
-- apply 总数 22 次，`committed_verified` 17 次，失败 5 次：
-  - 2 次参数被拒（D1、D3）
-  - 1 次会话竞争（D4）
-  - 1 次验证失败并锁死工作区（D5）
-  - 1 次进程被打断（D5 关联）
+> 原 v1 写"22 次 apply、17 成功、5 失败"是错的：把**工作区数**当成了 apply 次数。
+> 下面是按 `pilot-loop-*/apply-*.json` 逐个解析的真实统计（20 个文件，含 1 个 0 字节）。
+
+| 结果（按文件解析） | 次数 | 明细 |
+| --- | --- | --- |
+| `committed_verified`（verification=passed） | **14** | ws04/05/07/09-5a2/10/12/13/14/17/18/19/20/21/22 |
+| `committed_verification_failed` | **2** | ws03（原地改图）、ws16（set_text） |
+| 仅报错未提交（`error` 字段，无 status） | **2** | ws09 apply-5a（request_id 冲突）、ws11 apply-6a（会话占用） |
+| `rejected_before_submission` | **1** | ws08（标注 plan） |
+| 0 字节（进程被中断） | **1** | ws15 |
+| **合计 apply 尝试** | **20** | — |
+
+- **工作区 22 个 ≠ apply 20 次**：ws01/02/06 没有 apply 记录（ws02 是 handoff 试验、ws06 空目录）。
 - 因缺陷额外消耗的工作区：08（D1）、11（D4）、15/16（D5）、17-19（D5 导致重建）≈ 6 个，占 27%。
-- 每条图的平均成本：base + 设备 + 收口 = 3 次 apply ≈ 3 个目录 + 3 次 install/start。
+- 每张图的常态成本：base + 设备 + 收口 = 3 次 apply ≈ 3 个目录 + 3 次 install/start。
 
 ## 六、外部（GPT）复核时间线
 
