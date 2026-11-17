@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Build gate regression for ACAD2022 V1.1.
+       Compiles shared/Execution against net8 and proves the canonical JSON + SHA256
+       rules are byte-identical to the net48 plugin, so a net8-only check can never
+       drift from what the plugin actually signs. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <AssemblyName>hash-regress</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <Compile Include="..\..\shared\Execution\*.cs" LinkBase="shared\Execution" />
+  </ItemGroup>
+</Project>

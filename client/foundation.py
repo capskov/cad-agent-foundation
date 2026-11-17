@@ -136,7 +136,7 @@ def start(args):
     require(record['plugin_sha256']==manifest['plugin_sha256'],'Install this package version first')
     require(sha(record['plugin'])==record['plugin_sha256'],'Installed plugin differs')
     session_path=work/'session.json';closed=work/'closed-session.json'
-    reopen=bool(getattr(args,'reopen',False))
+    reopen=bool(getattr(args,'reopen',False));carry=None
     if session_path.exists():
         require(reopen,'Existing session preserved. Use doctor/status/stop; a new session needs a new workspace.')
         prior=read(session_path)
@@ -146,6 +146,7 @@ def start(args):
         except RuntimeError as ex:
             require('still running' not in str(ex),str(ex))
         held=held_fences(prior);require(not any(held.values()),'Reopen refused: unresolved write fence '+str(held))
+        carry=prior
         drawing=Path(prior['drawing']);require(drawing.is_file(),'Owned working drawing is missing; reopen needs the file that session wrote')
         source=Path(prior['source']);source_hash=prior['source_sha256']
         history=work/'sessions';history.mkdir(exist_ok=True)
@@ -183,7 +184,23 @@ def start(args):
     discovery,discovery_data=found
     require(discovery_data.get('pid')==proc.pid,'Native discovery belongs to a different CAD process')
     shutil.copy2(discovery,server/'Dwg'/discovery_name(year))
-    session['startup']='discovered';write(work/'session.json',session)
+    session['startup']='discovered'
+    # A reopened session may inherit the last verified disk digest, but only when the file
+    # on disk still hashes to exactly that value: the digest is re-proved, never assumed.
+    if carry and carry.get('last_saved_sha256') and str(Path(carry.get('last_saved_path') or '')).lower()==str(drawing.resolve()).lower():
+        disk=sha(drawing)
+        if disk==carry.get('last_saved_sha256'):
+            session['last_saved_sha256']=disk
+            session['last_saved_path']=str(drawing.resolve())
+            session['last_saved_at_utc']=carry.get('last_saved_at_utc')
+            session['last_saved_request_id']=carry.get('last_saved_request_id')
+            session['last_saved_write_request_id']=carry.get('last_saved_write_request_id')
+            session['last_saved_basis']='carried_from_prior_session'
+            session['last_saved_memory_disk_proven']=False
+            session['reopen_digest_recheck']='matched'
+        else:
+            session['reopen_digest_recheck']='mismatch_requires_save'
+    write(work/'session.json',session)
     write(work/'mcp-config.json',{'mcpServers':{'cad-foundation':{'command':sys.executable,'args':[str(Path(__file__).resolve()),'mcp','--workspace',str(work)]}}})
     return session
 
@@ -300,7 +317,23 @@ class Gateway:
             with sqlite3.connect(path.as_uri()+'?mode=ro',uri=True) as db:
                 return db.execute('select count(*) from plugin_jobs where request_id=?',(request_id,)).fetchone()[0]>0
         except Exception:return None
-    def persist(self ,save_to,request_id=None,overwrite=False):
+    def precheck_save_target(self,save_to,overwrite=False):
+        """Decide every save precondition before a single write is queued.
+
+        An illegal target must not leave a committed write, a request record or a held
+        fence behind, so this runs ahead of apply() and repeats no live-state check.
+        """
+        raw=str(save_to)
+        require('..' not in PureWindowsPath(raw).parts,'Save target must not contain parent-directory segments')
+        target=Path(raw).resolve()
+        require(target.suffix.lower()=='.dwg','Save target must be a .dwg file')
+        owned=Path(self.session['drawing']).resolve()
+        require(target==owned,'apply --save-to must target the bound owned drawing: '+str(owned)+' (use publish-dwg for a delivery copy, got '+str(target)+')')
+        require(bool(self.session.get('save_enabled')),'This session did not opt into plugin-side save; nothing was written')
+        if target.exists() and not overwrite:
+            raise RuntimeError('Save target already exists; rerun with --overwrite to replace it: '+str(target))
+        return target
+    def persist(self ,save_to,request_id=None,overwrite=False,basis='standalone_save',write_request_id=None):
         # 2022 save route: one separate save job of the bound owned drawing. It never
         # edits geometry; the write's fence stays held until this save exists.
         require(self.session.get('save_enabled'),'This session did not opt into plugin-side save')
@@ -334,10 +367,23 @@ class Gateway:
         # on disk is current.
         saved=reply.get('saved') if isinstance(reply.get('saved'),dict) else None
         saved_path=saved.get('saved_path') if saved else None
-        if reply.get('job',{}).get('phase')=='completed' and saved_path and Path(saved_path).is_file():
-            self.session['last_saved_sha256']=sha(Path(saved_path))
+        # A completed save job is not by itself proof that the drawing on disk matches the
+        # drawing this session verified. Only record a publishable digest when the file
+        # exists, sits on the bound path and hashes, and say plainly what that digest does
+        # not cover: an API-level SaveAs leaves DBMOD set, so memory state is unproven.
+        persisted_digest=None
+        if reply.get('job',{}).get('phase')=='completed' and saved_path:
+            sp=Path(saved_path)
+            if sp.is_file() and str(sp.resolve())==str(Path(self.session['drawing']).resolve()):
+                persisted_digest=sha(sp)
+        if persisted_digest:
+            self.session['last_saved_sha256']=persisted_digest
+            self.session['last_saved_path']=str(Path(saved_path).resolve())
             self.session['last_saved_at_utc']=dt.datetime.now(dt.timezone.utc).isoformat()
             self.session['last_saved_request_id']=rid
+            self.session['last_saved_basis']=basis
+            self.session['last_saved_write_request_id']=write_request_id
+            self.session['last_saved_memory_disk_proven']=False
             write(self.work/'session.json',self.session)
         return reply
     def apply(self,plan,request_id=None,save_to=None):
@@ -381,6 +427,10 @@ class Gateway:
         owned drawing to that path and re-queries the original write request, which
         lets the server release the fence only after a real save exists.
         """
+        if save_to:
+            # Fail before anything is queued: no request record, no plugin journal row,
+            # no fence, no drawing change on an illegal target.
+            self.precheck_save_target(save_to,overwrite)
         write_reply=self.apply(plan,request_id)
         # apply() generates the canonical request id when the caller did not pass one.
         # Finalization must query that same id; using the original None/auto id
@@ -415,7 +465,7 @@ class Gateway:
         target=Path(save_to).resolve()
         owned=Path(self.session['drawing'])
         require(target==owned,'apply --save-to must target the bound owned drawing: '+str(owned)+' (use publish-dwg for a delivery copy, got '+str(target)+')')
-        saved=self.persist(target,overwrite=overwrite)
+        saved=self.persist(target,overwrite=overwrite,basis='write_initial_save',write_request_id=write_id)
         saved_json=saved.get('saved') if isinstance(saved.get('saved'),dict) else None
         saved_ok=saved_json.get('saved_path') if isinstance(saved_json,dict) else None
         # A completed save of the bound drawing keeps its path; the session identity is never
@@ -440,6 +490,12 @@ class Gateway:
         result['save_reply']={'request_id':saved.get('request_id'),'saved_path':saved_ok,'phase':saved.get('job',{}).get('phase')}
         if not result['persisted']:
             result['next_action']='save_succeeded_but_finalize_pending: query the original write request; never replay the write'
+            return result
+        # The write is now finalized and its fence released, so this digest is tied to a
+        # confirmed transaction rather than to a bare save job.
+        self.session['last_saved_basis']='write_finalized'
+        self.session['last_saved_write_request_id']=write_id
+        write(self.work/'session.json',self.session)
         return result
 
 def publish(g,target,overwrite=False):
@@ -472,6 +528,7 @@ def publish(g,target,overwrite=False):
     require(bool(saved_digest),'Publish requires a verified save in this session; run save first')
     disk_digest=sha(owned)
     require(disk_digest==saved_digest,'Publish refused: the working DWG on disk differs from the last verified save; save again')
+    require(str(Path(s.get('last_saved_path') or '')).lower()==str(owned.resolve()).lower(),'Publish refused: the last verified save was not the bound working drawing')
     require(info.get('command_active')==0,'Publish requires an idle drawing (no active command)')
     require(info.get('loaded_plugin_mvid')==s['installation']['plugin_mvid'],'Loaded plugin changed since start')
     counts=held_fences(s);require(not any(counts.values()),'Publish refused: unresolved write fence '+str(counts))
@@ -495,14 +552,26 @@ def publish(g,target,overwrite=False):
     record={'schema':'foundation-publish-v1','published_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),
             'source_path':str(owned),'source_sha256':source_sha,'target_path':str(dst),'target_sha256':target_sha,
             'bytes':dst.stat().st_size,'overwrote_existing':bool(overwrite),'drawing_identity_changed':False,
-            'journal_scope_changed':False,'external_references':xref_note,'complete_engineering_package':not xref_note}
-    outdir=g.work/'publishes';outdir.mkdir(exist_ok=True)
-    name=dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ')+'-'+dst.stem+'.json'
-    write(outdir/name,record)
-    return {'published':True,'target_path':str(dst),'source_sha256':source_sha,'target_sha256':target_sha,
+            'journal_scope_changed':False,'external_references':xref_note,'external_dependency_scan':'xref_only','external_dependency_scan_complete':False,'complete_engineering_package':False,'delivery_scope':'dwg_copy_only'}
+    # The copy is already atomically in place, so a failed audit write is a partial result,
+    # not a failed publish: report it as such and let the caller trace by the target digest.
+    audit={'status':'not_written','path':None,'error':None}
+    try:
+        outdir=g.work/'publishes';outdir.mkdir(exist_ok=True)
+        name=dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ')+'-'+dst.stem+'.json'
+        write(outdir/name,record)
+        audit={'status':'written','path':str(outdir/name),'error':None}
+    except Exception as ex:
+        audit['error']=str(ex)
+    result={'published':True,'partial_completion':audit['status']!='written',
+            'target_path':str(dst),'source_sha256':source_sha,'target_sha256':target_sha,
             'bytes':record['bytes'],'external_references':xref_note,
-            'warning':None if not xref_note else 'The drawing references external files; a single DWG is not a complete package',
-            'record':str(outdir/name)}
+            'delivery_scope':'dwg_copy_only','dependencies_checked':'xref_only',
+            'complete_engineering_package':False,'memory_state_verified':False,
+            'audit_record':audit,
+            'warning':'Published as a copy of the confirmed disk-saved drawing. External dependencies other than XREFs (fonts, images, plot styles, underlays) were not checked, so this is not a complete engineering package.',
+            'next_action':None if audit['status']=='written' else 'published_but_audit_record_missing: trace the delivery by target_sha256'}
+    return result
 
 def main():
     p=argparse.ArgumentParser(description='CAD foundation first release; all drawings are owned copies')
