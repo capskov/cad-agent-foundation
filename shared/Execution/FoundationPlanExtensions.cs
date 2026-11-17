@@ -13,7 +13,13 @@ namespace Bimwright.Dwg.Shared.Execution
   {if(s["attachment"]!=null&&!new[]{"TopLeft","TopCenter","TopRight","MiddleLeft","MiddleCenter","MiddleRight","BottomLeft","BottomCenter","BottomRight"}.Contains(Text(s,"attachment",32)))throw new ArgumentException("known MTEXT attachment required");}
   public static void KeysWithOptional(JObject s,string[] required,params string[] optional)
   {
-   if(required.Any(k=>s[k]==null)||s.Properties().Any(p=>!required.Contains(p.Name)&&!optional.Contains(p.Name)))throw new ArgumentException("unexpected or missing plan fields");
+   var missing=required.Where(k=>s[k]==null).ToArray();
+   var extra=s.Properties().Where(p=>!required.Contains(p.Name)&&!optional.Contains(p.Name)).Select(p=>p.Name).ToArray();
+   if(missing.Length>0||extra.Length>0)
+    throw new ArgumentException("plan step '"+FoundationDrawingPlan.FieldContext(s)+"'"
+     +(missing.Length>0?" is missing required field(s): "+string.Join(", ",missing):"")
+     +(missing.Length>0&&extra.Length>0?"; ":"")
+     +(extra.Length>0?" has unexpected field(s): "+string.Join(", ",extra):""));
   }
   public static bool ValidateExtension(JObject s,ref int count)
   {

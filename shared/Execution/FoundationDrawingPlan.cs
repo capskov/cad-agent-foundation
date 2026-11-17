@@ -171,7 +171,23 @@ namespace Bimwright.Dwg.Shared.Execution
         {try{Parse(json);return true;}catch{return false;}} // Journal normalization may escape Unicode; identity is checked by its canonical payload digest.
         public static void Keys(JObject value,params string[] names)
         {
-            if(value==null||value.Properties().Count()!=names.Length||value.Properties().Any(p=>!names.Contains(p.Name,StringComparer.Ordinal)))throw new ArgumentException("unexpected or missing plan fields");
+            if(value==null)throw new ArgumentException("plan step required");
+            var missing=names.Where(n=>value[n]==null).ToArray();
+            var extra=value.Properties().Where(p=>!names.Contains(p.Name,StringComparer.Ordinal)).Select(p=>p.Name).ToArray();
+            if(missing.Length>0||extra.Length>0)
+                throw new ArgumentException("plan step '"+FieldContext(value)+"'"
+                    +(missing.Length>0?" is missing required field(s): "+string.Join(", ",missing):"")
+                    +(missing.Length>0&&extra.Length>0?"; ":"")
+                    +(extra.Length>0?" has unexpected field(s): "+string.Join(", ",extra):""));
+        }
+        // Names the failing step so a schema error points at one line of the submitted plan
+        // instead of the whole document.
+        public static string FieldContext(JObject value)
+        {
+            if(value!=null&&value["steps"]!=null)return "plan head";
+            string id=value?["id"]?.Type==JTokenType.String?value.Value<string>("id"):"?";
+            string op=value?["op"]?.Type==JTokenType.String?value.Value<string>("op"):"?";
+            return op+" step id="+id;
         }
         public static string Text(JObject o,string key,int maximum)
         {if(o[key]?.Type!=JTokenType.String||string.IsNullOrWhiteSpace(o.Value<string>(key))||o.Value<string>(key).Length>maximum||o.Value<string>(key).Contains('\0'))throw new ArgumentException("invalid "+key);return o.Value<string>(key);}

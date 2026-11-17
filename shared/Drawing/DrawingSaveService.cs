@@ -46,7 +46,16 @@ namespace Bimwright.Dwg.Plugin.Drawing
                     return null;
                 }
 
-                doc.Database.SaveAs(normalizedPath, DwgVersion.Current);
+                // Saving onto the drawing's own file is the in-place persistence route: the
+                // open document already owns that file, and a plain SaveAs to the same path
+                // fails with eFilerError. Keeping the document name unchanged also keeps the
+                // bound drawing identity stable so later writes are not blocked by a path change.
+                bool inPlace = !string.IsNullOrEmpty(doc.Name)
+                    && string.Equals(System.IO.Path.GetFullPath(normalizedPath), System.IO.Path.GetFullPath(doc.Name), StringComparison.OrdinalIgnoreCase);
+                if (inPlace)
+                    doc.Database.SaveAs(normalizedPath, true, DwgVersion.Current, doc.Database.SecurityParameters);
+                else
+                    doc.Database.SaveAs(normalizedPath, DwgVersion.Current);
                 return normalizedPath;
             }
         }
