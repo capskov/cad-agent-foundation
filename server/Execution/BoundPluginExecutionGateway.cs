@@ -1498,6 +1498,21 @@ namespace Bimwright.Dwg.Server.Execution
             if (TryGetInt64(job, "plugin_sequence", out long sequence))
                 projected["plugin_sequence"] = sequence;
 
+            // Fence state is the authoritative signal for the operator-resolve surface: a
+            // committed write whose readback failed must remain visibly fenced (released=false,
+            // finalized=false) so an agent can tell "held pending recovery" from "released after
+            // an authorized save" without guessing. These booleans are already produced by the
+            // plugin journal snapshot; they were previously dropped here.
+            foreach (string field in new[] { "write_fence_released", "write_fence_finalized", "global_fence" })
+            {
+                if (TryGetBoolean(job, field, out bool flag))
+                    projected[field] = flag;
+            }
+            if (TryGetInt64(job, "readback_revision", out long readbackRevision))
+                projected["readback_revision"] = readbackRevision;
+            CopyOptionalString(job, projected, "readback_digest");
+            CopyOptionalString(job, projected, "committed_result_digest");
+
             return projected;
         }
 
