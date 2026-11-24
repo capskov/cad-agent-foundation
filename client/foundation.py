@@ -260,10 +260,13 @@ class Gateway:
         self.client=E.McpStdioClient(self.proc)
         try:
             self.client.initialize(30);names={t['name'] for t in self.client.tools_list(30)['tools']}
-            expected=set(E.CATALOG_ALLOWLIST)
+            # The server advertises dwg_recover in every toolset, not only when the
+            # plugin-side save is enabled; expecting it only for --allow-save made
+            # read-only and write-without-save sessions fail before they could bind.
+            expected=set(E.CATALOG_ALLOWLIST)|{'dwg_recover'}
             if self.session['write_enabled']:expected.remove('dwg_inspect_lisp');expected.add('dwg_apply_plan');expected.add('dwg_view')
-            if self.session.get('save_enabled'):expected.add('dwg_foundation_save_drawing');expected.add('dwg_recover')
-            require(names==expected,'Unexpected tool catalog')
+            if self.session.get('save_enabled'):expected.add('dwg_foundation_save_drawing')
+            require(names==expected,'Unexpected tool catalog; missing='+str(sorted(expected-names))+' extra='+str(sorted(names-expected)))
             self.bound=self.call('dwg_bind_active_document',{})
             gate,issues=E.check_binding_identity(self.bound['binding_snapshot'],self.session['pid'],self.session['started'],self.session['drawing']);require(gate=='identity_matched',str(issues))
             info=self.bound.get('document_info',{});require(info.get('loaded_plugin_mvid')==self.session['installation']['plugin_mvid'],'Loaded plugin version unknown or differs')
@@ -607,7 +610,75 @@ def main():
             with Gateway(args.workspace) as g:
                 if args.action=='doctor':result=g.bound
                 elif args.action=='read':result=g.submit_read('dwg_get_entity_properties',{'handles':json.dumps(E.parse_handles(args.handles)),'include_geometry':True})
-                elif args.action=='view':result=g.submit_read('dwg_view',{'request_json':json.dumps(read(args.arguments),ensure_ascii=False)})
+                elif args.action=='view':
+                    # Plan A: auto_prepare enumerates real geometry extents, performs a
+                    # genuine window zoom in its OWN command, then captures in a SEPARATE
+                    # command. AutoCAD repaints between command boundaries; merging the two
+                    # brings back blank captures. Plain capture never moves the camera.
+                    req=read(args.arguments)
+                    if isinstance(req,dict) and req.get('action')=='capture' and req.get('auto_prepare'):
+                        req.pop('auto_prepare',None)
+                        rq=None
+                        pts=[]
+                        bbx=req.pop('bbox',None)
+                        if isinstance(bbx,dict) and all(k in bbx for k in ('min_x','min_y','max_x','max_y')):
+                            # Experiment A: caller supplies a known-good WCS bbox.
+                            pts=[(float(bbx['min_x']),float(bbx['min_y'])),(float(bbx['max_x']),float(bbx['max_y']))]
+                        else:
+                            # query_entities carries no coordinates; ask the plugin for native
+                            # model-space extents (Database.UpdateExt(false)) instead of guessing.
+                            er=g.submit_read('dwg_view',{'request_json':json.dumps({'action':'extents'})})
+                            rq=er
+                            def _findb(o):
+                                if isinstance(o,dict):
+                                    if all(k in o for k in ('min_x','min_y','max_x','max_y')):return o
+                                    for v in o.values():
+                                        b2=_findb(v)
+                                        if b2:return b2
+                                elif isinstance(o,str):
+                                    try:return _findb(json.loads(o))
+                                    except Exception:return None
+                                return None
+                            eb=_findb(er)
+                            if isinstance(eb,dict) and eb.get('ok') is not False:
+                                pts=[(float(eb['min_x']),float(eb['min_y'])),(float(eb['max_x']),float(eb['max_y']))]
+                        def _ext(o):
+                            if isinstance(o,dict):
+                                for k in ('start','end','center','position','location'):
+                                    v=o.get(k)
+                                    if isinstance(v,(list,tuple)) and len(v)>=2 and all(isinstance(x,(int,float)) for x in v[:2]):
+                                        pts.append((float(v[0]),float(v[1])))
+                                ex=o.get('extents')
+                                if isinstance(ex,dict):
+                                    for kk in ('min','min_pt','max','max_pt'):
+                                        v=ex.get(kk)
+                                        if isinstance(v,(list,tuple)) and len(v)>=2 and all(isinstance(x,(int,float)) for x in v[:2]):
+                                            pts.append((float(v[0]),float(v[1])))
+                                for v in o.values():_ext(v)
+                            elif isinstance(o,str):
+                                try:_ext(json.loads(o))
+                                except Exception:pass
+                            elif isinstance(o,list):
+                                for v in o:_ext(v)
+                        _ext(rq)
+                        if pts:
+                            xs=[p[0] for p in pts];ys=[p[1] for p in pts]
+                            mnx=min(xs);mxx=max(xs);mny=min(ys);mxy=max(ys)
+                            ww=max(mxx-mnx,1e-6);hh=max(mxy-mny,1e-6);pad=0.06
+                            win={'action':'window','min_x':mnx-ww*pad,'min_y':mny-hh*pad,'max_x':mxx+ww*pad,'max_y':mxy+hh*pad}
+                            wr=g.submit_read('dwg_view',{'request_json':json.dumps(win)})
+                            # The plugin L2-verifies the window (native_view_readback_mismatch).
+                            # Surface any rejection instead of silently capturing a stale view.
+                            wtxt=json.dumps(wr,ensure_ascii=False)
+                            if '"ok":false' in wtxt or '"ok": false' in wtxt:
+                                raise RuntimeError('auto_prepare_window_rejected: '+wtxt[:400])
+                        else:
+                            raise RuntimeError('auto_prepare_failed: entity query returned no parsable extents; refusing to capture a stale view (query_len=%d)'%len(json.dumps(rq,ensure_ascii=False)))
+                    result=g.submit_read('dwg_view',{'request_json':json.dumps(req,ensure_ascii=False)})
+                    rt=json.dumps(result,ensure_ascii=False)
+                    # A blank/stale capture or a rejected navigation must never look like success.
+                    if '"ok": false' in rt or '"ok":false' in rt:
+                        raise RuntimeError('view_action_failed: '+rt[:300])
                 elif args.action=='query':result=g.submit_read('dwg_query_entities',read(args.arguments))
                 elif args.action=='apply':result=g.apply_with_optional_save(read(args.plan),args.request_id,args.save_to,overwrite=args.overwrite)
                 elif args.action=='save':
