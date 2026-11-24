@@ -249,16 +249,21 @@ namespace Bimwright.Dwg.Plugin.Cad
             }
             catch (Exception)
             {
-                throw new InvalidOperationException(
-                    "spatial filter could not read geometric extents for handle " + entity.Handle);
+                // An entity whose extents cannot be computed (empty or proxy block
+                // definition, degenerate geometry) cannot be proven to intersect the
+                // window. Exclude it from this page instead of failing the whole query,
+                // so one bad block never makes a spatial query unusable; it stays
+                // reachable by handle through read/query without bounds.
+                return false;
             }
 
             Point3d min = extents.MinPoint;
             Point3d max = extents.MaxPoint;
             if (!IsFinite(min.X) || !IsFinite(min.Y) || !IsFinite(max.X) || !IsFinite(max.Y))
             {
-                throw new InvalidOperationException(
-                    "spatial filter found non-finite geometric extents for handle " + entity.Handle);
+                // Same rule as an unreadable extent: an infinite/NaN extent cannot be
+                // proven to intersect, so it is excluded rather than aborting the query.
+                return false;
             }
 
             // GeometricExtents is WCS-aligned. Closed-interval overlap means

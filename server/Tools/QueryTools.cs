@@ -34,7 +34,7 @@ namespace Bimwright.Dwg.Server.Tools
         public static Task<string> GetEntityProperties(
             [Description("JSON array of AutoCAD handles, e.g. [\"7F5AD\",\"2A4F\"].")] string handles,
             [Description("When true, include lightweight geometry such as extents, points, lengths, and text positions where available.")] bool include_geometry = false,
-            [Description("Optional geometry page offset, integer 0..4096; requires one handle and include_geometry=true. Use geometry_read.next_offset with the same entity_digest, document_session_id and drawing_revision; restart if any changes. Always check geometry_read issues and has_more.")] int? geometry_offset = null,
+            [Description("Optional geometry page offset, integer 0..1000000; requires one handle and include_geometry=true. Use geometry_read.next_offset with the same entity_digest, document_session_id and drawing_revision; restart if any changes. Always check geometry_read issues and has_more.")] int? geometry_offset = null,
             [Description("Optional JSON object with min_x,min_y,max_x,max_y; expands only block content intersecting this WCS window. Requires one handle and include_geometry=true.")] string geometry_window = null)
         {
             if (string.IsNullOrWhiteSpace(handles))

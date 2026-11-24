@@ -88,7 +88,7 @@ namespace Bimwright.Dwg.Plugin.Cad
             }
 
             var offset=obj["geometry_offset"];
-            if(offset!=null && (offset.Type!=JTokenType.Integer || !long.TryParse(offset.ToString(),out long offsetValue) || offsetValue<0 || offsetValue>4096 || !includeGeometry || handles.Count!=1)){error="geometry_offset requires include_geometry=true, one handle and integer 0..4096";return false;}
+            if(offset!=null && (offset.Type!=JTokenType.Integer || !long.TryParse(offset.ToString(),out long offsetValue) || offsetValue<0 || offsetValue>1000000 || !includeGeometry || handles.Count!=1)){error="geometry_offset requires include_geometry=true, one handle and integer 0..1000000";return false;}
             var windowToken=obj["geometry_window"];
             double[] window=null;
             if(windowToken!=null)
