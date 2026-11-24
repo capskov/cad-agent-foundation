@@ -22,7 +22,11 @@ namespace Bimwright.Dwg.Plugin {
     // Beside the source, so existing relative xref/image paths keep their base.
     string folder=Path.GetDirectoryName(name);for(var d=new DirectoryInfo(folder);d!=null;d=d.Parent)if(d.Exists&&(d.Attributes&FileAttributes.ReparsePoint)!=0)throw new InvalidOperationException("copy_reparse_path_refused");
     string output=Path.Combine(folder,step.Value<string>("file_name"));if(File.Exists(output))throw new InvalidOperationException("copy_exists_no_overwrite");pending=Path.Combine(folder,"pending-copy-"+Guid.NewGuid().ToString("N")+".dwg");
-    invoked=true;db.SaveAs(pending,false,DwgVersion.Current,db.SecurityParameters);
+    // Copy only a clean, already saved drawing. SaveAs on the live database can
+    // dirty DBMOD even with bBakAndRename=false; a detached byte copy cannot.
+    // Unsaved edits require an explicit save request before this operation.
+    if(dbmodBefore!=0)throw new InvalidOperationException("copy_requires_saved_clean_document_save_first");
+    invoked=true;File.Copy(name,pending,false);
     using(var disk=new Database(false,true)){disk.ReadDwgFile(pending,FileOpenMode.OpenForReadAndAllShare,true,null);disk.CloseInput(true);copyUnits=(int)disk.Insunits;using var tx=disk.TransactionManager.StartTransaction();diskEntities=ReadEntities(disk,tx,handles);diskLayers=LayerFacts(disk,tx);diskSymbols=SymbolFacts(disk,tx);diskLayouts=LayoutFacts(disk,tx);diskModel=Handles(disk,tx);tx.Abort();}
     using(var tx=db.TransactionManager.StartTransaction()){after=ReadEntities(db,tx,handles);if(!JToken.DeepEquals(before,after)||!JToken.DeepEquals(layers,LayerFacts(db,tx))||!JToken.DeepEquals(symbols,SymbolFacts(db,tx))||!JToken.DeepEquals(layouts,LayoutFacts(db,tx))||!JToken.DeepEquals(model,Handles(db,tx)))throw new InvalidOperationException("copy_source_changed");tx.Abort();}
     nameAfter=doc.Name;if(!string.Equals(db.Filename,name,StringComparison.OrdinalIgnoreCase))throw new InvalidOperationException("copy_database_path_changed");sourceHashAfter=CopyFileHash(name);dbmodAfter=Convert.ToInt32(Autodesk.AutoCAD.ApplicationServices.Core.Application.GetSystemVariable("DBMOD"));

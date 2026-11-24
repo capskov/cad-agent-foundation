@@ -277,7 +277,15 @@ namespace Bimwright.Dwg.Server
                 || !job.PluginSequence.HasValue)
                 return false;
 
-            bool recoveredStage = job.Observation == ObservationState.Recovery && job.ServerUnavailable;
+            // Legacy finalization cleared ServerUnavailable after a recovered
+            // stage but retained Recovery. Accept only the fully finalized
+            // variant; all identity, sequence and verification digest checks
+            // below still apply. New finalization restores IndependentReadback.
+            bool recoveredFinal = job.WriteFenceReleased && job.Verification == VerificationState.Passed
+                && job.VerificationStagedPluginSequence.Value < long.MaxValue
+                && job.PluginSequence.Value == job.VerificationStagedPluginSequence.Value + 1;
+            bool recoveredStage = job.Observation == ObservationState.Recovery
+                && (job.ServerUnavailable || recoveredFinal);
             bool currentStage = job.Observation == ObservationState.IndependentReadback && !job.ServerUnavailable;
             if (!recoveredStage && !currentStage)
                 return false;
@@ -332,10 +340,13 @@ namespace Bimwright.Dwg.Server
                 Description = "Model Context Protocol gateway for Autodesk AutoCAD DWG workflows",
                 WebsiteUrl = "https://github.com/bimwright/dwg-mcp"
             };
-            opts.ServerInstructions = ServerState.Config?.EnableFoundationWriteOrDefault == true
+            opts.ServerInstructions = CompanionSkillInstructions + (ServerState.Config?.EnableFoundationWriteOrDefault == true
                 ? "CAD foundation first release: bind the exact owned working drawing with dwg_bind_active_document; inspect binding_snapshot and document_info. Reads: dwg_list_layers, dwg_get_entity_properties (1..64 explicit handles, include_geometry=true returns native entity_digest), dwg_query_entities (filtered model-space candidates/paging). The only drawing write is dwg_apply_plan: foundation-drawing-plan-v1, source_role, units=raw_drawing_units (recommended; optional expected_insunits metadata check) or legacy units=metres, 1..16 bounded steps. Supported operations are enumerated in document_info.foundation_catalog.plan_operations. Includes: layer state, create/reuse-matching installed-font and dimension styles, line/circle/polyline, styled text/callout, new-boundary hatch, four native DIMENSION types, guarded closed-boundary/callout/content updates and supported complete-group move/rotate/scale/copy/archive. Catalog/layer digests are in document_info.foundation_catalog. Native text dimensions and paragraph extents are different; fit width before finite layout. Modified hatch area needs independent native read. Separate whole-document save performs specified-object disk verification. Provide context_id and a stable request_id, submit once. A timeout or ambiguous reply means query dwg_job_get for the original context/request; do not repeat the write or bypass fences. Both committed effects and passed verification with write_fence_released are required. Source drawings must be protected; use owned working copies. New bounded primitives, standalone line/circle offset and mirror-copy, text/dimension/table edits, page setup, current-layout PDF output and disk-verified DXF export are available as declared in that catalog. No arbitrary code, cross-drawing copies, generic delete/old-hatch repair, arbitrary layout/xref editing, batch/physical printer jobs or automatic engineering decisions. Coordinates and numeric sizes are raw 2D WCS drawing values; no unit conversion or INSUNITS changes. INSUNITS is auxiliary metadata for Agent interpretation and precision/plot decisions, not an ordinary raw-write prerequisite. Unitless/unknown-unit drawings work normally in raw mode; request unit consistency only when needed. Engineering tolerances belong to the task/Skill/Agent, separately from numeric readback tolerances. For unspecified typography derive text height from frame, paper and plot scale; ordinary Chinese paper height 2.5-3.5 mm is guidance, below 2 mm merits inspection; explicit user/Skill rules take precedence and engineering dimensions/formal scale stay correct. Text rotation is degrees, hatch angle radians. Save affects the entire current drawing. Layer/state and complete logical associations are checked. Existing-object edits require fresh native digests and all associated members. Task cancellation is queued-only; unknown writes remain fenced. Bind-time metadata is an observation, not live monitoring."
-                : ServerInstructionsText;
+                : ServerInstructionsText);
         }
+
+        private const string CompanionSkillInstructions =
+            "Before domain CAD work, proactively inspect the client's available Skills and read/use those applicable to the task unless the user declines. Road imagery: satellite-road-edge-tracing; callout placement: cad-callout-pair-layout; evidence-based distress/demolition: cad-distress-annotation; font issues: cad-font-diagnostics; pavement style reuse: cad-pavement-structure-style; road drawing delivery: road-design-delivery-style; applicable sheet/layout work: luna-cad-sheet-layout. Do not load unrelated or project-specific Skills blindly. If an optional Skill is missing, briefly explain its benefit and offer a verified installation source; the user may skip it and continue supported basic CAD. Remind once per relevant task phase, not every call. No automatic installation or native write prerequisite is added. Skill installation does not provide missing CAD operations. See runtime AGENTS.md and docs/SKILL-COMPANIONS.zh-CN.md. ";
 
         private const string ServerInstructionsText =
 @"dwg-mcp - MCP gateway for Autodesk AutoCAD DWG drawings. The governed pilot exposes three general drawing reads: dwg_list_layers, dwg_get_entity_properties (explicit handles only, 1-64 per request), and dwg_query_entities (filtered model-space reads). When the isolated Road08 D1 pilot is explicitly enabled, dwg_d1_preflight_r01 adds one fixed read-only inspection for its configured drawing; it cannot approve or perform a write. Other drawing reads, drawing changes, view changes, file writes, batch execution, code execution, and baked-tool execution are not available in this pilot.

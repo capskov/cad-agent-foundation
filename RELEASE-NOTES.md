@@ -1,5 +1,9 @@
 # CAD Agent Foundation v1.2.0-beta.3
 
+## v1.2.0-beta.3.24 — reusable AutoCAD 2026 review sessions
+
+Start the plugin from a clean drawing, then open project DWGs read-only in the same AutoCAD process. Adds startup-state diagnostics, explicit read-only draw-path binding, batched queries, layer listing and nested geometry offsets. Fixes explicit-layout queries through the server and native queue. Native smoke testing covered two explicit-layout queries, 173 layers and geometry offset readback. The preceding beta.3.23 tests covered cross-drawing binding and verified LINE save. [Usage and scope](docs/REVIEW-BETA323.zh-CN.md).
+
 ## v1.2.0-beta.3.18 — field reliability and explicit PDF printing
 
 Adds local CTB configuration and native transient window PDF output, plus save/leader/paper-space field fixes. 144 extension checks, 14 Python tests and 13 native A3 outputs passed within the recorded scope. [Evidence and limits](docs/RELEASE-v1.2.0-beta.3.18.md).

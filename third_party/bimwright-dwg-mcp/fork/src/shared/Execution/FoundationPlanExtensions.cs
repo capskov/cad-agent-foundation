@@ -97,13 +97,21 @@ namespace Bimwright.Dwg.Shared.Execution
     string op=table=="text_styles"?"text_style":"dimension_style";
     if(!added.SetEquals(steps.Cast<JObject>().Where(s=>s.Value<string>("op")==op&&!a.ContainsKey(s.Value<string>("name"))).Select(s=>s.Value<string>("name"))))return false;
    }
-   if(old["block_definitions"] is JObject blocks){if(next["block_definitions"] is not JObject newBlocks)return false;foreach(var row in blocks.Properties())if(!Equivalent(FontGeometryNeutral(row.Value,steps),FontGeometryNeutral(newBlocks[row.Name],steps)))return false;}
+   if(old["block_definitions"] is JObject blocks)
+   {
+    if(next["block_definitions"] is not JObject newBlocks)return false;
+    var fontStyles=steps.Cast<JObject>().Where(s=>s.Value<string>("op")=="set_text_style_font").Select(s=>s.Value<string>("name")).ToHashSet();
+    foreach(JObject warning in SavePresentationWarnings(receipt,steps))fontStyles.Add(warning.Value<string>("style"));
+    foreach(var row in blocks.Properties())
+     if(!Equivalent(FontGeometryNeutral(row.Value,fontStyles),FontGeometryNeutral(newBlocks[row.Name],fontStyles)))return false;
+   }
    return VerifyXrefPathChanges(old["xrefs"] as JObject,next["xrefs"] as JObject,steps)&&VerifyPaperViewportChanges(old["paper_viewports"] as JObject,next["paper_viewports"] as JObject,steps)&&VerifyPaperTextChanges(old["paper_texts"] as JObject,next["paper_texts"] as JObject,steps)&&VerifyPaperBlockChanges(old["paper_blocks"] as JObject,next["paper_blocks"] as JObject,steps,receipt);
   }
-  static JToken FontGeometryNeutral(JToken value,JArray steps)
+  static JToken FontGeometryNeutral(JToken value,HashSet<string> names)
   {
-   if(value==null)return JValue.CreateNull();var result=value.DeepClone();
-   var names=steps.Cast<JObject>().Where(s=>s.Value<string>("op")=="set_text_style_font").Select(s=>s.Value<string>("name")).ToHashSet();
+   if(value==null)return JValue.CreateNull();
+   if(names.Count==0)return value;
+   var result=value.DeepClone();
    void Walk(JToken node){if(node is JObject o){if(o.Value<string>("type") is "DBText" or "MText"&&names.Contains(o.Value<string>("text_style")))foreach(string f in new[]{"extents","actual_width","actual_height"})o.Remove(f);foreach(var p in o.Properties().ToArray())Walk(p.Value);}else if(node is JArray a)foreach(var n in a)Walk(n);}
    Walk(result);return result;
   }
@@ -114,16 +122,33 @@ namespace Bimwright.Dwg.Shared.Execution
   }
   public static bool TextStyleSaveEquivalent(JToken before,JToken after)
   {
-   if(before is not JObject a||after is not JObject b||a["resolved_font"] is not JObject font||string.IsNullOrWhiteSpace(font.Value<string>("typeface"))||!JToken.DeepEquals(font,b["resolved_font"]))return false;
-   string oldFile=a.Value<string>("font_file")??"",newFile=b.Value<string>("font_file")??"";
-   // AutoCAD can canonicalize either direction: a resolved TrueType face may
-   // gain its installed filename on save, or a legacy filename may become empty.
-   // Only this filename is neutral; the complete resolved face and every other
-   // style property must remain identical. SHX/BigFont styles are never neutral.
-   bool TrueTypeOrEmpty(string name)=>name.Length==0||name.EndsWith(".ttf",StringComparison.OrdinalIgnoreCase);
-   if(!TrueTypeOrEmpty(oldFile)||!TrueTypeOrEmpty(newFile)
-      ||!string.IsNullOrEmpty(a.Value<string>("big_font_file"))||!string.IsNullOrEmpty(b.Value<string>("big_font_file")))return false;
-   var x=(JObject)a.DeepClone();var y=(JObject)b.DeepClone();x.Remove("font_file");y.Remove("font_file");return JToken.DeepEquals(x,y);
+   if(before is not JObject a||after is not JObject b)return false;
+   // Font selection/normalization is a presentation warning, including SHX,
+   // BigFont and substituted TrueType faces. Never discard style identity or
+   // authored metrics. A lost, unresolved font remains a blocking failure.
+   if(string.IsNullOrWhiteSpace(b.Value<string>("font_file"))&&string.IsNullOrWhiteSpace(b["resolved_font"]?.Value<string>("typeface")))return false;
+   var x=(JObject)a.DeepClone();var y=(JObject)b.DeepClone();
+   foreach(string f in new[]{"font_file","big_font_file","resolved_font"}){x.Remove(f);y.Remove(f);}
+   return JToken.DeepEquals(x,y);
+  }
+  public static JArray SavePresentationWarnings(JObject receipt,JArray steps)
+  {
+   var warnings=new JArray();if(steps.Count!=1||steps[0].Value<string>("op")!="save")return warnings;
+   if(receipt["symbols_before"]?["text_styles"] is not JObject old||receipt["symbols_after"]?["text_styles"] is not JObject next)return warnings;
+   foreach(var p in old.Properties())if(!JToken.DeepEquals(p.Value,next[p.Name])&&TextStyleSaveEquivalent(p.Value,next[p.Name]))
+    warnings.Add(new JObject{["code"]="font_substitution",["severity"]="warning",["blocks_write"]=false,["style"]=p.Name,["before"]=p.Value.DeepClone(),["after"]=next[p.Name].DeepClone(),["visual_review_required"]=true,["message"]="Font changed on save; continue writing. Review glyphs and layout. Missing/invisible text or unreadable engineering symbols require Agent intervention; font metadata alone cannot certify visibility."});
+   return warnings;
+  }
+  public static bool SaveEntityEquivalent(JToken before,JToken after,JObject receipt)
+  {
+   if(Equivalent(before,after))return true;
+   var steps=new JArray(new JObject{["op"]="save"});
+   var names=SavePresentationWarnings(receipt,steps).Select(w=>w.Value<string>("style")).ToHashSet();
+   if(before is not JObject a||after is not JObject b||a.Value<string>("type") is not ("DBText" or "MText")||!names.Contains(a.Value<string>("text_style")))return false;
+   // Only computed glyph bounds may move. Authored content, height, position,
+   // rotation, width, visibility and style identity remain protected.
+   foreach(string f in new[]{"actual_width","actual_height"})if(b[f]!=null&&b[f].Type!=JTokenType.Null&&b.Value<double>(f)<=0&&!string.IsNullOrWhiteSpace(a.Value<string>("text")))return false;
+   return Equivalent(FontGeometryNeutral(a,names),FontGeometryNeutral(b,names));
   }
   public static bool VerifyExtension(JObject step,JObject receipt,out bool handled)
   {

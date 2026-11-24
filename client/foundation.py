@@ -111,7 +111,10 @@ def start(args):
     require(record['plugin_sha256']==manifest['plugin_sha256'],'Install this package version first')
     require(sha(record['plugin'])==record['plugin_sha256'],'Installed plugin differs')
     require(not (work/'session.json').exists(),'Existing session preserved. Use doctor/status/stop; a new session needs a new workspace.')
-    source=Path(args.source).resolve();require(source.is_file() and source.suffix.lower()=='.dwg','Existing source DWG required')
+    review=args.action=='start-review'
+    source=Path(args.source).resolve()
+    extensions={'.dwg','.dwt'} if review else {'.dwg'}
+    require(source.is_file() and source.suffix.lower() in extensions,'Use a clean local DWG/DWT for review startup, or an existing DWG for start')
     drawing=work/'drawings'/'work.dwg';drawing.parent.mkdir(parents=True,exist_ok=True)
     require(not drawing.exists(),'Working drawing already exists; refusing overwrite')
     source_hash=sha(source);shutil.copy2(source,drawing);require(sha(drawing)==source_hash,'Copy differs')
@@ -125,16 +128,59 @@ def start(args):
     proc=subprocess.Popen([str(Path(record['cad'])/'acad.exe'),str(drawing),'/b',str(script),'/nologo'],env=env,startupinfo=startup)
     birth=process_birth(proc.pid)
     session={'schema':'foundation-local-session-v1','session_id':uuid.uuid4().hex,'pid':proc.pid,'started':birth,'drawing':str(drawing),'source':str(source),'source_sha256':source_hash,'native_root':str(native),'server_root':str(server),'write_enabled':args.write,'installation':record,'created_at_utc':dt.datetime.now(dt.timezone.utc).isoformat()}
+    session.update(startup='starting',startup_mode='review' if review else 'source')
     write(work/'session.json',session)
+    write(work/'mcp-config.json',{'mcpServers':{'cad-foundation':{'command':sys.executable,'args':[str(Path(__file__).resolve()),'mcp','--workspace',str(work)]}}})
+    if args.no_wait:
+        return session
     discovery=native/'Dwg/acad-2026.json';deadline=time.monotonic()+90
     while not discovery.exists():
-        require(proc.poll() is None,'Owned CAD exited before plugin discovery; session preserved')
-        require(time.monotonic()<deadline,'Plugin startup not confirmed; inspect session, do not start another CAD in this workspace')
+        if proc.poll() is not None or time.monotonic()>=deadline:
+            observed=startup_status(work)
+            session['startup']=observed['state'];write(work/'session.json',session)
+            if observed['state']!='ready':
+                raise RuntimeError(json.dumps(observed,ensure_ascii=False))
+            break
         time.sleep(.25)
-    shutil.copy2(discovery,server/'Dwg/acad-2026.json')
+    sync_owned_discovery(work,session)
     session['startup']='discovered';write(work/'session.json',session)
-    write(work/'mcp-config.json',{'mcpServers':{'cad-foundation':{'command':sys.executable,'args':[str(Path(__file__).resolve()),'mcp','--workspace',str(work)]}}})
     return session
+
+def startup_status(work):
+    session=read(work/'session.json')
+    pid=session['pid']
+    result={'pid':pid,'mode':session.get('startup_mode','source')}
+    try:
+        same_process=process_birth(pid)==session['started']
+    except RuntimeError as error:
+        return dict(result,state='process_unavailable',detail=str(error))
+    if not same_process:
+        return dict(result,state='process_identity_changed')
+    discovery=Path(session['native_root'])/'Dwg/acad-2026.json'
+    if discovery.is_file():
+        endpoint=read(discovery)
+        if endpoint.get('pid')==pid and endpoint.get('acad_year')==2026 and endpoint.get('process_name')=='acad':
+            return dict(result,state='ready')
+        return dict(result,state='discovery_identity_mismatch')
+    user=ctypes.WinDLL('user32',use_last_error=True)
+    callback=ctypes.WINFUNCTYPE(ctypes.c_int,ctypes.c_void_p,ctypes.c_void_p)
+    windows=[]
+    @callback
+    def observe(handle,_):
+        owner=ctypes.c_uint32()
+        user.GetWindowThreadProcessId(ctypes.c_void_p(handle),ctypes.byref(owner))
+        if owner.value==pid and user.IsWindowVisible(ctypes.c_void_p(handle)):
+            title=ctypes.create_unicode_buffer(512)
+            window_class=ctypes.create_unicode_buffer(256)
+            user.GetWindowTextW(ctypes.c_void_p(handle),title,len(title))
+            user.GetClassNameW(ctypes.c_void_p(handle),window_class,len(window_class))
+            if title.value or window_class.value=='#32770':
+                windows.append({'title':title.value,'class':window_class.value})
+        return 1
+    user.EnumWindows(observe,0)
+    dialog=any(w['class']=='#32770' for w in windows)
+    return dict(result,state='waiting_for_dialog' if dialog else 'plugin_not_ready',windows=windows,
+                next_action='Inspect the owned CAD window and query startup-status again before restarting.')
 
 def process_birth(pid):
     # Native process identity, independent of active COM document selection.
@@ -160,12 +206,15 @@ def sync_owned_discovery(work,session):
     require(discovery.get('pid')==session['pid'] and discovery.get('acad_year')==2026 and discovery.get('process_name')=='acad','Delayed native discovery identity differs')
     require(dt.datetime.fromisoformat(discovery['started_at_utc'].replace('Z','+00:00'))>=dt.datetime.fromisoformat(session['started'].replace('Z','+00:00')),'Delayed discovery predates owned CAD process')
     destination.parent.mkdir(parents=True,exist_ok=True)
-    shutil.copy2(source,destination)
+    write(destination,discovery)
     write(Path(work)/'startup-discovery-sync.json',{'schema':'foundation-delayed-startup-sync-v1','session_id':session['session_id'],'pid':session['pid'],'copied_matching_native_discovery':True,'native_journal_unchanged':True,'binding_identity_still_required':True})
 
 class Gateway:
-    def __init__(self,work):
+    def __init__(self,work,read_target=None):
         manifest=installation();self.work=work;self.session=read(work/'session.json');s=self.session
+        require(not (read_target and s['write_enabled']),'Explicit read target requires a read-only session')
+        self.expected_drawing=str(read_target) if read_target else s['drawing']
+        self.read_target=read_target
         require(process_birth(s['pid'])==s['started'],'Owned CAD process identity changed')
         require(sha(s['installation']['plugin'])==s['installation']['plugin_sha256'],'Installed plugin changed')
         require(manifest['plugin_mvid']==s['installation']['plugin_mvid'],'This entry package does not match the installed native version')
@@ -193,7 +242,10 @@ class Gateway:
             if self.session['write_enabled']:expected.remove('dwg_inspect_lisp');expected.add('dwg_apply_plan');expected.add('dwg_view')
             require(names==expected,'Unexpected tool catalog')
             self.bound=self.call('dwg_bind_active_document',{})
-            gate,issues=E.check_binding_identity(self.bound['binding_snapshot'],self.session['pid'],self.session['started'],self.session['drawing']);require(gate=='identity_matched',str(issues))
+            gate,issues=E.check_binding_identity(self.bound['binding_snapshot'],self.session['pid'],self.session['started'],self.expected_drawing);require(gate=='identity_matched',str(issues))
+            if self.read_target:
+                require(self.bound.get('document_info',{}).get('document_read_only') is True,
+                        'Open the explicit target read-only in the existing AutoCAD instance')
             info=self.bound.get('document_info',{});require(info.get('loaded_plugin_mvid')==self.session['installation']['plugin_mvid'],'Loaded plugin version unknown or differs')
             self.context=self.bound['context_id'];return self
         except BaseException:self.__exit__(None,None,None);raise
@@ -223,9 +275,21 @@ class Gateway:
         if reply.get('status')=='rejected_before_submission' and reply.get('registered') is False and reply.get('effects')=='none' and reply.get('request_id')==request['request_id'] and reply.get('context_id')==self.context:
             request['terminal_rejection']=reply;write(self.work/'requests'/(request['request_id']+'.json'),request);return reply
         result=self.query(request)
-        raw=result.get('job',{}).get('result_json')
+        raw=(result.get('job') or {}).get('result_json')
         if isinstance(raw,str):result['data']=json.loads(raw)
         return result
+
+    def query_batch(self,queries):
+        require(isinstance(queries,list) and 1<=len(queries)<=16 and all(isinstance(q,dict) for q in queries),
+                'query-batch requires an array of 1–16 query argument objects')
+        outputs=[]
+        for query in queries:
+            reply=self.submit_read('dwg_query_entities',query)
+            outputs.append(reply)
+            if reply.get('pending') or reply.get('job',{}).get('phase')!='completed':
+                break
+        return {'requested':len(queries),'completed':sum(r.get('job',{}).get('phase')=='completed' for r in outputs),
+                'results':outputs}
     def apply(self,plan,request_id=None):
         require(self.session['write_enabled'],'This session is read-only')
         canonical=json.dumps(plan,ensure_ascii=False,sort_keys=True,separators=(',',':'));digest=hashlib.sha256(canonical.encode('utf-8')).hexdigest()
@@ -251,19 +315,58 @@ class Gateway:
             request['terminal_rejection']=reply;write(path,request);return reply
         write(path,request);return self.query(request)
 
+def companion_skill_guidance():
+    """Advisory discovery only; never installs or gates CAD operations."""
+    catalog=[
+        ('satellite-road-edge-tracing','卫星/正射影像描路及穿路范围'),
+        ('cad-callout-pair-layout','引线、圆点和文字排布'),
+        ('cad-distress-annotation','有依据的病害/拆除范围表达'),
+        ('cad-font-diagnostics','字体缺失、替代与可读性'),
+        ('cad-pavement-structure-style','复用路面结构样式'),
+        ('road-design-delivery-style','道路结构成果组织'),
+        ('luna-cad-sheet-layout','适用项目的图框、布局与目录'),
+    ]
+    codex_root=Path(os.environ.get('CODEX_HOME') or Path.home()/'.codex')
+    return {
+        'advisory_only':True,
+        'agent_instruction':'主动检查当前客户端Skill目录。已有且适用的Skill应读取并使用，用户明确跳过时尊重选择；缺少者说明作用和已核实安装入口，可选择继续基础操作。同一任务阶段提醒一次，不自动安装，不作为CAD执行门槛。只选择相关技能，项目专用技能另核适用范围。',
+        'skills':[{'name':name,'task':task,'local_skill_md_found':(codex_root/'skills'/name/'SKILL.md').is_file()} for name,task in catalog],
+        'discovery_note':'本地文件检查不包含插件或其他客户端目录；未找到时仍须查看实际会话Skill目录。',
+        'details':'docs/SKILL-COMPANIONS.zh-CN.md',
+    }
+
 def main():
     p=argparse.ArgumentParser(description='CAD foundation first release; all drawings are owned copies')
-    p.add_argument('action',choices=['install','start','doctor','read','query','apply','save','stop','status','mcp','view','plot-style','plot-batch'])
+    p.add_argument('action',choices=['install','start','start-review','startup-status','doctor','layers','read','query','query-batch','apply','save','stop','status','mcp','view','plot-style','plot-batch'])
     p.add_argument('--workspace',type=Path,required=True);p.add_argument('--cad',default=r'C:\Program Files\Autodesk\AutoCAD 2026')
     p.add_argument('--source');p.add_argument('--write',action='store_true');p.add_argument('--headless',action='store_true')
+    p.add_argument('--no-wait',action='store_true',help='Return after spawning CAD; observe with startup-status')
     p.add_argument('--handles');p.add_argument('--plan',type=Path);p.add_argument('--request-id');p.add_argument('--arguments',type=Path)
+    p.add_argument('--geometry-offset',type=int,help='Read one handle, using the native geometry_read.next_offset')
+    p.add_argument('--read-target',type=Path,help='Exact active read-only DWG in the existing CAD process')
     args=p.parse_args();args.workspace=args.workspace.resolve()
+    if args.geometry_offset is not None:
+        if args.action!='read' or not 0<=args.geometry_offset<=4096 or not args.handles or len(E.parse_handles(args.handles))!=1:
+            p.error('--geometry-offset requires read, one handle and an offset in 0..4096')
+    if args.action in {'start','start-review'} and not args.source:
+        p.error('startup requires --source')
+    if args.action=='start-review' and args.write:
+        p.error('start-review is read-only')
+    if args.action=='startup-status':
+        print(json.dumps(startup_status(args.workspace),ensure_ascii=False,indent=2))
+        return 0
+    if args.read_target:
+        if args.action not in {'doctor','layers','read','query','query-batch'}:
+            p.error('--read-target only supports doctor, layers, read, query and query-batch')
+        args.read_target=args.read_target.resolve()
+        if not args.read_target.is_file() or args.read_target.suffix.lower()!='.dwg':
+            p.error('--read-target must be an existing DWG')
     with lease(args.workspace):
         if args.action=='plot-style':
             import plot_style
             result=plot_style.run(args.workspace,read(args.arguments))
         elif args.action=='install':result=install(args)
-        elif args.action=='start':result=start(args)
+        elif args.action in {'start','start-review'}:result=start(args)
         elif args.action=='mcp':
             with Gateway(args.workspace) as g:command,env=g.command,g.env
             proc=subprocess.Popen(command,cwd=HOME/'server',env=env)
@@ -271,14 +374,20 @@ def main():
             finally:
                 if proc.poll() is None:proc.terminate();proc.wait(timeout=10)
         else:
-            with Gateway(args.workspace) as g:
+            with Gateway(args.workspace,args.read_target) as g:
                 if args.action=='plot-batch':
                     import plot_batch
                     result=plot_batch.run(g,args.workspace,read(args.arguments))
                 elif args.action=='doctor':result=g.bound
-                elif args.action=='read':result=g.submit_read('dwg_get_entity_properties',{'handles':json.dumps(E.parse_handles(args.handles)),'include_geometry':True})
+                elif args.action=='layers':result=g.submit_read('dwg_list_layers',{})
+                elif args.action=='read':
+                    query={'handles':json.dumps(E.parse_handles(args.handles)),'include_geometry':True}
+                    if args.geometry_offset is not None:
+                        query['geometry_offset']=args.geometry_offset
+                    result=g.submit_read('dwg_get_entity_properties',query)
                 elif args.action=='view':result=g.submit_read('dwg_view',{'request_json':json.dumps(read(args.arguments),ensure_ascii=False)})
                 elif args.action=='query':result=g.submit_read('dwg_query_entities',read(args.arguments))
+                elif args.action=='query-batch':result=g.query_batch(read(args.arguments))
                 elif args.action=='apply':result=g.apply(read(args.plan),args.request_id)
                 elif args.action=='save':
                     rows=g.submit_read('dwg_get_entity_properties',{'handles':json.dumps(E.parse_handles(args.handles)),'include_geometry':True}).get('data',{}).get('entities',[])
@@ -287,6 +396,8 @@ def main():
                     result=g.apply(plan,args.request_id)
                 elif args.action=='stop':result=stop(g)
                 else:result=g.query(read(args.workspace/'requests'/(args.request_id+'.json')))
+        if args.action in {'install','start','start-review','doctor','status'}:
+            result=dict(result,agent_skill_guidance=companion_skill_guidance())
         print(json.dumps(E.redact(result),ensure_ascii=False,indent=2));return 0
 if __name__=='__main__':
     try:sys.exit(main())

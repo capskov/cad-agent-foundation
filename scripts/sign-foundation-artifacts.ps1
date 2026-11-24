@@ -15,7 +15,7 @@ $results=@()
 foreach($file in $FilePath){
  $resolved=(Resolve-Path -LiteralPath $file).Path
  $name=[IO.Path]::GetFileName($resolved)
- if($name -notmatch '^(Bimwright\.Dwg\.(Plugin\.(Acad26|Journal)|Server)|Foundation\.(SaveFontRecovery|SaveXrefCacheRecovery2|SaveXrefCacheRecovery|TextAnchorRecovery|BlockCacheRecovery2))\.(dll|exe)$'){throw ('Not an owned Foundation binary: '+$name)}
+ if($name -notmatch '^(Bimwright\.Dwg\.(Plugin\.(Acad26|Journal)|Server)|Foundation\.(UnknownCopyRecovery3|UnknownCopyRecovery2|UnknownCopyRecovery|SaveFontRecovery|SaveXrefCacheRecovery2|SaveXrefCacheRecovery|TextAnchorRecovery|BlockCacheRecovery2))\.(dll|exe)$'){throw ('Not an owned Foundation binary: '+$name)}
  $signature=Set-AuthenticodeSignature -LiteralPath $resolved -Certificate $certificate -HashAlgorithm SHA256 -IncludeChain NotRoot
  $checked=Get-AuthenticodeSignature -LiteralPath $resolved
  if($signature.Status -ne 'Valid' -or $checked.Status -ne 'Valid' -or $checked.SignerCertificate.Thumbprint -ne $config.thumbprint){throw ('Signature verification failed for '+$name+': '+$checked.StatusMessage)}

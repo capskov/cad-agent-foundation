@@ -105,9 +105,9 @@ badUnits=(JObject)rawUnitPlan.DeepClone();badUnits["units"]="metres";Check(Inval
 var fontAlias=new JObject{["font_file"]="黑体.ttf",["width_factor"]=0.8,["resolved_font"]=new JObject{["typeface"]="黑体",["bold"]=false,["italic"]=false,["charset"]=134,["pitch_family"]=34}};
 var fontAliasDisk=(JObject)fontAlias.DeepClone();fontAliasDisk["font_file"]="simhei.ttf";
 Check(FoundationDrawingPlan.TextStyleSaveEquivalent(fontAlias,fontAliasDisk),"save accepts same resolved TTF identity alias");
-fontAliasDisk["resolved_font"]["typeface"]="宋体";Check(!FoundationDrawingPlan.TextStyleSaveEquivalent(fontAlias,fontAliasDisk),"actual font change still rejected");
+fontAliasDisk["resolved_font"]["typeface"]="宋体";Check(FoundationDrawingPlan.TextStyleSaveEquivalent(fontAlias,fontAliasDisk),"actual font replacement is a presentation warning");
 fontAliasDisk=(JObject)fontAlias.DeepClone();fontAliasDisk["width_factor"]=0.7;Check(!FoundationDrawingPlan.TextStyleSaveEquivalent(fontAlias,fontAliasDisk),"font geometry change still rejected");
-fontAliasDisk=(JObject)fontAlias.DeepClone();fontAliasDisk["font_file"]="txt.shx";Check(!FoundationDrawingPlan.TextStyleSaveEquivalent(fontAlias,fontAliasDisk),"SHX substitution not treated as TTF alias");
+fontAliasDisk=(JObject)fontAlias.DeepClone();fontAliasDisk["font_file"]="txt.shx";Check(FoundationDrawingPlan.TextStyleSaveEquivalent(fontAlias,fontAliasDisk),"SHX substitution is a presentation warning");
 
 var circle=new JObject{["handle"]="A",["type"]="Circle",["layer"]="T",["color_index"]=2,["center"]=Point(3,4),["radius"]=2,["diameter"]=4,["area"]=4*Math.PI,["circumference"]=4*Math.PI};
 var targets=new JArray(new JObject{["handle"]="A",["expected_sha256"]=FoundationDrawingPlan.Hash(circle)});
@@ -223,12 +223,18 @@ var saveTtf=new JObject{["handle"]="F1",["font_file"]="legacy.ttf",["big_font_fi
 var diskTtf=(JObject)saveTtf.DeepClone();diskTtf["font_file"]="";
 Check(FoundationDrawingPlan.TextStyleSaveEquivalent(saveTtf,diskTtf),"save accepts legacy TTF filename becoming empty with identical face");
 Check(FoundationDrawingPlan.TextStyleSaveEquivalent(diskTtf,saveTtf),"save accepts empty filename gaining TTF with identical face");
-var different=(JObject)diskTtf.DeepClone();different["resolved_font"]["typeface"]="Other Face";Check(!FoundationDrawingPlan.TextStyleSaveEquivalent(saveTtf,different),"save rejects different resolved typeface");
-different=(JObject)diskTtf.DeepClone();different["resolved_font"]["bold"]=true;Check(!FoundationDrawingPlan.TextStyleSaveEquivalent(saveTtf,different),"save rejects changed weight");
+var different=(JObject)diskTtf.DeepClone();different["resolved_font"]["typeface"]="Other Face";Check(FoundationDrawingPlan.TextStyleSaveEquivalent(saveTtf,different),"save warns on substituted resolved typeface");
+different=(JObject)diskTtf.DeepClone();different["resolved_font"]["bold"]=true;Check(FoundationDrawingPlan.TextStyleSaveEquivalent(saveTtf,different),"save warns on resolved weight changes");
 different=(JObject)diskTtf.DeepClone();different["width_factor"]=.9;Check(!FoundationDrawingPlan.TextStyleSaveEquivalent(saveTtf,different),"save rejects changed width");
-different=(JObject)diskTtf.DeepClone();different["big_font_file"]="hztxt.shx";Check(!FoundationDrawingPlan.TextStyleSaveEquivalent(saveTtf,different),"save never ignores BigFont changes");
-different=(JObject)saveTtf.DeepClone();different["font_file"]="txt.shx";Check(!FoundationDrawingPlan.TextStyleSaveEquivalent(different,diskTtf),"save never normalizes SHX into empty TTF");
+different=(JObject)diskTtf.DeepClone();different["big_font_file"]="hztxt.shx";Check(FoundationDrawingPlan.TextStyleSaveEquivalent(saveTtf,different),"save warns on BigFont changes");
+different=(JObject)saveTtf.DeepClone();different["font_file"]="txt.shx";Check(FoundationDrawingPlan.TextStyleSaveEquivalent(different,diskTtf),"save accepts SHX metadata becoming resolved TTF");
 different=(JObject)diskTtf.DeepClone();different["resolved_font"]["typeface"]="";var unresolved=(JObject)saveTtf.DeepClone();unresolved["resolved_font"]["typeface"]="";Check(!FoundationDrawingPlan.TextStyleSaveEquivalent(unresolved,different),"save requires a resolved typeface");
+different=(JObject)saveTtf.DeepClone();different["handle"]="OTHER";Check(!FoundationDrawingPlan.TextStyleSaveEquivalent(saveTtf,different),"font warning cannot hide style identity change");
+different=(JObject)saveTtf.DeepClone();different["fixed_height"]=2;Check(!FoundationDrawingPlan.TextStyleSaveEquivalent(saveTtf,different),"font warning cannot hide authored height change");
+var fontWarningReceipt=new JObject{["symbols_before"]=new JObject{["text_styles"]=new JObject{["F"]=saveTtf}},["symbols_after"]=new JObject{["text_styles"]=new JObject{["F"]=diskTtf}}};
+var warnings=FoundationDrawingPlan.SavePresentationWarnings(fontWarningReceipt,new JArray(new JObject{["op"]="save"}));
+Check(warnings.Count==1&&warnings[0].Value<string>("severity")=="warning"&&warnings[0].Value<bool>("blocks_write")==false,"font warning is explicit and nonblocking");
+Check(FoundationDrawingPlan.SavePresentationWarnings(fontWarningReceipt,new JArray(new JObject{["op"]="line"})).Count==0,"font exception does not apply outside save");
 Console.WriteLine($"Including save-font regression: {passed} passed");
 
 var centerFixture=JObject.Parse(System.IO.File.ReadAllText(System.IO.Path.Combine(AppContext.BaseDirectory,"centered-text-receipt.json")));
@@ -343,3 +349,9 @@ foreach(string path in new[]{"../delivery.dwg","folder/file.dwg","delivery.dxf"}
 var emptyCopy=(JObject)copyStep.DeepClone();emptyCopy["expected"]=new JArray();Check(!Valid(emptyCopy),"save-copy cannot skip selected disk verification");
 var mixedCopy=Plan(copyStep);((JArray)mixedCopy["steps"]).Add(wideStep.DeepClone());bool copyMixedRejected=false;try{FoundationDrawingPlan.Parse(mixedCopy.ToString());}catch{copyMixedRejected=true;}Check(copyMixedRejected,"save-copy is a separate file-effect request");
 Console.WriteLine($"Including save-copy plan boundaries: {passed} passed");
+var glyphBefore=new JObject{["handle"]="TXT",["type"]="MText",["text_style"]="F",["text"]="管径DN50",["position"]=Point(1,2),["height"]=2,["actual_width"]=10,["actual_height"]=2,["visible"]=true,["extents"]=new JObject{["min"]=Point(1,2),["max"]=Point(11,4)}};
+var glyphAfter=(JObject)glyphBefore.DeepClone();glyphAfter["actual_width"]=12;glyphAfter["extents"]["max"]=Point(13,4);
+Check(FoundationDrawingPlan.SaveEntityEquivalent(glyphBefore,glyphAfter,fontWarningReceipt),"substituted font computed bounds do not lock save");
+foreach(string key in new[]{"text","position","visible","actual_width"}){var bad=(JObject)glyphAfter.DeepClone();if(key=="text")bad[key]="";else if(key=="position")bad[key]=Point(9,9);else if(key=="visible")bad[key]=false;else bad[key]=0;Check(!FoundationDrawingPlan.SaveEntityEquivalent(glyphBefore,bad,fontWarningReceipt),"font warning cannot hide text loss or authored change "+key);}
+Check(!FoundationDrawingPlan.SaveEntityEquivalent(glyphBefore,glyphAfter,new JObject()),"no font substitution cannot relax text bounds");
+Console.WriteLine($"Including presentation warning severity: {passed} passed");

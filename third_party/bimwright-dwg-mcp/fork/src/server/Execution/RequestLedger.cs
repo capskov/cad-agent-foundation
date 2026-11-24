@@ -552,7 +552,7 @@ WHERE request_id=$id;"))
         }
 
         using (SqliteCommand update = CreateCommand(connection, transaction, @"
-UPDATE request_jobs SET plugin_sequence=$sequence,write_fence_released=1,server_unavailable=0,
+UPDATE request_jobs SET plugin_sequence=$sequence,write_fence_released=1,server_unavailable=0,observation='independent_readback',
  updated_at_utc=$updated,observed_at_utc=$observed WHERE request_id=$id;
 "))
         {

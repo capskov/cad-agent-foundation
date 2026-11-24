@@ -532,7 +532,9 @@ namespace Bimwright.Dwg.Server.Execution
             if (effects == "unknown")
                 return (phase is "running" or "cancellation_requested" or "unknown")
                     && !fenceReleased && !fenceFinalized && verification == "not_checked"
-                    && resultJson == null && readbackRevision == null && stagedSequence == null
+                    // A terminal unknown write may carry the native diagnostic
+                    // receipt. It is evidence, never proof of commit or release.
+                    && (resultJson == null || phase == "unknown") && readbackRevision == null && stagedSequence == null
                     && readbackDigest == null && readbackJson == null && committedDigest == null
                     && noEffectSequence == null && noEffectOutcome == null;
 

@@ -1,6 +1,7 @@
 """Focused protection tests for the new local entry; no CAD acceptance claims."""
 import importlib.util,json,tempfile,unittest
 from pathlib import Path
+from unittest.mock import patch
 spec=importlib.util.spec_from_file_location('first_release_entry',Path(__file__).resolve().parents[1]/'client/foundation.py')
 F=importlib.util.module_from_spec(spec);spec.loader.exec_module(F)
 class EntrySafetyTests(unittest.TestCase):
@@ -26,6 +27,25 @@ class EntrySafetyTests(unittest.TestCase):
         g=self.gateway();g.session['write_enabled']=False
         with self.assertRaises(RuntimeError):g.apply({'anything':1})
         self.assertFalse((self.work/'requests').exists())
+    def test_query_batch_stops_on_first_unfinished_read(self):
+        g=self.gateway()
+        with patch.object(g,'submit_read',side_effect=[
+            {'job':{'phase':'completed'}},{'pending':True}
+        ]) as submit:
+            output=g.query_batch([{'limit':1},{'limit':2},{'limit':3}])
+        self.assertEqual((output['requested'],output['completed'],submit.call_count),(3,1,2))
+        with self.assertRaises(RuntimeError):
+            g.query_batch([{}]*17)
+
+    def test_startup_status_detects_mismatched_discovery(self):
+        native=self.work/'native'
+        F.write(self.work/'session.json',{'pid':123,'started':'birth','native_root':str(native)})
+        endpoint=native/'Dwg/acad-2026.json'
+        F.write(endpoint,{'pid':456,'acad_year':2026,'process_name':'acad'})
+        with patch.object(F,'process_birth',return_value='birth'):
+            self.assertEqual(F.startup_status(self.work)['state'],'discovery_identity_mismatch')
+            F.write(endpoint,{'pid':123,'acad_year':2026,'process_name':'acad'})
+            self.assertEqual(F.startup_status(self.work)['state'],'ready')
     def test_workspace_lease_excludes_other_session(self):
         with F.lease(self.work):
             with self.assertRaises(RuntimeError):

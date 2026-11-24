@@ -22,6 +22,7 @@ namespace Bimwright.Dwg.Plugin
         {
             "entity_type",
             "layer",
+            "layout",
             "color_index",
             "min_x",
             "min_y",
@@ -60,13 +61,18 @@ namespace Bimwright.Dwg.Plugin
                     return false;
 
                 if (!TryValidateStringFilter(query, "entity_type")
-                    || !TryValidateStringFilter(query, "layer"))
+                    || !TryValidateStringFilter(query, "layer")
+                    || !TryValidateStringFilter(query, "layout"))
                 {
                     return false;
                 }
 
+                string layout = query.Value<string>("layout");
+                if (layout != null && (layout.Length > 255 || layout.Any(char.IsControl)))
+                    return false;
                 bool hasFilter = HasNonEmptyStringFilter(query, "entity_type")
-                    || HasNonEmptyStringFilter(query, "layer");
+                    || HasNonEmptyStringFilter(query, "layer")
+                    || layout != null;
 
                 JToken colorToken = query["color_index"];
                 if (colorToken != null)

@@ -5,6 +5,7 @@
   <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Cad/CadWire.cs" Link="CadWire.cs" />
   <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Cad/HandleBatchRequest.cs" Link="HandleBatchRequest.cs" />
   <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationSaveCopyRecovery.cs" Link="FoundationSaveCopyRecovery.cs" />
   <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationSaveFontRecovery.cs" Link="FoundationSaveFontRecovery.cs" />
   <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationSaveXrefCacheRecovery.cs" Link="FoundationSaveXrefCacheRecovery.cs" />
   <Compile Include="../../third_party/bimwright-dwg-mcp/fork/src/shared/Execution/FoundationTextAnchorRecovery.cs" Link="FoundationTextAnchorRecovery.cs" />

@@ -11,11 +11,12 @@ namespace Bimwright.Dwg.Plugin
 {
  internal static partial class FoundationPlanWriteHandler
  {
+  const int NamedBlockCatalogLimit = 4096;
   static JObject BlockDefinitions(Database db,Transaction tx)
   {
    int detailBudget=128;var result=new JObject();foreach(ObjectId id in (BlockTable)tx.GetObject(db.BlockTableId,OpenMode.ForRead))
    {
-    var b=(BlockTableRecord)tx.GetObject(id,OpenMode.ForRead);if(b.IsLayout||b.IsAnonymous)continue;if(result.Count>=256)throw new InvalidOperationException("named_block_catalog_limit_256");
+    var b=(BlockTableRecord)tx.GetObject(id,OpenMode.ForRead);if(b.IsLayout||b.IsAnonymous)continue;if(result.Count>=NamedBlockCatalogLimit)throw new InvalidOperationException("named_block_catalog_limit_"+NamedBlockCatalogLimit);
     bool complete=!b.IsFromExternalReference&&!b.IsFromOverlayReference&&!b.IsDynamicBlock;var members=new JArray();int count=0;
     if(!complete){result[b.Name]=new JObject{["name"]=b.Name,["handle"]=b.Handle.ToString(),["complete"]=false,["entity_count"]=JValue.CreateNull(),["members"]=members,["reason"]="xref_or_dynamic_block_contents_not_read"};continue;}
     foreach(ObjectId entityId in b){count++;if(count>32||detailBudget<=0){complete=false;continue;}detailBudget--;var entity=tx.GetObject(entityId,OpenMode.ForRead) as Entity;if(entity==null){complete=false;continue;}bool supported=entity switch{Line l=>l.StartPoint.Z==0&&l.EndPoint.Z==0&&l.Thickness==0,Circle c=>c.Normal==Vector3d.ZAxis&&c.Center.Z==0&&c.Thickness==0,AttributeDefinition a=>!a.Constant&&!a.IsMTextAttributeDefinition&&a.Normal==Vector3d.ZAxis&&a.Position.Z==0&&a.Thickness==0,_=>false};if(!supported){complete=false;members.Add(new JObject{["handle"]=entity.Handle.ToString(),["type"]=entity.GetType().Name,["coverage"]="unsupported_member_geometry_not_read"});continue;}var facts=Facts(entity,tx);members.Add(facts);}

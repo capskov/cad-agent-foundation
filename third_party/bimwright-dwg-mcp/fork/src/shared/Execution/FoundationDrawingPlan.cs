@@ -146,7 +146,7 @@ namespace Bimwright.Dwg.Shared.Execution
                     {
                         if(!Regex.IsMatch(receipt.Value<string>("saved_file_sha256")??"","^[A-F0-9]{64}$")||receipt.Value<int?>("dbmod_after_save")!=0)return false;
                         if(step["expected_layouts"] is JObject expectedLayouts){if(receipt["layouts_before"] is not JObject layoutsBefore||receipt["layouts_after"] is not JObject layoutsAfter)return false;foreach(var row in expectedLayouts.Properties())if(layoutsBefore[row.Name]==null||Hash(layoutsBefore[row.Name])!=row.Value.Value<string>()||!Equivalent(layoutsBefore[row.Name],layoutsAfter[row.Name]))return false;}
-                        foreach(JObject t in (JArray)step["expected"]){string h=t.Value<string>("handle");if(Hash(before[h])!=t.Value<string>("expected_sha256")||!Equivalent(before[h],after[h]))return false;}continue;
+                        foreach(JObject t in (JArray)step["expected"]){string h=t.Value<string>("handle");if(Hash(before[h])!=t.Value<string>("expected_sha256")||!SaveEntityEquivalent(before[h],after[h],receipt))return false;}continue;
                     }
                     if(op=="set_text")
                     {
@@ -270,7 +270,7 @@ namespace Bimwright.Dwg.Shared.Execution
             }
         }
         public static bool VerifyReadback(string result,string readback,string plan)
-        {try{var value=JObject.Parse(result);var observed=JObject.Parse(readback);return JToken.DeepEquals(value,observed)&&VerifyReceipt(value,plan)||VerifyArchiveRoundoffRecovery(value,observed,plan)||VerifySaveFontRecovery(value,observed,plan)||VerifySaveXrefCacheRecovery(value,observed,plan)||VerifyTextAnchorRecovery(value,observed,plan)||VerifyBlockCacheRecovery(value,observed,plan);}catch{return false;}}
+        {try{var value=JObject.Parse(result);var observed=JObject.Parse(readback);return JToken.DeepEquals(value,observed)&&VerifyReceipt(value,plan)||VerifyArchiveRoundoffRecovery(value,observed,plan)||VerifySaveFontRecovery(value,observed,plan)||VerifySaveXrefCacheRecovery(value,observed,plan)||VerifyTextAnchorRecovery(value,observed,plan)||VerifyBlockCacheRecovery(value,observed,plan)||VerifySaveCopyRecovery(value,observed,plan);}catch{return false;}}
         public static bool Equivalent(JToken a,JToken b,string field="")
         {
             if(a==null||b==null)return a==null&&b==null;

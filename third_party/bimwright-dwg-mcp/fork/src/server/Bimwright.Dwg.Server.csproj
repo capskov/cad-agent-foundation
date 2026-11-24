@@ -33,6 +33,7 @@
   <Compile Include="..\shared\Execution\FoundationCurveEdits.cs" Link="FoundationCurveEdits.cs" />
   <Compile Include="..\shared\Execution\FoundationDxfContract.cs" Link="FoundationDxfContract.cs" />
   <Compile Include="..\shared\Execution\FoundationSaveCopyContract.cs" Link="FoundationSaveCopyContract.cs" />
+  <Compile Include="..\shared\Execution\FoundationSaveCopyRecovery.cs" Link="FoundationSaveCopyRecovery.cs" />
   <Compile Include="..\shared\Execution\FoundationAngularContract.cs" Link="FoundationAngularContract.cs" />
   <Compile Include="..\shared\Execution\FoundationBlockContract.cs" Link="FoundationBlockContract.cs" />
   </ItemGroup>

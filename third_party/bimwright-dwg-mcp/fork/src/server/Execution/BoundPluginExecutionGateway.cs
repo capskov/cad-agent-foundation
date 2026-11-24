@@ -537,7 +537,8 @@ namespace Bimwright.Dwg.Server.Execution
             {
                 if (argumentName != "entity_type" && argumentName != "layer" && argumentName != "color_index"
                     && argumentName != "min_x" && argumentName != "min_y" && argumentName != "max_x" && argumentName != "max_y"
-                    && argumentName != "limit" && argumentName != "page_token" && argumentName != "include_geometry")
+                    && argumentName != "limit" && argumentName != "page_token" && argumentName != "include_geometry"
+                    && argumentName != "layout")
                 {
                     error = "query_entities contains an unsupported business argument";
                     return false;
@@ -547,6 +548,7 @@ namespace Bimwright.Dwg.Server.Execution
             var parameters = new JObject();
             if (!TryReadOptionalQueryString(invocation.BusinessArguments, "entity_type", parameters, out error)
                 || !TryReadOptionalQueryString(invocation.BusinessArguments, "layer", parameters, out error)
+                || !TryReadOptionalQueryString(invocation.BusinessArguments, "layout", parameters, out error)
                 || !TryReadOptionalQueryInteger(invocation.BusinessArguments, "color_index", 1, 256,
                     "color_index must be an integer from 1 through 256", parameters, out error)
                 || !TryReadOptionalQueryDouble(invocation.BusinessArguments, "min_x", parameters, out error)
@@ -601,9 +603,10 @@ namespace Bimwright.Dwg.Server.Execution
             if (parameters.Property("entity_type", StringComparison.Ordinal) == null
                 && parameters.Property("layer", StringComparison.Ordinal) == null
                 && parameters.Property("color_index", StringComparison.Ordinal) == null
+                && parameters.Property("layout", StringComparison.Ordinal) == null
                 && boundCount == 0)
             {
-                error = "query_entities requires at least one filter: entity_type, layer, color_index, or spatial bounds";
+                error = "query_entities requires a type, layer, color, bounds, or an explicit layout";
                 return false;
             }
 
@@ -714,14 +717,15 @@ namespace Bimwright.Dwg.Server.Execution
             {
                 if (property.Name != "entity_type" && property.Name != "layer" && property.Name != "color_index"
                     && property.Name != "min_x" && property.Name != "min_y" && property.Name != "max_x" && property.Name != "max_y"
-                    && property.Name != "limit" && property.Name != "page_token" && property.Name != "include_geometry")
+                    && property.Name != "limit" && property.Name != "page_token" && property.Name != "include_geometry"
+                    && property.Name != "layout")
                 {
                     error = "query_entities contains an unsupported parameter";
                     return false;
                 }
             }
 
-            foreach (string propertyName in new[] { "entity_type", "layer" })
+            foreach (string propertyName in new[] { "entity_type", "layer", "layout" })
             {
                 JToken value = parameters[propertyName];
                 if (value != null && (value.Type != JTokenType.String || string.IsNullOrWhiteSpace(value.Value<string>())))
@@ -779,9 +783,10 @@ namespace Bimwright.Dwg.Server.Execution
             if (parameters.Property("entity_type", StringComparison.Ordinal) == null
                 && parameters.Property("layer", StringComparison.Ordinal) == null
                 && parameters.Property("color_index", StringComparison.Ordinal) == null
+                && parameters.Property("layout", StringComparison.Ordinal) == null
                 && boundCount == 0)
             {
-                error = "query_entities requires at least one filter: entity_type, layer, color_index, or spatial bounds";
+                error = "query_entities requires a type, layer, color, bounds, or an explicit layout";
                 return false;
             }
 
