@@ -584,6 +584,7 @@ def main():
     p.add_argument('--source');p.add_argument('--write',action='store_true');p.add_argument('--headless',action='store_true')
     p.add_argument('--allow-save',action='store_true',help='AutoCAD 2022 only: enable plugin-side save and the finalize-before-save guard')
     p.add_argument('--handles');p.add_argument('--plan',type=Path);p.add_argument('--request-id');p.add_argument('--arguments',type=Path)
+    p.add_argument('--geometry-offset',type=int,help='read only: start offset for paginated nested geometry; use geometry_read.next_offset from the previous page')
     p.add_argument('--save-to',type=Path,help='apply only: persist the bound owned drawing to this absolute .dwg after the write is verified')
     p.add_argument('--overwrite',action='store_true',help='allow --save-to to replace an existing .dwg (default refuses)')
     p.add_argument('--reopen',action='store_true',help='start only: relaunch a stopped session on its existing owned drawing')
@@ -609,7 +610,12 @@ def main():
         else:
             with Gateway(args.workspace) as g:
                 if args.action=='doctor':result=g.bound
-                elif args.action=='read':result=g.submit_read('dwg_get_entity_properties',{'handles':json.dumps(E.parse_handles(args.handles)),'include_geometry':True})
+                elif args.action=='read':
+                    payload={'handles':json.dumps(E.parse_handles(args.handles)),'include_geometry':True}
+                    if args.geometry_offset is not None:
+                        require(args.geometry_offset>=0,'--geometry-offset must be a non-negative integer')
+                        payload['geometry_offset']=args.geometry_offset
+                    result=g.submit_read('dwg_get_entity_properties',payload)
                 elif args.action=='view':
                     # Plan A: auto_prepare enumerates real geometry extents, performs a
                     # genuine window zoom in its OWN command, then captures in a SEPARATE
