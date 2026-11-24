@@ -20,6 +20,7 @@ namespace Bimwright.Dwg.Plugin.Cad
         internal IReadOnlyList<string> Handles { get; }
         internal bool IncludeGeometry { get; }
         internal int GeometryOffset { get; private set; }
+        internal double[] GeometryWindow { get; private set; }
 
         internal static bool TryCreate(JToken parameters, out HandleBatchRequest request, out string error)
         {
@@ -88,8 +89,26 @@ namespace Bimwright.Dwg.Plugin.Cad
 
             var offset=obj["geometry_offset"];
             if(offset!=null && (offset.Type!=JTokenType.Integer || !long.TryParse(offset.ToString(),out long offsetValue) || offsetValue<0 || offsetValue>4096 || !includeGeometry || handles.Count!=1)){error="geometry_offset requires include_geometry=true, one handle and integer 0..4096";return false;}
+            var windowToken=obj["geometry_window"];
+            double[] window=null;
+            if(windowToken!=null)
+            {
+                if(!includeGeometry || handles.Count!=1){error="geometry_window requires include_geometry=true and one handle";return false;}
+                if(windowToken.Type!=JTokenType.Object){error="geometry_window must be an object with min_x/min_y/max_x/max_y";return false;}
+                var windowObject=(JObject)windowToken;
+                var names=new[]{"min_x","min_y","max_x","max_y"};
+                window=new double[4];
+                for(int i=0;i<names.Length;i++)
+                {
+                    var value=windowObject[names[i]];
+                    if(value==null || value.Type!=JTokenType.Float && value.Type!=JTokenType.Integer){error="geometry_window."+names[i]+" must be a number";return false;}
+                    window[i]=value.Value<double>();
+                }
+                if(window[2]<=window[0] || window[3]<=window[1]){error="geometry_window max must exceed min";return false;}
+            }
             request = new HandleBatchRequest(handles, includeGeometry);
             request.GeometryOffset=offset==null?0:offset.Value<int>();
+            request.GeometryWindow=window;
             return true;
         }
 
@@ -139,7 +158,8 @@ namespace Bimwright.Dwg.Plugin.Cad
             {
                 "handles",
                 "include_geometry",
-                "geometry_offset"
+                "geometry_offset",
+                "geometry_window"
             };
             var unsupportedProperty = obj.Properties()
                 .Select(property => property.Name)

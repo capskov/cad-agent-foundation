@@ -9,11 +9,11 @@ namespace Bimwright.Dwg.Plugin
     // Transient native decomposition only. Never append, erase, transform or open for write.
     internal sealed class FoundationGeometryReader
     {
-        private int nodesLeft = 4096, valuesLeft = 60000;
-        internal JObject Read(Entity source, Transaction tx, int offset)
+        private int nodesLeft = 50000, valuesLeft = 300000;
+        internal JObject Read(Entity source, Transaction tx, int offset, double[] window = null)
         {
             var leaves = new JArray(); var issues = new JArray();
-            Visit(source, tx, "0", 0, leaves, issues);
+            Visit(source, tx, "0", 0, leaves, issues, window);
             var page=new JArray();int bytes=0;int next=offset;
             for(;next<leaves.Count && page.Count<64;next++){
                 var leaf=leaves[next];int size=System.Text.Encoding.UTF8.GetByteCount(leaf.ToString(Newtonsoft.Json.Formatting.None));
@@ -37,8 +37,18 @@ namespace Bimwright.Dwg.Plugin
         }
         private static JArray P(Point3d p)=>new JArray(p.X,p.Y,p.Z);
         private static JArray V(Vector3d v)=>new JArray(v.X,v.Y,v.Z);
+        private static bool Intersects(Entity e,double[] w)
+        {
+            if(w==null)return true;
+            try
+            {
+                var ext=e.GeometricExtents;
+                return ext.MaxPoint.X>=w[0] && ext.MinPoint.X<=w[2] && ext.MaxPoint.Y>=w[1] && ext.MinPoint.Y<=w[3];
+            }
+            catch(Exception){return true;}
+        }
         private void Reserve(int count) { if(count>valuesLeft)throw new InvalidOperationException("batch_scalar_limit"); valuesLeft-=count; }
-        private void Visit(Entity e, Transaction tx, string path, int depth, JArray leaves, JArray issues)
+        private void Visit(Entity e, Transaction tx, string path, int depth, JArray leaves, JArray issues, double[] window)
         {
             if(nodesLeft--<=0){Issue("batch_node_limit");return;}
             if(depth>12){Issue("depth_limit");return;}
@@ -47,6 +57,7 @@ namespace Bimwright.Dwg.Plugin
             try
             {
                 Reserve(24);
+                try{row["layer"]=e.Layer;}catch(Exception){row["layer"]=JValue.CreateNull();}
                 if(e is ProxyEntity proxy){row["original_class_name"]=proxy.OriginalClassName;row["application_description"]=proxy.ApplicationDescription;}
                 switch(e)
                 {
@@ -93,6 +104,68 @@ namespace Bimwright.Dwg.Plugin
                         for(int i=0;i<leader.NumVertices;i++)leaderPoints.Add(P(leader.VertexAt(i)));
                         row["vertices"]=leaderPoints;row["is_splined"]=leader.IsSplined;
                         row["annotation_handle"]=leader.Annotation.IsNull?JValue.CreateNull():new JValue(leader.Annotation.Handle.ToString());break;
+                    case Hatch hatch:
+                        // Hatch has no native Explode(); read boundary loops directly so
+                        // filled station boxes and protection areas are not dropped.
+                        if(!Intersects(hatch,window))return;
+                        row["pattern_name"]=hatch.PatternName;row["loop_count"]=hatch.NumberOfLoops;
+                        for(int li=0;li<hatch.NumberOfLoops;li++)
+                        {
+                            HatchLoop loop=null;try{loop=hatch.GetLoopAt(li);}catch(Exception ex){Issue("hatch_loop_"+li+"_unavailable: "+ex.Message);continue;}
+                            var loopRow=new JObject{["path"]=path+"/L"+li,["type"]="Polyline",["boundary_of"]="Hatch",["loop_type"]=loop.LoopType.ToString(),["layer"]=e.Layer};
+                            BulgeVertexCollection boundary=null;try{boundary=loop.Polyline;}catch(Exception ex){Issue("hatch_loop_"+li+"_polyline_unavailable: "+ex.Message);}
+                            if(boundary!=null)
+                            {
+                                if(boundary.Count>20000){Issue("hatch_loop_"+li+"_vertex_limit");continue;}
+                                Reserve(boundary.Count*6);var vs=new JArray();
+                                for(int i=0;i<boundary.Count;i++){var bv=boundary[i];vs.Add(new JObject{["point"]=new JArray(bv.Vertex.X,bv.Vertex.Y,0.0),["bulge"]=bv.Bulge});}
+                                loopRow["vertices"]=vs;loopRow["closed"]=true;leaves.Add(loopRow);
+                            }
+                            else
+                            {
+                                // Associative edge loops: reuse the real boundary curves.
+                                bool expanded=false;
+                                try
+                                {
+                                    ObjectIdCollection ids=hatch.GetAssociatedObjectIdsAt(li);
+                                    if(ids!=null)for(int i=0;i<ids.Count;i++)
+                                    {
+                                        if(ids[i].IsNull)continue;
+                                        var be=tx.GetObject(ids[i],OpenMode.ForRead) as Entity;
+                                        if(be!=null){Visit(be,tx,path+"/L"+li+"/"+i,depth+1,leaves,issues,window);expanded=true;}
+                                    }
+                                }
+                                catch(Exception ex){Issue("hatch_loop_"+li+"_association_unavailable: "+ex.Message);}
+                                if(!expanded)Issue("hatch_loop_"+li+"_no_polyline_or_associated_curve");
+                            }
+                        }
+                        return;
+                    case BlockReference blockReference:
+                        // Explode() rejects non-uniformly scaled references (this drawing has
+                        // many). Expand the definition and apply the full block transform.
+                        row["position"]=P(blockReference.Position);row["rotation"]=blockReference.Rotation;
+                        row["scale"]=new JArray(blockReference.ScaleFactors.X,blockReference.ScaleFactors.Y,blockReference.ScaleFactors.Z);
+                        try{row["block_name"]=blockReference.Name;}catch(Exception){}
+                        BlockTableRecord definition=null;try{definition=(BlockTableRecord)tx.GetObject(blockReference.BlockTableRecord,OpenMode.ForRead);}catch(Exception ex){Issue("block_definition_unavailable: "+ex.Message);}
+                        if(definition==null)return;
+                        int childIndex=0;
+                        foreach(ObjectId childId in definition)
+                        {
+                            if(childId.IsNull){childIndex++;continue;}
+                            Entity child=null;try{child=(Entity)tx.GetObject(childId,OpenMode.ForRead);}catch(Exception ex){Issue("block_child_"+childIndex+"_unavailable: "+ex.Message);childIndex++;continue;}
+                            Entity clone=null;
+                            try
+                            {
+                                clone=(Entity)child.Clone();
+                                clone.TransformBy(blockReference.BlockTransform);
+                                if(!Intersects(clone,window)){childIndex++;continue;}
+                                Visit(clone,tx,path+"/"+childIndex,depth+1,leaves,issues,window);
+                            }
+                            catch(Exception ex){Issue("block_child_"+childIndex+"_expand_failed: "+ex.Message);}
+                            finally{if(clone!=null)clone.Dispose();}
+                            childIndex++;
+                        }
+                        return;
                     case DBPoint point:row["position"]=P(point.Position);break;
                     default:
                         if(e is DBText || e is MText || e is AttributeDefinition){Issue("non_geometric_text_not_expanded");return;}
@@ -104,7 +177,7 @@ namespace Bimwright.Dwg.Plugin
                             for(int i=0;i<children.Count;i++)
                             {
                                 if(nodesLeft<=0){Issue("batch_node_limit; remaining children omitted");break;}
-                                if(children[i] is Entity child)Visit(child,tx,path+"/"+i,depth+1,leaves,issues);
+                                if(children[i] is Entity child)Visit(child,tx,path+"/"+i,depth+1,leaves,issues,window);
                                 else Issue("non_entity_explode_child");
                             }
                         }
@@ -112,6 +185,7 @@ namespace Bimwright.Dwg.Plugin
                         return;
                 }
                 if(e is Curve curve){row["start"]=P(curve.StartPoint);row["end"]=P(curve.EndPoint);row["closed"]=curve.Closed;try{row["length"]=curve.GetDistanceAtParameter(curve.EndParam)-curve.GetDistanceAtParameter(curve.StartParam);}catch(Exception ex){row["length_error"]=ex.Message;}}
+                if(!Intersects(e,window))return;
                 leaves.Add(row);
             }
             catch(Exception ex){Issue(ex.GetType().Name+": "+ex.Message);}

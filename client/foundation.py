@@ -585,6 +585,7 @@ def main():
     p.add_argument('--allow-save',action='store_true',help='AutoCAD 2022 only: enable plugin-side save and the finalize-before-save guard')
     p.add_argument('--handles');p.add_argument('--plan',type=Path);p.add_argument('--request-id');p.add_argument('--arguments',type=Path)
     p.add_argument('--geometry-offset',type=int,help='read only: start offset for paginated nested geometry; use geometry_read.next_offset from the previous page')
+    p.add_argument('--geometry-window',help='read only: min_x,min_y,max_x,max_y; expand only block content intersecting this WCS window')
     p.add_argument('--save-to',type=Path,help='apply only: persist the bound owned drawing to this absolute .dwg after the write is verified')
     p.add_argument('--overwrite',action='store_true',help='allow --save-to to replace an existing .dwg (default refuses)')
     p.add_argument('--reopen',action='store_true',help='start only: relaunch a stopped session on its existing owned drawing')
@@ -615,6 +616,10 @@ def main():
                     if args.geometry_offset is not None:
                         require(args.geometry_offset>=0,'--geometry-offset must be a non-negative integer')
                         payload['geometry_offset']=args.geometry_offset
+                    if args.geometry_window:
+                        parts=[float(x) for x in args.geometry_window.split(',')]
+                        require(len(parts)==4 and parts[2]>parts[0] and parts[3]>parts[1],'--geometry-window must be min_x,min_y,max_x,max_y with max>min')
+                        payload['geometry_window']=json.dumps({'min_x':parts[0],'min_y':parts[1],'max_x':parts[2],'max_y':parts[3]},separators=(',',':'))
                     result=g.submit_read('dwg_get_entity_properties',payload)
                 elif args.action=='view':
                     # Plan A: auto_prepare enumerates real geometry extents, performs a

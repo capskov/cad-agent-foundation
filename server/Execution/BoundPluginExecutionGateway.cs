@@ -464,7 +464,7 @@ namespace Bimwright.Dwg.Server.Execution
 
             foreach (string argumentName in invocation.BusinessArguments.Keys)
             {
-                if (argumentName != "handles" && argumentName != "include_geometry" && argumentName != "geometry_offset")
+                if (argumentName != "handles" && argumentName != "include_geometry" && argumentName != "geometry_offset" && argumentName != "geometry_window")
                 {
                     error = "get_entity_properties contains an unsupported business argument";
                     return false;
@@ -499,6 +499,20 @@ namespace Bimwright.Dwg.Server.Execution
             if(invocation.BusinessArguments.TryGetValue("geometry_offset",out JsonElement offsetArgument)){
                 if(offsetArgument.ValueKind!=JsonValueKind.Number || !offsetArgument.TryGetInt32(out int offset)){error="geometry_offset must be an integer";return false;}
                 parameters["geometry_offset"]=offset;
+            }
+            if(invocation.BusinessArguments.TryGetValue("geometry_window",out JsonElement windowArgument)){
+                JObject windowObject;
+                if(windowArgument.ValueKind==JsonValueKind.String){
+                    try{windowObject=JObject.Parse(windowArgument.GetString());}
+                    catch{error="geometry_window must be a JSON object";return false;}
+                }else if(windowArgument.ValueKind==JsonValueKind.Object){
+                    windowObject=new JObject();
+                    foreach(var name in new[]{"min_x","min_y","max_x","max_y"}){
+                        if(!windowArgument.TryGetProperty(name,out JsonElement value) || value.ValueKind!=JsonValueKind.Number){error="geometry_window."+name+" must be a number";return false;}
+                        windowObject[name]=JToken.Parse(value.GetRawText());
+                    }
+                }else{error="geometry_window must be an object";return false;}
+                parameters["geometry_window"]=windowObject;
             }
             if (!HandleBatchRequest.TryCreate(parameters, out _, out error))
                 return false;

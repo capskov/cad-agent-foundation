@@ -59,7 +59,7 @@ namespace Bimwright.Dwg.Plugin.Handlers
                         if(request.IncludeGeometry){
                             var revision=Bimwright.Dwg.Plugin.View.DrawingRevision.For(doc);
                             long beforeRevision=revision.Revision;
-                            geometry=geometryReader.Read(entity,tx,request.GeometryOffset);
+                            geometry=geometryReader.Read(entity,tx,request.GeometryOffset,request.GeometryWindow);
                             geometry["document_session_id"]=revision.SessionId;
                             geometry["drawing_revision"]=beforeRevision;
                             if(revision.Revision!=beforeRevision)throw new InvalidOperationException("drawing_changed_during_geometry_read");
