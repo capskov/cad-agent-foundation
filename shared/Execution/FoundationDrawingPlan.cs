@@ -114,7 +114,7 @@ namespace Bimwright.Dwg.Shared.Execution
                     case "circle":Keys(step,"id","op","center","radius","layer","color");Point(step["center"]);Positive(step,"radius");Options(step);estimatedHandles++;break;
                     case "polyline":
                         KeysWithOptional(step,new[]{"id","op","vertices","closed","layer","color"},"constant_width");if(step["constant_width"]!=null&&Number(step["constant_width"])<0)throw new ArgumentException("nonnegative polyline width required");Options(step);Bool(step,"closed");
-                        if(step["vertices"] is not JArray points||points.Count<(step.Value<bool>("closed")?3:2)||points.Count>128)throw new ArgumentException("2..128 polyline vertices required; closed needs 3");
+                        if(step["vertices"] is not JArray points||points.Count<(step.Value<bool>("closed")?3:2)||points.Count>20000)throw new ArgumentException("2..20000 polyline vertices required; closed needs 3");
                         foreach(JToken v in points){Point(v,true);if(((JArray)v).Count==3&&Math.Abs(Number(v[2]))>1)throw new ArgumentException("major bulge unsupported in first release");}vertices+=points.Count;estimatedHandles++;break;
                     case "text":case "mtext":
                         if(op=="text")KeysWithOptional(step,new[]{"id","op","text","position","height","rotation","layer","color"},"text_style");else{KeysWithOptional(step,new[]{"id","op","text","position","height","rotation","width","layer","color"},"text_style");Positive(step,"width");}
@@ -139,7 +139,7 @@ namespace Bimwright.Dwg.Shared.Execution
                         if(step["companions"] is not JArray companions||companions.Count>32)throw new ArgumentException("0..32 companions required");foreach(JObject t in companions){Keys(t,"handle","expected_sha256");Expected(t);}estimatedHandles+=companions.Count+1;break;
                     case "set_polyline":
                         Keys(step,"id","op","handle","expected_sha256","vertices","companions");Expected(step);
-                        if(step["vertices"] is not JArray pv||pv.Count<3||pv.Count>128)throw new ArgumentException("3..128 closed boundary vertices required");
+                        if(step["vertices"] is not JArray pv||pv.Count<3||pv.Count>20000)throw new ArgumentException("3..20000 closed boundary vertices required");
                         foreach(JToken v in pv){Point(v,true);if(((JArray)v).Count==3&&Math.Abs(Number(v[2]))>1)throw new ArgumentException("major bulge unsupported");}
                         if(step["companions"] is not JArray pc||pc.Count>1)throw new ArgumentException("0..1 associated hatch required");foreach(JObject t in pc){Keys(t,"handle","expected_sha256");Expected(t);}vertices+=pv.Count;estimatedHandles+=pc.Count+1;break;
                     case "set_callout":
@@ -158,7 +158,7 @@ namespace Bimwright.Dwg.Shared.Execution
             }
             if(steps.Cast<JObject>().Any(s=>s.Value<string>("op")=="set_raster_path")&&steps.Count!=1)throw new ArgumentException("raster path repair requires separate single-step plan");
             if(steps.Cast<JObject>().Any(s=>(PrintOperations.Contains(s.Value<string>("op"))||s.Value<string>("op")=="export_dxf"))&&steps.Count!=1)throw new ArgumentException("page setup and PDF plotting require separate single-step plans");
-            if(vertices>1024||estimatedHandles>MaxHandles||Encoding.UTF8.GetByteCount(Canonical(p))>131072)throw new ArgumentException("plan exceeds 1024 vertices, 64 entity outcomes or semantic 128 KiB");
+            if(vertices>50000||estimatedHandles>MaxHandles||Encoding.UTF8.GetByteCount(Canonical(p))>8388608)throw new ArgumentException("plan exceeds 50000 vertices, 64 entity outcomes or semantic 8 MiB");
             return p;
         }
         // INSUNITS is auxiliary metadata. Only an opted-in check or the legacy

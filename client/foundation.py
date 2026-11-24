@@ -578,7 +578,7 @@ def publish(g,target,overwrite=False):
 
 def main():
     p=argparse.ArgumentParser(description='CAD foundation first release; all drawings are owned copies')
-    p.add_argument('action',choices=['install','start','doctor','read','query','apply','save','publish-dwg','stop','status','mcp','view','plot-style','resolve'])
+    p.add_argument('action',choices=['install','start','doctor','read','query','apply','save','publish-dwg','stop','status','mcp','view','plot-style','resolve','layers'])
     p.add_argument('--workspace',type=Path,required=True);p.add_argument('--cad',default=None)
     p.add_argument('--acad-year',type=int,default=DEFAULT_ACAD_YEAR,help='Target AutoCAD release year (2022 or 2026)')
     p.add_argument('--source');p.add_argument('--write',action='store_true');p.add_argument('--headless',action='store_true')
@@ -611,6 +611,7 @@ def main():
         else:
             with Gateway(args.workspace) as g:
                 if args.action=='doctor':result=g.bound
+                elif args.action=='layers':result=g.submit_read('dwg_list_layers',{})
                 elif args.action=='read':
                     payload={'handles':json.dumps(E.parse_handles(args.handles)),'include_geometry':True}
                     if args.geometry_offset is not None:

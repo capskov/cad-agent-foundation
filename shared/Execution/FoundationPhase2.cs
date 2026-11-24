@@ -49,7 +49,7 @@ namespace Bimwright.Dwg.Shared.Execution
      ValidateTargets(s,ref count);if(((JArray)s["targets"]).Count!=1)throw new ArgumentException("one standalone primitive required");break;
     case "set_open_polyline":
      Keys(s,"id","op","targets","vertices");ValidateTargets(s,ref count);
-     if(((JArray)s["targets"]).Count!=1||s["vertices"] is not JArray v||v.Count<2||v.Count>128)throw new ArgumentException("one open polyline and 2..128 vertices required");
+     if(((JArray)s["targets"]).Count!=1||s["vertices"] is not JArray v||v.Count<2||v.Count>20000)throw new ArgumentException("one open polyline and 2..20000 vertices required");
      foreach(var p in v){Point(p,true);if(((JArray)p).Count==3&&Math.Abs(Number(p[2]))>1)throw new ArgumentException("major bulge unsupported");}break;
     case "set_text_format":
      KeysWithOptional(s,new[]{"id","op","targets","position","height","rotation","text_style"},"width");ValidateTargets(s,ref count);Point(s["position"]);Positive(s,"height");Number(s["rotation"]);Text(s,"text_style",255);if(s["width"]!=null)Positive(s,"width");
