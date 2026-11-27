@@ -105,7 +105,7 @@ namespace Bimwright.Dwg.Shared.Execution
     foreach(var row in blocks.Properties())
      if(!Equivalent(FontGeometryNeutral(row.Value,fontStyles),FontGeometryNeutral(newBlocks[row.Name],fontStyles)))return false;
    }
-   return VerifyXrefPathChanges(old["xrefs"] as JObject,next["xrefs"] as JObject,steps)&&VerifyPaperViewportChanges(old["paper_viewports"] as JObject,next["paper_viewports"] as JObject,steps)&&VerifyPaperTextChanges(old["paper_texts"] as JObject,next["paper_texts"] as JObject,steps)&&VerifyPaperBlockChanges(old["paper_blocks"] as JObject,next["paper_blocks"] as JObject,steps,receipt);
+   return VerifyXrefPathChanges(old["xrefs"] as JObject,next["xrefs"] as JObject,steps)&&VerifyPaperViewportChanges(old["paper_viewports"] as JObject,next["paper_viewports"] as JObject,steps)&&VerifyPaperTextChanges(old["paper_texts"] as JObject,next["paper_texts"] as JObject,steps,receipt)&&VerifyPaperBlockChanges(old["paper_blocks"] as JObject,next["paper_blocks"] as JObject,steps,receipt);
   }
   static JToken FontGeometryNeutral(JToken value,HashSet<string> names)
   {
@@ -237,8 +237,10 @@ namespace Bimwright.Dwg.Shared.Execution
   public static JObject TransformFacts(JObject source,JObject step)
   {
    var value=(JObject)source.DeepClone();var type=value.Value<string>("type");
-   if(!new[]{"Line","Circle","DBText","Text","MText","Leader","Polyline","Hatch"}.Contains(type))throw new ArgumentException("unsupported transform type");
-   var op=step.Value<string>("op");double factor=op=="scale"?Number(step["factor"]):1,angle=op=="rotate"?Number(step["angle"])*Math.PI/180:0;
+   var op=step.Value<string>("op");
+   if(!new[]{"Line","Circle","DBText","Text","MText","Leader","Polyline","Hatch"}.Contains(type) && !(op=="copy" && type=="BlockReference"))
+    throw new ArgumentException("unsupported transform type");
+   double factor=op=="scale"?Number(step["factor"]):1,angle=op=="rotate"?Number(step["angle"])*Math.PI/180:0;
    JObject P(JToken token)
    {
     var p=(JObject)token.DeepClone();double x=Number(p["x"]),y=Number(p["y"]);

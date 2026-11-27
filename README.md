@@ -1,5 +1,7 @@
 # CAD Agent Foundation — AutoCAD MCP & CLI for AI Agents
 
+[v1.2.0-beta.3.30 runtime preview](https://github.com/capskov/cad-agent-foundation/releases/tag/v1.2.0-beta.3.30) · [Scope and release notes](docs/BETA330-CLOSEOUT.zh-CN.md). Earlier releases below are historical.
+
 Current field release: **1.2.0-beta.3.18** adds local CTB controls, transient window PDF output and field reliability fixes. [Validation and limits](docs/RELEASE-v1.2.0-beta.3.18.md). Earlier milestones below remain historical.
 
 **Public runtime preview v1.2.0-beta.3.** Proxy/compound geometry and text reads, bounded native views/captures, raster-path repair, rejection classification and polyline-width fixes. Reuses the accepted beta.3 binaries; [scope, known capture limitations and upgrade notes](docs/RELEASE-v1.2.0-beta.3.md).
@@ -37,7 +39,7 @@ This Windows/AutoCAD bridge is maintained by **capskov**. The current preview is
 
 The project grew out of road and civil-engineering CAD work: creating boundaries, fills, quantities and linked callouts, then revising and saving them over a long agent session. A useful drawing command is only part of that workflow. The agent also needs to know which drawing it owns, whether a modification has already happened, what remains unverified, and whether another attempt would duplicate it.
 
-The design focuses on those decisions. Durable records, drawing identity and native readback add overhead; no comparative speed, token-cost or productivity advantage has been established. Engineering judgment and domain-specific layout rules remain in separate Skills.
+The design focuses on those decisions. The AutoCAD-hosted .NET plugin batches native database operations and reuses a bound session across revisions. A matched civil-drawing case recorded about 59 seconds for Foundation from cold start through verified delivery, versus about 3 minutes 46 seconds across the initial U-C4N COM tool sessions. The timing boundaries differ. See the [field benchmark and methodology](docs/FIELD-PERFORMANCE.zh-CN.md). Engineering judgment and domain-specific layout rules remain in separate Skills.
 
 ## Native operations and installation
 

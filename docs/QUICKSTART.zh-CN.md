@@ -37,3 +37,5 @@ MCP配置片段在工作目录 mcp-config.json，按客户端要求自行配置�
 工作目录包含连接凭据、工程几何与路径，保留为私有。反馈时使用最小合成例并去除具体工程信息，不能把整张工程图或完整运行目录上传公开Issue。
 
 Local 1.2.0-local.4: ordinary plans use raw DWG values; `expected_insunits` is optional. INSUNITS is auxiliary metadata for Agent interpretation/precision/plotting, not an ordinary raw-write prerequisite. The legacy `metres` mode remains compatible. See [units and typography](DRAWING-UNITS-AND-TYPOGRAPHY.zh-CN.md).
+
+后续修改优先复用现有受控工作图。尺寸及界线冒头、斜短划和字高按 [默认尺寸样式与工作图续作](DEFAULT-ANNOTATION-AND-SESSION.zh-CN.md) 执行。

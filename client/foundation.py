@@ -106,15 +106,28 @@ def install(args):
     record={'cad':str(cad),'plugin':str(target/'Bimwright.Dwg.Plugin.Acad26.dll'),'plugin_mvid':manifest['plugin_mvid'],'plugin_sha256':manifest['plugin_sha256'],'package':str(HOME)}
     write(args.workspace/'installation.json',record);return record
 
+def default_review_template():
+    local=Path(os.environ.get('LOCALAPPDATA') or Path.home()/'AppData/Local')
+    profile=local/'Autodesk/AutoCAD 2026/R25.1'
+    candidates=sorted(profile.glob('*/Template/acadiso.dwt'))
+    require(len(candidates)==1,
+            'Cannot select a unique installed acadiso.dwt; pass --source with a clean local DWT')
+    return candidates[0]
+
 def start(args):
     work=args.workspace;record=read(work/'installation.json');manifest=installation()
     require(record['plugin_sha256']==manifest['plugin_sha256'],'Install this package version first')
     require(sha(record['plugin'])==record['plugin_sha256'],'Installed plugin differs')
     require(not (work/'session.json').exists(),'Existing session preserved. Use doctor/status/stop; a new session needs a new workspace.')
     review=args.action=='start-review'
-    source=Path(args.source).resolve()
-    extensions={'.dwg','.dwt'} if review else {'.dwg'}
-    require(source.is_file() and source.suffix.lower() in extensions,'Use a clean local DWG/DWT for review startup, or an existing DWG for start')
+    source=(Path(args.source) if args.source else default_review_template()).resolve()
+    extension='.dwt' if review else '.dwg'
+    require(source.is_file() and source.suffix.lower()==extension,
+            'Review startup requires a clean DWT; open project DWGs only after the plugin is ready' if review else 'Existing source DWG required')
+    if review:
+        tasks=subprocess.check_output(['tasklist.exe','/FI','IMAGENAME eq acad.exe','/FO','CSV','/NH'])
+        require(b'"acad.exe"' not in tasks.lower(),
+                'An AutoCAD process is already running. Reuse its owned review workspace or close it normally before starting another.')
     drawing=work/'drawings'/'work.dwg';drawing.parent.mkdir(parents=True,exist_ok=True)
     require(not drawing.exists(),'Working drawing already exists; refusing overwrite')
     source_hash=sha(source);shutil.copy2(source,drawing);require(sha(drawing)==source_hash,'Copy differs')
@@ -157,11 +170,11 @@ def startup_status(work):
     if not same_process:
         return dict(result,state='process_identity_changed')
     discovery=Path(session['native_root'])/'Dwg/acad-2026.json'
-    if discovery.is_file():
+    discovered=discovery.is_file()
+    if discovered:
         endpoint=read(discovery)
-        if endpoint.get('pid')==pid and endpoint.get('acad_year')==2026 and endpoint.get('process_name')=='acad':
-            return dict(result,state='ready')
-        return dict(result,state='discovery_identity_mismatch')
+        if endpoint.get('pid')!=pid or endpoint.get('acad_year')!=2026 or endpoint.get('process_name')!='acad':
+            return dict(result,state='discovery_identity_mismatch')
     user=ctypes.WinDLL('user32',use_last_error=True)
     callback=ctypes.WINFUNCTYPE(ctypes.c_int,ctypes.c_void_p,ctypes.c_void_p)
     windows=[]
@@ -179,8 +192,21 @@ def startup_status(work):
         return 1
     user.EnumWindows(observe,0)
     dialog=any(w['class']=='#32770' for w in windows)
-    return dict(result,state='waiting_for_dialog' if dialog else 'plugin_not_ready',windows=windows,
+    if discovered and not dialog:
+        return dict(result,state='ready',plugin_discovered=True)
+    return dict(result,state='waiting_for_dialog' if dialog else 'plugin_not_ready',plugin_discovered=discovered,windows=windows,
                 next_action='Inspect the owned CAD window and query startup-status again before restarting.')
+
+def wait_for_owned_startup(work, timeout_seconds=45):
+    deadline=time.monotonic()+timeout_seconds
+    while True:
+        observed=startup_status(work)
+        if observed['state']=='ready':
+            return
+        if observed['state']!='plugin_not_ready' or time.monotonic()>=deadline:
+            raise RuntimeError(json.dumps(observed,ensure_ascii=False))
+        time.sleep(.25)
+
 
 def process_birth(pid):
     # Native process identity, independent of active COM document selection.
@@ -337,18 +363,34 @@ def companion_skill_guidance():
 
 def main():
     p=argparse.ArgumentParser(description='CAD foundation first release; all drawings are owned copies')
-    p.add_argument('action',choices=['install','start','start-review','startup-status','doctor','layers','read','query','query-batch','apply','save','stop','status','mcp','view','plot-style','plot-batch'])
-    p.add_argument('--workspace',type=Path,required=True);p.add_argument('--cad',default=r'C:\Program Files\Autodesk\AutoCAD 2026')
+    p.add_argument('action',choices=['install','start','start-review','startup-status','doctor','layers','read','query','query-batch','apply','save','stop','status','mcp','view','plot-style','plot-batch','sign-tool'])
+    p.add_argument('--workspace',type=Path);p.add_argument('--cad',default=r'C:\Program Files\Autodesk\AutoCAD 2026')
     p.add_argument('--source');p.add_argument('--write',action='store_true');p.add_argument('--headless',action='store_true')
     p.add_argument('--no-wait',action='store_true',help='Return after spawning CAD; observe with startup-status')
     p.add_argument('--handles');p.add_argument('--plan',type=Path);p.add_argument('--request-id');p.add_argument('--arguments',type=Path)
     p.add_argument('--geometry-offset',type=int,help='Read one handle, using the native geometry_read.next_offset')
     p.add_argument('--read-target',type=Path,help='Exact active read-only DWG in the existing CAD process')
-    args=p.parse_args();args.workspace=args.workspace.resolve()
+    p.add_argument('--tool',type=Path,help='Exact Foundation.TaskTool binary for sign-tool')
+    p.add_argument('--tool-sha256',help='Expected artifact digest before signing or when verifying')
+    p.add_argument('--verify-only',action='store_true',help='Verify the signed tool and expected digest without changing it')
+    p.add_argument('--signing-config',type=Path,help='Local Foundation certificate configuration')
+    args=p.parse_args()
+    if args.action=='sign-tool':
+        if not args.tool or not args.tool_sha256:
+            p.error('sign-tool requires --tool and --tool-sha256')
+        import tool_signing
+        result=tool_signing.run(args.tool,args.tool_sha256,args.verify_only,args.signing_config)
+        print(json.dumps(result,ensure_ascii=False,indent=2))
+        return 0
+    if args.tool or args.tool_sha256 or args.verify_only or args.signing_config:
+        p.error('tool signing options require sign-tool')
+    if not args.workspace:
+        p.error('--workspace is required for CAD and workspace commands')
+    args.workspace=args.workspace.resolve()
     if args.geometry_offset is not None:
         if args.action!='read' or not 0<=args.geometry_offset<=4096 or not args.handles or len(E.parse_handles(args.handles))!=1:
             p.error('--geometry-offset requires read, one handle and an offset in 0..4096')
-    if args.action in {'start','start-review'} and not args.source:
+    if args.action=='start' and not args.source:
         p.error('startup requires --source')
     if args.action=='start-review' and args.write:
         p.error('start-review is read-only')
@@ -362,6 +404,8 @@ def main():
         if not args.read_target.is_file() or args.read_target.suffix.lower()!='.dwg':
             p.error('--read-target must be an existing DWG')
     with lease(args.workspace):
+        if args.action=='doctor':
+            wait_for_owned_startup(args.workspace)
         if args.action=='plot-style':
             import plot_style
             result=plot_style.run(args.workspace,read(args.arguments))

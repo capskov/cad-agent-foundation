@@ -159,6 +159,7 @@ namespace Bimwright.Dwg.Plugin
         var v=(JArray)expected["vertices"];for(int i=0;i<line.NumberOfVertices;i++)line.SetPointAt(i,new Point2d(v[i].Value<double>("x"),v[i].Value<double>("y")));break;
        case Leader leader:
         var vs=(JArray)expected["vertices_wcs"];for(int i=0;i<leader.NumVertices;i++)leader.SetVertexAt(i,new Point3d(vs[i].Value<double>("x"),vs[i].Value<double>("y"),vs[i].Value<double>("z")));leader.Dimtxt=expected.Value<double>("text_height");leader.Dimgap=expected.Value<double>("gap");break;
+       case BlockReference block when op=="copy":block.Position=P("position");break;
        case Hatch:break;
        default:throw new InvalidOperationException("unsupported_transform_entity");
       }

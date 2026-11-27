@@ -27,6 +27,8 @@ def main():
         dest=output/name;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(source,dest)
     shutil.copy2(ROOT/'client/plot_style.py',output/'client/plot_style.py')
     shutil.copy2(ROOT/'client/plot_batch.py',output/'client/plot_batch.py')
+    shutil.copy2(ROOT/'client/tool_signing.py',output/'client/tool_signing.py')
+    shutil.copy2(ROOT/'scripts/sign-foundation-artifacts.ps1',output/'support/sign-foundation-artifacts.ps1')
     (output/'docs').mkdir()
     for f in (ROOT/'docs').glob('*.md'):shutil.copy2(f,output/'docs'/f.name)
     # Runtime ZIP is not a source checkout. Link missing source/example assets

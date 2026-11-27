@@ -30,6 +30,13 @@ namespace Bimwright.Dwg.Plugin.Cad
             }
 
             result["linetype"]=entity.Linetype;
+#if ACAD2026
+            if(entity is Polyline polylineFacts)
+            {
+                result["linetype_generation"]=polylineFacts.Plinegen;
+                result["linetype_scale"]=polylineFacts.LinetypeScale;
+            }
+#endif
             result["lineweight"]=(int)entity.LineWeight;
 
             AddExtents(result, entity);

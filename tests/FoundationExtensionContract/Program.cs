@@ -355,3 +355,62 @@ Check(FoundationDrawingPlan.SaveEntityEquivalent(glyphBefore,glyphAfter,fontWarn
 foreach(string key in new[]{"text","position","visible","actual_width"}){var bad=(JObject)glyphAfter.DeepClone();if(key=="text")bad[key]="";else if(key=="position")bad[key]=Point(9,9);else if(key=="visible")bad[key]=false;else bad[key]=0;Check(!FoundationDrawingPlan.SaveEntityEquivalent(glyphBefore,bad,fontWarningReceipt),"font warning cannot hide text loss or authored change "+key);}
 Check(!FoundationDrawingPlan.SaveEntityEquivalent(glyphBefore,glyphAfter,new JObject()),"no font substitution cannot relax text bounds");
 Console.WriteLine($"Including presentation warning severity: {passed} passed");
+
+var paperLayout = new JObject { ["model_type"] = false, ["handle"] = "77" };
+var paperTextStep = new JObject
+{
+ ["id"]="label", ["op"]="mtext", ["paper_layout"]="Paper",
+ ["expected_layout_sha256"]=FoundationDrawingPlan.Hash(paperLayout), ["text"]="N",
+ ["position"]=new JArray(8,9), ["height"]=7, ["rotation"]=0, ["width"]=18, ["layer"]="0", ["color"]=7
+};
+Check(Valid(paperTextStep),"paper text accepts explicit fresh layout identity");
+var noLayoutDigest=(JObject)paperTextStep.DeepClone();
+noLayoutDigest.Remove("expected_layout_sha256");
+Check(!Valid(noLayoutDigest),"paper text refuses omitted layout digest");
+var createdPaperText = new JObject
+{
+ ["type"]="MText", ["layout_name"]="Paper", ["text"]="N", ["location"]=Point(8,9),
+ ["text_height"]=7, ["rotation"]=0, ["width"]=18, ["layer"]="0", ["color_index"]=7, ["text_style"]="Standard"
+};
+var paperTextSymbols=new JObject
+{
+ ["text_styles"]=new JObject(), ["dimension_styles"]=new JObject(), ["paper_texts"]=new JObject()
+};
+var paperTextSymbolsAfter=(JObject)paperTextSymbols.DeepClone();
+paperTextSymbolsAfter["paper_texts"]["A"]=createdPaperText.DeepClone();
+var paperTextReceipt=new JObject
+{
+ ["symbols_before"]=paperTextSymbols, ["symbols_after"]=paperTextSymbolsAfter,
+ ["objects"]=new JObject { ["label"]=new JObject { ["entity"]="A" } },
+ ["after"]=new JObject { ["A"]=createdPaperText },
+ ["layouts_before"]=new JObject { ["Paper"]=paperLayout }
+};
+Check(FoundationDrawingPlan.VerifySymbols(paperTextReceipt,new JArray(paperTextStep)),
+ "paper symbol verification accepts the exact authorized text creation");
+paperTextSymbolsAfter["paper_texts"]["A"]["layout_name"]="Model";
+Check(!FoundationDrawingPlan.VerifySymbols(paperTextReceipt,new JArray(paperTextStep)),
+ "paper symbol verification refuses an incorrect destination");
+Console.WriteLine($"Including explicit paper creation: {passed} passed");
+
+var paperMoveStep=new JObject
+{
+ ["id"]="move-label", ["op"]="move", ["paper_layout"]="Paper",
+ ["expected_layout_sha256"]=FoundationDrawingPlan.Hash(paperLayout), ["delta"]=new JArray(0,20),
+ ["targets"]=new JArray(new JObject { ["handle"]="A", ["expected_sha256"]=FoundationDrawingPlan.Hash(createdPaperText) })
+};
+Check(Valid(paperMoveStep),"paper move requires the exact layout and can reuse a bounded translation");
+var originalPaperTextSymbols=(JObject)paperTextSymbols.DeepClone();
+originalPaperTextSymbols["paper_texts"]["A"]=createdPaperText.DeepClone();
+var movedPaperTextSymbols=(JObject)originalPaperTextSymbols.DeepClone();
+movedPaperTextSymbols["paper_texts"]["A"]["location"]["y"]=29;
+var movedPaperTextReceipt=new JObject
+{
+ ["symbols_before"]=originalPaperTextSymbols, ["symbols_after"]=movedPaperTextSymbols,
+ ["layouts_before"]=new JObject { ["Paper"]=paperLayout }
+};
+Check(FoundationDrawingPlan.VerifySymbols(movedPaperTextReceipt,new JArray(paperMoveStep)),
+ "paper text movement verifies the displacement within its layout");
+movedPaperTextSymbols["paper_texts"]["A"]["text"]="altered";
+Check(!FoundationDrawingPlan.VerifySymbols(movedPaperTextReceipt,new JArray(paperMoveStep)),
+ "paper text movement rejects an unrequested label change");
+Console.WriteLine($"Including bounded paper movement: {passed} passed");

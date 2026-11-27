@@ -1,5 +1,7 @@
 # CAD Agent Foundation — AutoCAD MCP／CLI 智能体操作接口
 
+[v1.2.0-beta.3.30 运行预览](https://github.com/capskov/cad-agent-foundation/releases/tag/v1.2.0-beta.3.30) · [本版范围与说明](docs/BETA330-CLOSEOUT.zh-CN.md)。下方为历史版本。
+
 当前实战版本：**1.2.0-beta.3.18**，新增本地CTB配置、原生窗口PDF及实战可靠性修复。[验收范围与限制](docs/RELEASE-v1.2.0-beta.3.18.md)。下方旧版本记录保留为历史。
 
 **当前公开运行预览 v1.2.0-beta.3。** 包含代理几何/文字读取、受控放缩平移与截图、光栅路径修复、拒绝分类与常宽事实修正。复用已实测二进制；[范围、已知截图限制及升级方法](docs/RELEASE-v1.2.0-beta.3.md)。
@@ -37,6 +39,8 @@
 让智能体明确绑定图纸，持久记录请求归属与执行状态，在回应不明确时查询原请求，并在写入和保存后核对指定对象。当前实现集成在经过修改、固定来源版本的 [Bimwright DWG MCP](https://github.com/bimwright/dwg-mcp) 宿主中。
 
 维护者：**capskov**。当前预览为**v1.2.0-beta.3**，附独立构建运行ZIP和局部实机证据；已验收v1.0.0-local基线保留，不承诺所有AutoCAD2026补丁兼容。
+
+底座通过 AutoCAD 进程内的 .NET 插件执行结构化事务、批量读回，并可跨轮复用原工作图。同一张约 4.29 MB 的 A1 土建图案例，底座从冷启动到另存验证约 59 秒，对照 U-C4N COM 初次工具会话分段合计约 3 分 46 秒。两条路径的计时边界和验证步骤见 [实测性能与比较范围](docs/FIELD-PERFORMANCE.zh-CN.md)。尺寸与后续修改的默认做法见 [默认尺寸样式与工作图续作](docs/DEFAULT-ANNOTATION-AND-SESSION.zh-CN.md)。
 
 ## 为什么开发
 

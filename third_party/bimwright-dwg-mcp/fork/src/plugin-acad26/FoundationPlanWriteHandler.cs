@@ -61,6 +61,58 @@ namespace Bimwright.Dwg.Plugin
         {
             var result=new JObject();var table=(LayerTable)tx.GetObject(db.LayerTableId,OpenMode.ForRead);foreach(ObjectId id in table){var layer=(LayerTableRecord)tx.GetObject(id,OpenMode.ForRead);result[layer.Name]=new JObject{["handle"]=id.Handle.ToString(),["color_index"]=(int)layer.Color.ColorIndex,["is_off"]=layer.IsOff,["is_frozen"]=layer.IsFrozen,["is_locked"]=layer.IsLocked,["is_plottable"]=layer.IsPlottable,["lineweight"]=(int)layer.LineWeight,["linetype"]=((LinetypeTableRecord)tx.GetObject(layer.LinetypeObjectId,OpenMode.ForRead)).Name,["linetype_handle"]=layer.LinetypeObjectId.Handle.ToString()};}return result;
         }
+        static HashSet<string> PreservesPolylineReactors(JObject plan) =>
+            ((JArray)plan["steps"]).Cast<JObject>()
+                .Where(s => s.Value<string>("op") == "set_properties" && s.Value<bool?>("preserve_polyline_reactors") == true)
+                .SelectMany(s => ((JArray)s["targets"]).Select(t => t.Value<string>("handle")))
+                .Concat(((JArray)plan["steps"]).Cast<JObject>().Where(s=>s.Value<string>("op")=="set_polyline" && s.Value<bool?>("preserve_grouped_width")==true).Select(s=>s.Value<string>("handle")))
+                .ToHashSet(StringComparer.Ordinal);
+
+        static JObject ReactorFacts(Database db, Transaction tx, IEnumerable<string> handles)
+        {
+            var facts = new JObject();
+            foreach (string handle in handles)
+            {
+                var entity = (Entity)tx.GetObject(Resolve(db, handle), OpenMode.ForRead);
+                facts[handle] = new JArray(entity.GetPersistentReactorIds().Cast<ObjectId>()
+                    .OrderBy(id => id.Handle.ToString(), StringComparer.Ordinal)
+                    .Select(id =>
+                    {
+                        var linked = tx.GetObject(id, OpenMode.ForRead);
+                        return new JObject
+                        {
+                            ["handle"] = id.Handle.ToString(),
+                            ["type"] = linked.GetType().Name,
+                            ["group_members"] = linked is Group group
+                                ? new JArray(group.GetAllEntityIds().Select(member => member.Handle.ToString()))
+                                : null,
+                            ["hatch_sha256"] = linked is Hatch hatch ? FoundationDrawingPlan.Hash(Facts(hatch, tx)) : null
+                        };
+                    }));
+            }
+            return facts;
+        }
+        static JObject PaperHandles(Database db, Transaction tx, JObject plan)
+        {
+            var result = new JObject();
+            var names = ((JArray)plan["steps"]).Cast<JObject>()
+                .Select(step => step.Value<string>("paper_layout"))
+                .Where(name => name != null).Distinct(StringComparer.Ordinal);
+            foreach (string name in names)
+            {
+                var layout = FindLayout(db, tx, name, OpenMode.ForRead);
+                if (layout.ModelType) throw new InvalidOperationException("paper_layout_required:" + name);
+                var owner = (BlockTableRecord)tx.GetObject(layout.BlockTableRecordId, OpenMode.ForRead);
+                result[name] = new JArray(owner.Cast<ObjectId>().Select(id => id.Handle.ToString()).OrderBy(handle => handle, StringComparer.Ordinal));
+            }
+            return result;
+        }
+
+        static bool PaperChangesMatch(JObject before, JObject after, JObject plan, JObject objects) =>
+            before.Properties().All(layout => IdentitySetMatches((JArray)layout.Value, (JArray)after[layout.Name],
+                ((JArray)plan["steps"]).Cast<JObject>().Where(step => FoundationDrawingPlan.IsPaperCreation(step) && step.Value<string>("paper_layout") == layout.Name)
+                    .Select(step => objects[step.Value<string>("id")].Value<string>("entity"))));
+
         static ObjectId Layer(Database db,Transaction tx,string name,int color,bool archive=false)
         {
             var table=(LayerTable)tx.GetObject(db.LayerTableId,OpenMode.ForRead);if(!table.Has(name)){table.UpgradeOpen();table.DisableUndoRecording(false);}
@@ -127,23 +179,63 @@ namespace Bimwright.Dwg.Plugin
             var hatchFormatNames=((JArray)plan["steps"]).Cast<JObject>().Where(s=>s.Value<string>("op")=="set_hatch_pattern").SelectMany(s=>((JArray)s["targets"]).Cast<JObject>()).Select(t=>t.Value<string>("handle")).ToHashSet(StringComparer.Ordinal);
             var transformNames=((JArray)plan["steps"]).Cast<JObject>().Where(s=>s.Value<string>("op") is "rotate" or "scale" or "copy").SelectMany(s=>((JArray)s["targets"]).Cast<JObject>()).Select(t=>t.Value<string>("handle")).ToHashSet(StringComparer.Ordinal);
             if(names.Count!=targets.Length)throw new InvalidOperationException("an_existing_handle_may_be_modified_once_per_plan");
+            var copyNames=((JArray)plan["steps"]).Cast<JObject>().Where(s=>s.Value<string>("op")=="copy")
+                .SelectMany(s=>((JArray)s["targets"]).Select(t=>t.Value<string>("handle"))).ToHashSet();
+            var paperProperties=((JArray)plan["steps"]).Cast<JObject>()
+                .Where(s=>s["paper_layout"]!=null && s.Value<string>("op") is "set_properties" or "move" or "archive")
+                .SelectMany(s=>((JArray)s["targets"]).Select(t=>(handle:t.Value<string>("handle"),step:s)))
+                .ToDictionary(pair=>pair.handle,pair=>pair.step,StringComparer.Ordinal);
+            var preservedPolylineReactors = PreservesPolylineReactors(plan);
             ObjectId model=SymbolUtilityServices.GetBlockModelSpaceId(db);
             foreach(var target in targets)
             {
                 string h=target.Value<string>("handle");var entity=tx.GetObject(Resolve(db,h),OpenMode.ForRead) as Entity;
                 var owner=entity==null?null:tx.GetObject(entity.OwnerId,OpenMode.ForRead) as BlockTableRecord;
-                if(entity==null||owner==null||!owner.IsLayout||entity.OwnerId!=model||(entity is not (Line or Circle or DBText or MText or Leader or Hatch)&&!(phase2Names.Contains(h)&&entity is (Polyline or Arc or Ellipse or DBPoint or Table or BlockReference or RasterImage or RotatedDimension or AlignedDimension or RadialDimension or DiametricDimension))&&!(archiveNames.Contains(h)&&entity is (Polyline or RotatedDimension or AlignedDimension or RadialDimension or DiametricDimension))&&!(boundaryNames.Contains(h)&&entity is Polyline{Closed:true})&&!(transformNames.Contains(h)&&entity is Polyline)))throw new InvalidOperationException("unsupported_existing_entity_or_space:"+h);
+                bool paperTarget = paperProperties.TryGetValue(h,out var paperStep);
+                bool validOwner = entity!=null && owner!=null && owner.IsLayout && entity.OwnerId==model && !paperTarget;
+                if(paperTarget && owner!=null && owner.IsLayout &&
+                   (paperStep.Value<string>("op") switch
+                    {
+                        "archive" => entity is Line or Polyline or MText,
+                        "move" => entity is Line or MText,
+                        _ => entity is Polyline { Closed:true }
+                    }))
+                {
+                    string layoutName = paperStep.Value<string>("paper_layout");
+                    var layout = FindLayout(db, tx, layoutName, OpenMode.ForRead);
+                    validOwner = !layout.ModelType && owner.ObjectId==layout.BlockTableRecordId &&
+                        FoundationDrawingPlan.Hash(LayoutFacts(db,tx)[layoutName])==paperStep.Value<string>("expected_layout_sha256");
+                }
+                bool plainBlockCopy = copyNames.Contains(h) && entity is BlockReference reference &&
+                    reference.AttributeCollection.Count==0 && !reference.IsDynamicBlock && reference.Position.Z==0 &&
+                    tx.GetObject(reference.BlockTableRecord,OpenMode.ForRead) is BlockTableRecord
+                        { IsFromExternalReference:false, IsFromOverlayReference:false, IsAnonymous:false };
+                if(!validOwner||(entity is not (Line or Circle or DBText or MText or Leader or Hatch)&&!(phase2Names.Contains(h)&&entity is (Polyline or Arc or Ellipse or DBPoint or Table or BlockReference or RasterImage or RotatedDimension or AlignedDimension or RadialDimension or DiametricDimension))&&!(archiveNames.Contains(h)&&entity is (Polyline or RotatedDimension or AlignedDimension or RadialDimension or DiametricDimension))&&!(boundaryNames.Contains(h)&&entity is Polyline{Closed:true})&&!(transformNames.Contains(h)&&entity is Polyline)&&!plainBlockCopy))throw new InvalidOperationException("unsupported_existing_entity_or_space:"+h);
                 if(((LayerTableRecord)tx.GetObject(entity.LayerId,OpenMode.ForRead)).IsLocked)throw new InvalidOperationException("locked_source_layer:"+h);
                 if(transformNames.Contains(h))
                 {
-                    bool planar=entity switch{Line l=>l.StartPoint.Z==0&&l.EndPoint.Z==0&&l.Thickness==0,Circle c=>c.Normal==Vector3d.ZAxis&&c.Center.Z==0&&c.Thickness==0,Polyline p=>p.Normal==Vector3d.ZAxis&&p.Elevation==0&&p.ConstantWidth==0&&Enumerable.Range(0,p.NumberOfVertices).All(i=>p.GetStartWidthAt(i)==0&&p.GetEndWidthAt(i)==0),DBText t=>t.Normal==Vector3d.ZAxis&&t.Position.Z==0&&t.Thickness==0,MText t=>t.Normal==Vector3d.ZAxis&&t.Location.Z==0,Leader l=>l.Normal==Vector3d.ZAxis&&Enumerable.Range(0,l.NumVertices).All(i=>l.VertexAt(i).Z==0),Hatch f=>f.Normal==Vector3d.ZAxis&&f.Elevation==0,_=>false};
+                    bool planar=entity switch{Line l=>l.StartPoint.Z==0&&l.EndPoint.Z==0&&l.Thickness==0,Circle c=>c.Normal==Vector3d.ZAxis&&c.Center.Z==0&&c.Thickness==0,Polyline p=>p.Normal==Vector3d.ZAxis&&p.Elevation==0&&p.ConstantWidth==0&&Enumerable.Range(0,p.NumberOfVertices).All(i=>p.GetStartWidthAt(i)==0&&p.GetEndWidthAt(i)==0),DBText t=>t.Normal==Vector3d.ZAxis&&t.Position.Z==0&&t.Thickness==0,MText t=>t.Normal==Vector3d.ZAxis&&t.Location.Z==0,Leader l=>l.Normal==Vector3d.ZAxis&&Enumerable.Range(0,l.NumVertices).All(i=>l.VertexAt(i).Z==0),Hatch f=>f.Normal==Vector3d.ZAxis&&f.Elevation==0,BlockReference _=>plainBlockCopy,_=>false};
                     if(!planar)throw new InvalidOperationException("transform_requires_supported_zero_width_2d_wcs_entities:"+h);
                 }
                 if(phase2Names.Contains(h)&&entity.GetPersistentReactorIds().Count>0&&((JArray)plan["steps"]).Cast<JObject>().Any(s=>s.Value<string>("op") is "set_open_polyline" or "set_text_format" or "set_dimension_text"&&(s["targets"] as JArray??new JArray()).Cast<JObject>().Any(t=>t.Value<string>("handle")==h)))throw new InvalidOperationException("standalone_entity_without_persistent_reactors_required:"+h);
                 if(FoundationDrawingPlan.Hash(before[h])!=target.Value<string>("expected_sha256"))throw new InvalidOperationException("entity_changed:"+h);
                 if(entity is RasterImage&& !((JArray)plan["steps"]).Cast<JObject>().Any(s=>s.Value<string>("op")=="set_raster_path"&&((JArray)s["targets"]).Cast<JObject>().Any(t=>t.Value<string>("handle")==h)))throw new InvalidOperationException("raster_only_supports_explicit_path_repair");
+                bool preserveReactors = preservedPolylineReactors.Contains(h);
+                if(preserveReactors && entity is not Polyline { Closed: true })
+                    throw new InvalidOperationException("closed_polyline_required_for_reactor_preservation:" + h);
                 foreach(ObjectId reactor in entity.GetPersistentReactorIds())
-                {if(entity is RasterImage ri&&reactor==ri.ReactorId)continue;var other=tx.GetObject(reactor,OpenMode.ForRead) as Entity;if(other==null||!names.Contains(other.Handle.ToString()))throw new InvalidOperationException("include_complete_associated_group:"+h);}
+                {
+                    if(entity is RasterImage ri && reactor==ri.ReactorId)continue;
+                    var linked=tx.GetObject(reactor,OpenMode.ForRead);
+                    if (preserveReactors && (linked is Group ||
+                        propertyNames.Contains(h) && linked is Hatch { Associative: true } hatchReactor &&
+                        hatchReactor.OwnerId == entity.OwnerId &&
+                        Enumerable.Range(0, hatchReactor.NumberOfLoops).Any(index =>
+                            hatchReactor.GetAssociatedObjectIdsAt(index).Cast<ObjectId>().Contains(entity.ObjectId))))
+                        continue;
+                    if(linked is not Entity other || !names.Contains(other.Handle.ToString()))
+                        throw new InvalidOperationException($"include_complete_associated_group:{h}; reactor={reactor.Handle}; type={linked.GetType().Name}");
+                }
                 if(entity is Leader leader&&!leader.Annotation.IsNull&&!names.Contains(leader.Annotation.Handle.ToString()))throw new InvalidOperationException("include_leader_annotation:"+h);
                 if(entity is Hatch hatch)
                 {
@@ -193,21 +285,44 @@ namespace Bimwright.Dwg.Plugin
             if(((JArray)plan["steps"]).Count==1&&plan["steps"][0].Value<string>("op")=="save_copy")return SaveDocumentCopy(doc,plan,canonicalPlan);
             JObject before=new JObject(),after=new JObject(),objects=new JObject(),layers=new JObject(),allLayersBefore=null,allLayersAfter=null,symbolsBefore=null,symbolsAfter=null,layoutsBefore=null,layoutsAfter=null;JArray modelBefore=null,modelAfter=null;
             string activeStep=null,activeOperation=null,failureStage="preflight";var completedSteps=new JArray();
+            JObject reactorsBefore=null, reactorsAfter=null, paperBefore=null, paperAfter=null;
             Transaction tx=null;bool opened=false,invoked=false,committed=false;string outcome="unknown",error=null;var created=new List<string>();
             using(doc.LockDocument())try
             {
                 if(doc.IsReadOnly||!doc.Database.UndoRecording)throw new InvalidOperationException("document_read_only_or_undo_disabled");
                 if(!FoundationDrawingPlan.UnitMetadataMatches(plan,Convert.ToInt32(doc.Database.Insunits)))throw new InvalidOperationException("drawing_unit_metadata_changed");
                 tx=doc.Database.TransactionManager.StartTransaction();modelBefore=Handles(doc.Database,tx);allLayersBefore=LayerFacts(doc.Database,tx);symbolsBefore=SymbolFacts(doc.Database,tx);layoutsBefore=LayoutFacts(doc.Database,tx);
+                paperBefore=PaperHandles(doc.Database, tx, plan);
                 before=ReadEntities(doc.Database,tx,Targets(plan).Select(v=>v.Value<string>("handle")));GuardTargets(doc.Database,tx,plan,before);
                 // All modifications share one transaction. Symbol/table changes and associated boundaries participate in undo.
-                var db=doc.Database;var refs=new Dictionary<string,ObjectId>();ObjectId creationSpace=SymbolUtilityServices.GetBlockModelSpaceId(db);
+                var db=doc.Database;var refs=new Dictionary<string,ObjectId>();
+                var preservedReactors = PreservesPolylineReactors(plan);
+                reactorsBefore = ReactorFacts(db, tx, preservedReactors);
                 foreach(JObject step in (JArray)plan["steps"])
                 {
                     string id=step.Value<string>("id"),op=step.Value<string>("op");activeStep=id;activeOperation=op;failureStage="executing_step";var map=new JObject();objects[id]=map;opened=true;
                     string layer=step.Value<string>("layer");int color=step.Value<int?>("color")??256;
                     ObjectId Add(Entity e,string role="entity",int? explicitColor=null)
-                    {ObjectId oid=Append(db,tx,e,layer,explicitColor??color,creationSpace);map[role]=oid.Handle.ToString();created.Add(oid.Handle.ToString());return oid;}
+                    {
+                        ObjectId space = SymbolUtilityServices.GetBlockModelSpaceId(db);
+                        if (step.Value<string>("paper_layout") is string name)
+                        {
+                            var layout = FindLayout(db, tx, name, OpenMode.ForRead);
+                            if (layout.ModelType || FoundationDrawingPlan.Hash(layoutsBefore[name]) != step.Value<string>("expected_layout_sha256"))
+                                throw new InvalidOperationException("paper_layout_identity_changed:" + name);
+                            space = layout.BlockTableRecordId;
+                        }
+                        var oid=Append(db,tx,e,layer,explicitColor??color,space);
+                        if (step.Value<string>("linetype") is string linetype)
+                        {
+                            var table=(LinetypeTable)tx.GetObject(db.LinetypeTableId,OpenMode.ForRead);
+                            if(!table.Has(linetype))throw new InvalidOperationException("existing_linetype_required:" + linetype);
+                            e.LinetypeId=table[linetype];
+                        }
+                        map[role]=oid.Handle.ToString();
+                        created.Add(oid.Handle.ToString());
+                        return oid;
+                    }
                     switch(op)
                     {
                         case "wipeout_rectangle":
@@ -226,7 +341,10 @@ namespace Bimwright.Dwg.Plugin
                         case "line":refs[id]=Add(new Line(Point(step["start"]),Point(step["end"])));break;
                         case "circle":refs[id]=Add(new Circle(Point(step["center"]),Vector3d.ZAxis,step.Value<double>("radius")));break;
                         case "polyline":
-                            var poly=new Polyline();poly.SetDatabaseDefaults(db);var points=(JArray)step["vertices"];for(int i=0;i<points.Count;i++){var p=(JArray)points[i];poly.AddVertexAt(i,new Point2d(p[0].Value<double>(),p[1].Value<double>()),p.Count==3?p[2].Value<double>():0,0,0);}poly.Closed=step.Value<bool>("closed");if(step["constant_width"]!=null)poly.ConstantWidth=step.Value<double>("constant_width");refs[id]=Add(poly);break;
+                            var poly=new Polyline();poly.SetDatabaseDefaults(db);var points=(JArray)step["vertices"];for(int i=0;i<points.Count;i++){var p=(JArray)points[i];poly.AddVertexAt(i,new Point2d(p[0].Value<double>(),p[1].Value<double>()),p.Count==3?p[2].Value<double>():0,0,0);}poly.Closed=step.Value<bool>("closed");if(step["constant_width"]!=null)poly.ConstantWidth=step.Value<double>("constant_width");
+                            if(step["linetype_generation"]!=null)poly.Plinegen=step.Value<bool>("linetype_generation");
+                            if(step["linetype_scale"]!=null)poly.LinetypeScale=step.Value<double>("linetype_scale");
+                            refs[id]=Add(poly);break;
                         case "text":
                             if(!AnnotationEntityFactory.TryCreateText(TextInput(step,false),out DBText text,out string textError))throw new InvalidOperationException(textError);ApplyTextStyle(db,tx,text,step);refs[id]=Add(text);break;
                         case "mtext":
@@ -250,10 +368,16 @@ namespace Bimwright.Dwg.Plugin
                             if(existing is DBText oldText)oldText.TextString=step.Value<string>("text");else if(existing is MText oldMtext)oldMtext.Contents=step.Value<string>("text");else throw new InvalidOperationException("text_entity_required");map["entity"]=existing.Handle.ToString();break;
                         case "set_polyline":
                             var oldPoly=tx.GetObject(Resolve(db,step.Value<string>("handle")),OpenMode.ForWrite) as Polyline;
-                            if(oldPoly==null||!oldPoly.Closed||oldPoly.Normal!=Vector3d.ZAxis||oldPoly.Elevation!=0||oldPoly.ConstantWidth!=0||Enumerable.Range(0,oldPoly.NumberOfVertices).Any(i=>oldPoly.GetStartWidthAt(i)!=0||oldPoly.GetEndWidthAt(i)!=0))throw new InvalidOperationException("closed_zero_width_2d_wcs_boundary_required");
+                            if(oldPoly==null||!oldPoly.Closed||oldPoly.Normal!=Vector3d.ZAxis||oldPoly.Elevation!=0)
+                                throw new InvalidOperationException("closed_2d_wcs_boundary_required");
+                            bool keepWidth=step.Value<bool?>("preserve_grouped_width")==true;
+                            double width=keepWidth?oldPoly.ConstantWidth:0;
+                            if(Enumerable.Range(0,oldPoly.NumberOfVertices).Any(i=>oldPoly.GetStartWidthAt(i)!=width||oldPoly.GetEndWidthAt(i)!=width))
+                                throw new InvalidOperationException("uniform_width_required");
                             oldPoly.DisableUndoRecording(false);var pv=(JArray)step["vertices"];
                             while(oldPoly.NumberOfVertices>pv.Count)oldPoly.RemoveVertexAt(oldPoly.NumberOfVertices-1);
-                            for(int i=0;i<pv.Count;i++){var v=(JArray)pv[i];var xy=new Point2d(v[0].Value<double>(),v[1].Value<double>());double bulge=v.Count==3?v[2].Value<double>():0;if(i<oldPoly.NumberOfVertices){oldPoly.SetPointAt(i,xy);oldPoly.SetBulgeAt(i,bulge);}else oldPoly.AddVertexAt(i,xy,bulge,0,0);}
+                            for(int i=0;i<pv.Count;i++){var v=(JArray)pv[i];var xy=new Point2d(v[0].Value<double>(),v[1].Value<double>());double bulge=v.Count==3?v[2].Value<double>():0;if(i<oldPoly.NumberOfVertices){oldPoly.SetPointAt(i,xy);oldPoly.SetBulgeAt(i,bulge);}else oldPoly.AddVertexAt(i,xy,bulge,width,width);}
+                            if(keepWidth)oldPoly.ConstantWidth=width;
                             foreach(JObject companion in (JArray)step["companions"]){var associated=tx.GetObject(Resolve(db,companion.Value<string>("handle")),OpenMode.ForWrite) as Hatch;if(associated==null)throw new InvalidOperationException("associated_hatch_required");associated.DisableUndoRecording(false);var patternType=associated.PatternType;string patternName=associated.PatternName;double scale=associated.PatternScale,angle=associated.PatternAngle;associated.RemoveLoopAt(0);associated.Associative=true;associated.AppendLoop(HatchLoopTypes.External,new ObjectIdCollection{oldPoly.ObjectId});associated.SetHatchPattern(patternType,patternName);associated.PatternScale=scale;associated.PatternAngle=angle;associated.EvaluateHatch(true);associated.RecordGraphicsModified(true);map[companion.Value<string>("handle")]=companion.Value<string>("handle");}
                             map["entity"]=oldPoly.Handle.ToString();break;
                         case "set_callout":
@@ -288,10 +412,12 @@ namespace Bimwright.Dwg.Plugin
                 }
                 RefreshChangedFontText(db,tx,plan);
                 var observed=before.Properties().Select(p=>p.Name).Concat(created).ToArray();after=ReadEntities(db,tx,observed);modelAfter=Handles(db,tx);allLayersAfter=LayerFacts(db,tx);symbolsAfter=SymbolFacts(db,tx);layoutsAfter=LayoutFacts(db,tx);
-                JObject Receipt(){var r=Build(plan,before,after,objects,layers,allLayersBefore,allLayersAfter,modelBefore,modelAfter,created,"committed_verified",true,true,null,symbolsBefore,symbolsAfter);r["layouts_before"]=layoutsBefore;r["layouts_after"]=layoutsAfter;return r;}
-                var paperCreated=((JArray)plan["steps"]).Cast<JObject>().Where(s=>s.Value<string>("op")=="copy_paper_frame").Select(s=>objects[s.Value<string>("id")]?.Value<string>("entity")).ToHashSet();var modelCreated=created.Where(h=>!paperCreated.Contains(h)).ToArray();
+                reactorsAfter = ReactorFacts(db, tx, preservedReactors);
+                paperAfter = PaperHandles(db, tx, plan);
+                JObject Receipt(){var r=Build(plan,before,after,objects,layers,allLayersBefore,allLayersAfter,modelBefore,modelAfter,created,"committed_verified",true,true,null,symbolsBefore,symbolsAfter);r["layouts_before"]=layoutsBefore;r["layouts_after"]=layoutsAfter;r["reactors_before"]=reactorsBefore;r["reactors_after"]=reactorsAfter;return r;}
+                var paperCreated=((JArray)plan["steps"]).Cast<JObject>().Where(FoundationDrawingPlan.IsPaperCreation).Select(s=>objects[s.Value<string>("id")]?.Value<string>("entity")).ToHashSet();var modelCreated=created.Where(h=>!paperCreated.Contains(h)).ToArray();
                 failureStage="precommit_verification";activeStep=null;activeOperation=null;
-                if(!FoundationDrawingPlan.VerifyReceipt(Receipt(),canonicalPlan)||!IdentitySetMatches(modelBefore,modelAfter,modelCreated))
+                if(!FoundationDrawingPlan.VerifyReceipt(Receipt(),canonicalPlan)||!IdentitySetMatches(modelBefore,modelAfter,modelCreated)||!PaperChangesMatch(paperBefore,paperAfter,plan,objects))
                 {
                     var diagnosticReceipt=Receipt();
                     string summary="; checks: layout="+FoundationDrawingPlan.VerifyLayoutChanges(diagnosticReceipt,(JArray)plan["steps"])+", layers="+FoundationDrawingPlan.VerifyLayerChanges(allLayersBefore,allLayersAfter,(JArray)plan["steps"])+", symbols="+FoundationDrawingPlan.VerifySymbols(diagnosticReceipt,(JArray)plan["steps"]);
@@ -317,8 +443,8 @@ namespace Bimwright.Dwg.Plugin
                     throw new InvalidOperationException("plan_precommit_verification_failed"+detail+"; review_supported_operation_limits_and_fresh_inputs");
                 }
                 failureStage="commit";invoked=true;tx.Commit();committed=true;tx.Dispose();tx=null;checkpoint?.Invoke("after_commit");
-                failureStage="postcommit_readback";using(var read=db.TransactionManager.StartTransaction()){after=ReadEntities(db,read,observed);modelAfter=Handles(db,read);allLayersAfter=LayerFacts(db,read);symbolsAfter=SymbolFacts(db,read);layoutsAfter=LayoutFacts(db,read);read.Abort();}
-                outcome=FoundationDrawingPlan.VerifyReceipt(Receipt(),canonicalPlan)&&IdentitySetMatches(modelBefore,modelAfter,modelCreated)?"committed_verified":"committed_readback_failed";
+                failureStage="postcommit_readback";using(var read=db.TransactionManager.StartTransaction()){after=ReadEntities(db,read,observed);modelAfter=Handles(db,read);allLayersAfter=LayerFacts(db,read);symbolsAfter=SymbolFacts(db,read);layoutsAfter=LayoutFacts(db,read);reactorsAfter=ReactorFacts(db,read,preservedReactors);paperAfter=PaperHandles(db,read,plan);read.Abort();}
+                outcome=FoundationDrawingPlan.VerifyReceipt(Receipt(),canonicalPlan)&&IdentitySetMatches(modelBefore,modelAfter,modelCreated)&&PaperChangesMatch(paperBefore,paperAfter,plan,objects)?"committed_verified":"committed_readback_failed";
             }
             catch(Exception ex)
             {
@@ -329,12 +455,15 @@ namespace Bimwright.Dwg.Plugin
                 else
                 {
                     try
-                    {tx?.Abort();tx?.Dispose();tx=null;using var read=doc.Database.TransactionManager.StartTransaction();after=ReadEntities(doc.Database,read,before.Properties().Select(p=>p.Name));modelAfter=Handles(doc.Database,read);allLayersAfter=LayerFacts(doc.Database,read);symbolsAfter=SymbolFacts(doc.Database,read);layoutsAfter=LayoutFacts(doc.Database,read);read.Abort();outcome=JToken.DeepEquals(layoutsBefore,layoutsAfter)&&JToken.DeepEquals(before,after)&&JToken.DeepEquals(allLayersBefore,allLayersAfter)&&JToken.DeepEquals(symbolsBefore,symbolsAfter)&&JToken.DeepEquals(modelBefore,modelAfter)?"aborted_verified":"rollback_outcome_unknown";}
+                    {tx?.Abort();tx?.Dispose();tx=null;using var read=doc.Database.TransactionManager.StartTransaction();after=ReadEntities(doc.Database,read,before.Properties().Select(p=>p.Name));modelAfter=Handles(doc.Database,read);allLayersAfter=LayerFacts(doc.Database,read);symbolsAfter=SymbolFacts(doc.Database,read);layoutsAfter=LayoutFacts(doc.Database,read);
+                     paperAfter=PaperHandles(doc.Database,read,plan);
+                     reactorsAfter=ReactorFacts(doc.Database,read,PreservesPolylineReactors(plan));
+                     read.Abort();outcome=JToken.DeepEquals(paperBefore,paperAfter)&&JToken.DeepEquals(reactorsBefore,reactorsAfter)&&JToken.DeepEquals(layoutsBefore,layoutsAfter)&&JToken.DeepEquals(before,after)&&JToken.DeepEquals(allLayersBefore,allLayersAfter)&&JToken.DeepEquals(symbolsBefore,symbolsAfter)&&JToken.DeepEquals(modelBefore,modelAfter)?"aborted_verified":"rollback_outcome_unknown";}
                     catch{outcome="rollback_outcome_unknown";}
                 }
             }
             finally{tx?.Dispose();}
-            var final=Build(plan,before,after,objects,layers,allLayersBefore,allLayersAfter,modelBefore,modelAfter,created,outcome,invoked,committed,error,symbolsBefore,symbolsAfter);final["failure_stage"]=error==null?JValue.CreateNull():new JValue(failureStage);final["layouts_before"]=layoutsBefore;final["layouts_after"]=layoutsAfter;final["failed_step"]=error==null?JValue.CreateNull():new JValue(activeStep);final["failed_operation"]=error==null?JValue.CreateNull():new JValue(activeOperation);final["steps_executed_before_outcome"]=completedSteps;final["step_execution_is_not_commit"]=true;return final;
+            var final=Build(plan,before,after,objects,layers,allLayersBefore,allLayersAfter,modelBefore,modelAfter,created,outcome,invoked,committed,error,symbolsBefore,symbolsAfter);final["reactors_before"]=reactorsBefore;final["reactors_after"]=reactorsAfter;final["failure_stage"]=error==null?JValue.CreateNull():new JValue(failureStage);final["layouts_before"]=layoutsBefore;final["layouts_after"]=layoutsAfter;final["failed_step"]=error==null?JValue.CreateNull():new JValue(activeStep);final["failed_operation"]=error==null?JValue.CreateNull():new JValue(activeOperation);final["steps_executed_before_outcome"]=completedSteps;final["step_execution_is_not_commit"]=true;return final;
         }
         static bool IdentitySetMatches(JArray before,JArray after,IEnumerable<string> created)=>before!=null&&after!=null&&after.Values<string>().ToHashSet().SetEquals(before.Values<string>().Concat(created))&&created.Distinct().Count()==created.Count();
         static JObject SaveDocument(Document doc,JObject plan,string canonicalPlan)

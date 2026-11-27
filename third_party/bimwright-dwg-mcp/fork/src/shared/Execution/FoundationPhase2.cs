@@ -37,7 +37,7 @@ namespace Bimwright.Dwg.Shared.Execution
      Keys(s,"id","op","min","max","layer","color");Point(s["min"]);Point(s["max"]);Options(s);
      if(Number(s["max"][0])<=Number(s["min"][0])||Number(s["max"][1])<=Number(s["min"][1]))throw new ArgumentException("rectangle max must exceed min on both axes");count++;break;
     case "set_properties":
-     KeysWithOptional(s,new[]{"id","op","targets","layer","color"},"linetype","lineweight");Text(s,"layer",255);Color(s,"color");ValidateTargets(s,ref count);
+     KeysWithOptional(s,new[]{"id","op","targets","layer","color"},"linetype","lineweight","preserve_polyline_reactors","paper_layout","expected_layout_sha256");ValidateCreationPlacement(s);if(s["preserve_polyline_reactors"]!=null)Bool(s,"preserve_polyline_reactors");Text(s,"layer",255);Color(s,"color");ValidateTargets(s,ref count);
      if(s["linetype"]!=null)Text(s,"linetype",255);
      if(s["lineweight"]!=null&&(s["lineweight"].Type!=JTokenType.Integer||!new[]{-3,-2,-1,0,5,9,13,15,18,20,25,30,35,40,50,53,60,70,80,90,100,106,120,140,158,200,211}.Contains(s.Value<int>("lineweight"))))throw new ArgumentException("native lineweight enum in hundredths of a millimetre required");break;
     case "set_hatch_pattern":
@@ -133,7 +133,12 @@ namespace Bimwright.Dwg.Shared.Execution
      var expected=(JArray)old["cells"].DeepClone();expected[row][column]=s["text"].DeepClone();if(!JToken.DeepEquals(current["cells"],expected))return false;mutable=new[]{"cells","extents"};
     }
     else if(op=="set_properties")
-    {if(!EntityOptions(current,s)||s["linetype"]!=null&&current.Value<string>("linetype")!=s.Value<string>("linetype")||s["lineweight"]!=null&&current.Value<int?>("lineweight")!=s.Value<int>("lineweight"))return false;mutable=new[]{"layer","color_index"}.Concat(old.Value<string>("type")=="BlockReference"?new[]{"extents"}:Array.Empty<string>()).Concat(s["linetype"]!=null?new[]{"linetype"}:Array.Empty<string>()).Concat(s["lineweight"]!=null?new[]{"lineweight"}:Array.Empty<string>()).ToArray();}
+    {
+     if(s.Value<bool?>("preserve_polyline_reactors")==true &&
+        (old.Value<string>("type")!="Polyline" || old.Value<bool?>("is_closed")!=true ||
+         receipt["reactors_before"]?[h] is not JArray reactors ||
+         !JToken.DeepEquals(reactors,receipt["reactors_after"]?[h])))return false;
+     if(!VerifyCreationPlacement(current,s,receipt)||!EntityOptions(current,s)||s["linetype"]!=null&&current.Value<string>("linetype")!=s.Value<string>("linetype")||s["lineweight"]!=null&&current.Value<int?>("lineweight")!=s.Value<int>("lineweight"))return false;mutable=new[]{"layer","color_index"}.Concat(old.Value<string>("type")=="BlockReference"?new[]{"extents"}:Array.Empty<string>()).Concat(s["linetype"]!=null?new[]{"linetype"}:Array.Empty<string>()).Concat(s["lineweight"]!=null?new[]{"lineweight"}:Array.Empty<string>()).ToArray();}
     else if(op=="set_open_polyline")
     {if(old.Value<string>("type")!="Polyline"||old.Value<bool?>("is_closed")!=false||current.Value<bool?>("is_closed")!=false||!VerticesMatch(current["vertices"],(JArray)s["vertices"]))return false;mutable=new[]{"vertices","vertex_count","length","area","extents"};}
     else if(op=="set_text_metrics")

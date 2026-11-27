@@ -44,18 +44,18 @@ namespace Bimwright.Dwg.Shared.Execution
                 switch(op)
                 {
                     case "layer":Keys(step,"id","op","name","color");Text(step,"name",255);Color(step,"color");break;
-                    case "line":Keys(step,"id","op","start","end","layer","color");Point(step["start"]);Point(step["end"]);Options(step);estimatedHandles++;break;
-                    case "circle":Keys(step,"id","op","center","radius","layer","color");Point(step["center"]);Positive(step,"radius");Options(step);estimatedHandles++;break;
+                    case "line":KeysWithOptional(step,new[]{"id","op","start","end","layer","color"},"paper_layout","expected_layout_sha256","linetype");ValidateCreationPlacement(step);Point(step["start"]);Point(step["end"]);Options(step);estimatedHandles++;break;
+                    case "circle":KeysWithOptional(step,new[]{"id","op","center","radius","layer","color"},"paper_layout","expected_layout_sha256");ValidateCreationPlacement(step);Point(step["center"]);Positive(step,"radius");Options(step);estimatedHandles++;break;
                     case "polyline":
-                        KeysWithOptional(step,new[]{"id","op","vertices","closed","layer","color"},"constant_width");if(step["constant_width"]!=null&&Number(step["constant_width"])<0)throw new ArgumentException("nonnegative polyline width required");Options(step);Bool(step,"closed");
-                        if(step["vertices"] is not JArray points||points.Count<(step.Value<bool>("closed")?3:2)||points.Count>128)throw new ArgumentException("2..128 polyline vertices required; closed needs 3");
+                        KeysWithOptional(step,new[]{"id","op","vertices","closed","layer","color"},"constant_width","paper_layout","expected_layout_sha256","linetype","linetype_generation","linetype_scale");ValidateCreationPlacement(step);if(step["linetype_generation"]!=null)Bool(step,"linetype_generation");if(step["linetype_scale"]!=null)Positive(step,"linetype_scale");if(step["constant_width"]!=null&&Number(step["constant_width"])<0)throw new ArgumentException("nonnegative polyline width required");Options(step);Bool(step,"closed");
+                        if(step["vertices"] is not JArray points||points.Count<(step.Value<bool>("closed")?3:2)||points.Count>(step.Value<bool>("closed")?1024:128))throw new ArgumentException("Closed polylines need 3..1024 vertices; open polylines need 2..128");
                         foreach(JToken v in points){Point(v,true);if(((JArray)v).Count==3&&Math.Abs(Number(v[2]))>1)throw new ArgumentException("major bulge unsupported in first release");}vertices+=points.Count;estimatedHandles++;break;
                     case "text":case "mtext":
-                        if(op=="text")KeysWithOptional(step,new[]{"id","op","text","position","height","rotation","layer","color"},"text_style");else{KeysWithOptional(step,new[]{"id","op","text","position","height","rotation","width","layer","color"},"text_style");Positive(step,"width");}
+                        if(op=="text")KeysWithOptional(step,new[]{"id","op","text","position","height","rotation","layer","color"},"text_style","paper_layout","expected_layout_sha256");else{KeysWithOptional(step,new[]{"id","op","text","position","height","rotation","width","layer","color"},"text_style","paper_layout","expected_layout_sha256");Positive(step,"width");}ValidateCreationPlacement(step);
                         if(step["text_style"]!=null)Text(step,"text_style",255);
                         Text(step,"text",2048);Point(step["position"]);Positive(step,"height");Number(step["rotation"]);Options(step);estimatedHandles++;break;
                     case "callout":
-                        KeysWithOptional(step,new[]{"id","op","text","position","height","width","vertices","dot_radius","layer","color"},"text_style","dimension_style","text_color","gap","attachment");Text(step,"text",2048);Point(step["position"]);Positive(step,"height");Positive(step,"width");Positive(step,"dot_radius");Options(step);
+                        KeysWithOptional(step,new[]{"id","op","text","position","height","width","vertices","dot_radius","layer","color"},"text_style","dimension_style","text_color","gap","attachment","rotation");if(step["rotation"]!=null)Number(step["rotation"]);Text(step,"text",2048);Point(step["position"]);Positive(step,"height");Positive(step,"width");Positive(step,"dot_radius");Options(step);
                         if(step["text_style"]!=null)Text(step,"text_style",255);if(step["dimension_style"]!=null)Text(step,"dimension_style",255);if(step["text_color"]!=null)Color(step,"text_color");
                         if(step["gap"]!=null)Number(step["gap"]);
                         ValidateAttachment(step);
@@ -68,8 +68,8 @@ namespace Bimwright.Dwg.Shared.Execution
                         Keys(step,"id","op","handle","expected_sha256","text","companions");Expected(step);Text(step,"text",2048);
                         if(step["companions"] is not JArray companions||companions.Count>32)throw new ArgumentException("0..32 companions required");foreach(JObject t in companions){Keys(t,"handle","expected_sha256");Expected(t);}estimatedHandles+=companions.Count+1;break;
                     case "set_polyline":
-                        Keys(step,"id","op","handle","expected_sha256","vertices","companions");Expected(step);
-                        if(step["vertices"] is not JArray pv||pv.Count<3||pv.Count>128)throw new ArgumentException("3..128 closed boundary vertices required");
+                        KeysWithOptional(step,new[]{"id","op","handle","expected_sha256","vertices","companions"},"preserve_grouped_width");Expected(step);if(step["preserve_grouped_width"]!=null)Bool(step,"preserve_grouped_width");
+                        if(step["vertices"] is not JArray pv||pv.Count<3||pv.Count>1024)throw new ArgumentException("3..1024 closed boundary vertices required");
                         foreach(JToken v in pv){Point(v,true);if(((JArray)v).Count==3&&Math.Abs(Number(v[2]))>1)throw new ArgumentException("major bulge unsupported");}
                         if(step["companions"] is not JArray pc||pc.Count>1)throw new ArgumentException("0..1 associated hatch required");foreach(JObject t in pc){Keys(t,"handle","expected_sha256");Expected(t);}vertices+=pv.Count;estimatedHandles+=pc.Count+1;break;
                     case "set_callout":
@@ -79,7 +79,8 @@ namespace Bimwright.Dwg.Shared.Execution
                     case "save":
                         KeysWithOptional(step,new[]{"id","op","expected"},"expected_layouts");if(step["expected_layouts"]!=null){if(step["expected_layouts"] is not JObject el||el.Count<1||el.Count>64)throw new ArgumentException("1..64 expected layout digests required");foreach(var row in el.Properties()){if(string.IsNullOrWhiteSpace(row.Name)||row.Name.Length>255||!Regex.IsMatch(row.Value.Value<string>()??"","^[A-F0-9]{64}$"))throw new ArgumentException("invalid expected layout digest");}}if(steps.Count!=1||step["expected"] is not JArray expected||expected.Count<1||expected.Count>64)throw new ArgumentException("save is a separate whole-document operation with 1..64 expected entities");foreach(JObject t in expected){Keys(t,"handle","expected_sha256");Expected(t);}estimatedHandles+=expected.Count;break;
                     case "move":case "archive":
-                        Keys(step,"id","op","targets",op=="move"?"delta":"layer");
+                        if(op=="move"){KeysWithOptional(step,new[]{"id","op","targets","delta"},"paper_layout","expected_layout_sha256");ValidateCreationPlacement(step);}
+                        else {KeysWithOptional(step,new[]{"id","op","targets","layer"},"paper_layout","expected_layout_sha256");ValidateCreationPlacement(step);}
                         if(step["targets"] is not JArray targets||targets.Count<1||targets.Count>32)throw new ArgumentException("1..32 explicit targets required");
                         var handles=new System.Collections.Generic.HashSet<string>();foreach(JObject t in targets){Keys(t,"handle","expected_sha256");Expected(t);if(!handles.Add(t.Value<string>("handle")))throw new ArgumentException("duplicate target");}
                         if(op=="move")Point(step["delta"]);else Text(step,"layer",255);estimatedHandles+=targets.Count;break;
@@ -132,7 +133,7 @@ namespace Bimwright.Dwg.Shared.Execution
                 if(receipt["objects"] is not JObject objects||receipt["after"] is not JObject after||receipt["before"] is not JObject before)return false;
                 if(receipt["model_handles_before"] is not JArray oldModel||receipt["model_handles_after"] is not JArray newModel||receipt["created_handles"] is not JArray created||receipt["all_layers_before"] is not JObject oldLayers||receipt["all_layers_after"] is not JObject newLayers)return false;
                 string[] oldIds=oldModel.Values<string>().ToArray(),newIds=newModel.Values<string>().ToArray(),newCreated=created.Values<string>().ToArray();
-                if(oldIds.Length>100000||newCreated.Length>MaxHandles||oldIds.Distinct().Count()!=oldIds.Length||newIds.Distinct().Count()!=newIds.Length||newCreated.Distinct().Count()!=newCreated.Length||newCreated.Intersect(oldIds).Any()||!newIds.ToHashSet().SetEquals(oldIds.Concat(newCreated.Except(((JArray)plan["steps"]).Cast<JObject>().Where(s=>s.Value<string>("op")=="copy_paper_frame").Select(s=>objects[s.Value<string>("id")]?.Value<string>("entity")))))||!after.Properties().Select(p=>p.Name).ToHashSet().SetEquals(before.Properties().Select(p=>p.Name).Concat(newCreated)))return false;
+                if(oldIds.Length>100000||newCreated.Length>MaxHandles||oldIds.Distinct().Count()!=oldIds.Length||newIds.Distinct().Count()!=newIds.Length||newCreated.Distinct().Count()!=newCreated.Length||newCreated.Intersect(oldIds).Any()||!newIds.ToHashSet().SetEquals(oldIds.Concat(newCreated.Except(((JArray)plan["steps"]).Cast<JObject>().Where(IsPaperCreation).Select(s=>objects[s.Value<string>("id")]?.Value<string>("entity")))))||!after.Properties().Select(p=>p.Name).ToHashSet().SetEquals(before.Properties().Select(p=>p.Name).Concat(newCreated)))return false;
                 foreach(var row in after.Properties())if(row.Value?.Value<string>("handle")!=row.Name)return false;
                 if(!VerifyLayoutChanges(receipt,(JArray)plan["steps"])||!VerifyLayerChanges(oldLayers,newLayers,(JArray)plan["steps"])||!VerifySymbols(receipt,(JArray)plan["steps"]))return false;
                 foreach(JObject step in (JArray)plan["steps"])
@@ -166,6 +167,7 @@ namespace Bimwright.Dwg.Shared.Execution
                         if(receipt.Value<string>("verification_scope")!="boundary_vertices_and_native_area_plus_associated_hatch_path;cached_hatch_area_requires_independent_read")return false;
                         string h=step.Value<string>("handle");var old=(JObject)before[h];var actual=(JObject)after[h];
                         if(Hash(old)!=step.Value<string>("expected_sha256")||old.Value<string>("type")!="Polyline"||old.Value<bool?>("is_closed")!=true||actual.Value<bool?>("is_closed")!=true)return false;
+                        if(step.Value<bool?>("preserve_grouped_width")==true && (receipt["reactors_before"]?[h] is not JArray reactors || !JToken.DeepEquals(reactors,receipt["reactors_after"]?[h])))return false;
                         var a=(JObject)old.DeepClone();var b=(JObject)actual.DeepClone();foreach(string f in new[]{"vertices","vertex_count","area","length","extents"}){a.Remove(f);b.Remove(f);}if(!JToken.DeepEquals(a,b))return false;
                         var expected=(JArray)step["vertices"];var av=(JArray)actual["vertices"];if(av.Count!=expected.Count)return false;
                         for(int i=0;i<expected.Count;i++){var v=(JArray)expected[i];if(!PointMatches(av[i],v)||!Near(av[i]["bulge"],v.Count==3?Number(v[2]):0,1e-10))return false;}
@@ -188,10 +190,10 @@ namespace Bimwright.Dwg.Shared.Execution
                             string h=target.Value<string>("handle");if(Hash(before[h])!=target.Value<string>("expected_sha256")||after[h] is not JObject actual)return false;
                             if(op=="archive")
                             {
-                                if(actual.Value<string>("layer")!=step.Value<string>("layer"))return false;var old=(JObject)before[h].DeepClone();var next=(JObject)actual.DeepClone();old.Remove("layer");next.Remove("layer");if(!Equivalent(old,next))return false;
+                                if(!VerifyCreationPlacement(actual,step,receipt)||actual.Value<string>("layer")!=step.Value<string>("layer"))return false;var old=(JObject)before[h].DeepClone();var next=(JObject)actual.DeepClone();old.Remove("layer");next.Remove("layer");if(!Equivalent(old,next))return false;
                                 var l=receipt["layers"]?[step.Value<string>("layer")];if(l?.Value<bool?>("is_off")!=true||l.Value<bool?>("is_frozen")!=true||l.Value<bool?>("is_plottable")!=false)return false;
                             }
-                            if(op=="move"&&!Moved((JObject)before[h],actual,(JArray)step["delta"]))return false;
+                            if(op=="move"&&(!VerifyCreationPlacement(actual,step,receipt)||!Moved((JObject)before[h],actual,(JArray)step["delta"])||step["paper_layout"]!=null&&!TransformEquivalent(TransformFacts((JObject)before[h],new JObject{["op"]="copy",["delta"]=step["delta"]}),actual)))return false;
                         }
                         continue;
                     }
@@ -199,12 +201,12 @@ namespace Bimwright.Dwg.Shared.Execution
                     if(op!="callout"&&(entity==null||!EntityOptions(entity,step)))return false;
                     switch(op)
                     {
-                        case "line":if(entity.Value<string>("type")!="Line"||!PointMatches(entity["start"],(JArray)step["start"])||!PointMatches(entity["end"],(JArray)step["end"]))return false;break;
-                        case "circle":if(entity.Value<string>("type")!="Circle"||!PointMatches(entity["center"],(JArray)step["center"])||!Near(entity["radius"],Number(step["radius"])))return false;break;
+                        case "line":if(!VerifyCreationPlacement(entity,step,receipt)||entity.Value<string>("type")!="Line"||!PointMatches(entity["start"],(JArray)step["start"])||!PointMatches(entity["end"],(JArray)step["end"]))return false;break;
+                        case "circle":if(!VerifyCreationPlacement(entity,step,receipt)||entity.Value<string>("type")!="Circle"||!PointMatches(entity["center"],(JArray)step["center"])||!Near(entity["radius"],Number(step["radius"])))return false;break;
                         case "polyline":
-                            if(step["constant_width"]!=null&&!Near(entity["constant_width"],Number(step["constant_width"])))return false;var vertices=(JArray)step["vertices"];if(entity.Value<string>("type")!="Polyline"||entity.Value<bool?>("is_closed")!=step.Value<bool>("closed")||entity["vertices"] is not JArray actualVertices||actualVertices.Count!=vertices.Count)return false;
+                            if(!VerifyCreationPlacement(entity,step,receipt)||step["linetype_generation"]!=null&&entity.Value<bool?>("linetype_generation")!=step.Value<bool>("linetype_generation")||step["linetype_scale"]!=null&&!Near(entity["linetype_scale"],Number(step["linetype_scale"]))||step["constant_width"]!=null&&!Near(entity["constant_width"],Number(step["constant_width"])))return false;var vertices=(JArray)step["vertices"];if(entity.Value<string>("type")!="Polyline"||entity.Value<bool?>("is_closed")!=step.Value<bool>("closed")||entity["vertices"] is not JArray actualVertices||actualVertices.Count!=vertices.Count)return false;
                             for(int i=0;i<vertices.Count;i++){var v=(JArray)vertices[i];if(!PointMatches(actualVertices[i],v)||!Near(actualVertices[i]["bulge"],v.Count==3?Number(v[2]):0,1e-10))return false;}break;
-                        case "text":case "mtext":if(!TextMatches(entity,step,op=="mtext")||(step["text_style"]!=null&&entity.Value<string>("text_style")!=step.Value<string>("text_style")))return false;break;
+                        case "text":case "mtext":if(!VerifyCreationPlacement(entity,step,receipt)||!TextMatches(entity,step,op=="mtext")||(step["text_style"]!=null&&entity.Value<string>("text_style")!=step.Value<string>("text_style")))return false;break;
                         case "hatch":
                             var bm=objects[step.Value<string>("boundary")] as JObject;var boundary=after[bm?.Value<string>("entity")??""] as JObject;if(!HatchMatches(entity,boundary)||entity.Value<string>("pattern_name")!=step.Value<string>("pattern")||!Near(entity["pattern_scale"],Number(step["scale"]),1e-10)||!Near(entity["pattern_angle"],Number(step["angle"]),1e-10))return false;
                             if(step["template"] is JObject template){string sh=template.Value<string>("handle");if(before[sh]==null||Hash(before[sh])!=template.Value<string>("expected_sha256")||!JToken.DeepEquals(before[sh],after[sh])||before[sh].Value<string>("pattern_name")!=step.Value<string>("pattern"))return false;}break;
@@ -220,6 +222,31 @@ namespace Bimwright.Dwg.Shared.Execution
             }
             catch{return false;}
         }
+        public static bool IsPaperCreation(JObject step) =>
+            step.Value<string>("op") == "copy_paper_frame" ||
+            step["paper_layout"] != null && step.Value<string>("op") is "line" or "circle" or "polyline" or "text" or "mtext";
+
+        static void ValidateCreationPlacement(JObject step)
+        {
+            if (step["linetype"] != null) Text(step, "linetype", 255);
+            if (step["paper_layout"] == null && step["expected_layout_sha256"] == null) return;
+            Text(step, "paper_layout", 255);
+            if (!Regex.IsMatch(Text(step, "expected_layout_sha256", 64), "^[A-F0-9]{64}$"))
+                throw new ArgumentException("paper_layout requires a fresh expected_layout_sha256");
+        }
+
+        static bool VerifyCreationPlacement(JObject entity, JObject step, JObject receipt)
+        {
+            if (step["linetype"] != null && !string.Equals(entity.Value<string>("linetype"),
+                step.Value<string>("linetype"), StringComparison.OrdinalIgnoreCase)) return false;
+            if (step["paper_layout"] == null) return true;
+            string name = step.Value<string>("paper_layout");
+            var layout = receipt["layouts_before"]?[name];
+            return layout?.Value<bool?>("model_type") == false &&
+                Hash(layout) == step.Value<string>("expected_layout_sha256") &&
+                entity.Value<string>("layout_name") == name;
+        }
+
         public static bool HatchMatches(JObject hatch,JObject boundary,bool checkCachedArea=true)
         {
             if(hatch==null||boundary==null||hatch.Value<string>("type")!="Hatch"||hatch.Value<bool?>("is_associative")!=true||hatch.Value<int?>("loop_count")!=1||hatch.Value<string>("loop_read_status")!="complete"||hatch.Value<bool?>("loops_truncated")!=false||(checkCachedArea&&Math.Abs(Number(hatch["area"])-Number(boundary["area"]))>=0.001))return false;
